@@ -654,6 +654,76 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
 })();
 
 /* ---------------------------------------------------------
+   Bottom CTA — scroll scale gallery (after Framer's "Scroll Scale Gallery")
+   While the section is pinned, scroll progress p runs 0 → 1. Every photo
+   scales up from the centre of the screen. The centre photo grows until
+   it covers the whole window; the others grow a little faster, so they
+   spread apart and fly off the edges. Near the end the call to action
+   fades in over the centre photo. Motion trails the scroll slightly.
+   --------------------------------------------------------- */
+(() => {
+  const section = document.querySelector('.zoom-cta');
+  if (!section || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const pin = section.querySelector('.zoom-pin');
+  const photos = [...section.querySelectorAll('.zoom-photo')].map((el, i) => ({
+    el,
+    x: parseFloat(el.style.getPropertyValue('--x')),
+    y: parseFloat(el.style.getPropertyValue('--y')),
+    centre: el.classList.contains('zoom-photo--centre'),
+    extra: 1.15 + (i % 3) * 0.12,               // outer photos outgrow the centre one at varying rates
+  }));
+  const centre = photos.find(p => p.centre);
+  const LAG = 0.3;                               // seconds the motion trails the scroll
+  const CTA_FROM = 0.78, CTA_TO = 0.95;          // when the call to action fades in
+
+  const ease = t => t * t * (3 - 2 * t);         // smooth start and finish
+  let target = 0, current = 0, last = 0, raf = 0;
+  let unit = 0, coverScale = 1;
+
+  const measure = () => {
+    // --u is a min(…) length, so read its size back from the centre photo's rendered width
+    unit = centre.el.offsetWidth / parseFloat(centre.el.style.getPropertyValue('--w'));
+    const w = centre.el.offsetWidth, h = centre.el.offsetHeight;
+    coverScale = Math.max(window.innerWidth / w, window.innerHeight / h) * 1.02;   // just past the edges
+  };
+
+  const readScroll = () => {
+    const travel = section.offsetHeight - pin.offsetHeight;
+    const scrolled = -section.getBoundingClientRect().top;
+    target = Math.min(1, Math.max(0, scrolled / travel));
+  };
+
+  const render = () => {
+    const e = ease(current);
+    photos.forEach(ph => {
+      const goal = ph.centre ? coverScale : coverScale * ph.extra;
+      const s = 1 + (goal - 1) * e;
+      ph.el.style.transform =
+        `translate(-50%, -50%) translate(${ph.x * unit * s}px, ${ph.y * unit * s}px) scale(${s})`;
+    });
+    const cta = Math.min(1, Math.max(0, (current - CTA_FROM) / (CTA_TO - CTA_FROM)));
+    section.style.setProperty('--cta', cta.toFixed(3));
+    section.classList.toggle('is-ready', cta > 0.9);
+  };
+
+  const tick = now => {
+    const dt = Math.min(0.1, (now - last) / 1000 || 0.016);
+    last = now;
+    current += (target - current) * (1 - Math.exp(-dt / (LAG / 3)));
+    render();
+    raf = Math.abs(target - current) > 0.0005 ? requestAnimationFrame(tick) : 0;
+  };
+  const wake = () => { if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); } };
+
+  measure();
+  readScroll();
+  current = target;
+  render();
+  window.addEventListener('scroll', () => { readScroll(); wake(); }, { passive: true });
+  window.addEventListener('resize', () => { measure(); readScroll(); current = target; render(); });
+})();
+
+/* ---------------------------------------------------------
    Sponsor ticker: Figma track holds the logo set three times
    --------------------------------------------------------- */
 (() => {

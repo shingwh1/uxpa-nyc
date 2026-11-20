@@ -1102,3 +1102,97 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
 .pixel-band canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .pixel-band + .events { margin-top: 0; }        /* the band runs straight into the black section */
 .events + .pixel-band { margin-top: 0; }        /* …and straight out of it */
+
+/* =========================================================
+   Bottom CTA — scroll scale gallery (after Framer's "Scroll Scale
+   Gallery"). The section pins for 1.6 window-heights of scrolling;
+   main.js scales every photo up from the centre of the screen: the
+   outer ones fly off the edges and the centre photo grows to fill the
+   screen, then the call to action fades in over it.
+   Positions and sizes are in --u units (≈1% of the window width).
+   ========================================================= */
+.zoom-cta {
+  --u: min(1vw, 1.55svh);                       /* collage fits short windows too */
+  --cta: 0;                                     /* 0 → 1: call-to-action visibility */
+  position: relative;
+  height: calc(100svh + 160svh);
+  margin-top: var(--section-gap);
+}
+.zoom-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+.zoom-stage { position: absolute; inset: 0; }
+.zoom-photo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: calc(var(--w) * var(--u));
+  aspect-ratio: var(--ar);
+  margin: 0;
+  transform: translate(-50%, -50%) translate(calc(var(--x) * var(--u)), calc(var(--y) * var(--u)));
+  will-change: transform;
+}
+.zoom-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.zoom-photo--centre { z-index: 2; }
+.zoom-photo--centre::after {                    /* shade so the white copy reads, as on the event cards */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 45% at 50% 50%, rgba(0, 0, 0, .35), rgba(0, 0, 0, 0)),   /* extra behind the copy */
+    rgba(0, 0, 0, .5);
+  opacity: var(--cta);
+}
+.zoom-copy {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-inline: var(--gutter);
+  color: var(--white);
+  text-align: center;
+  opacity: var(--cta);
+  transform: translateY(calc((1 - var(--cta)) * 24px));
+  pointer-events: none;
+}
+.zoom-cta.is-ready .zoom-copy { pointer-events: auto; }
+.zoom-title {
+  font-size: var(--h2);
+  line-height: 1.26;
+  font-weight: 300;
+}
+.zoom-body {
+  margin-top: 12px;
+  font-size: var(--body);
+  line-height: 1.5;
+}
+/* White selection-box button for the dark photo */
+.select-btn.zoom-btn {
+  width: min(336px, 100%);
+  margin-top: 32px;
+  background: transparent;
+  color: var(--white);
+  box-shadow: inset 0 0 0 1px var(--white);
+}
+.select-btn.zoom-btn .h { box-shadow: inset 0 0 0 1px var(--white); }
+.select-btn.zoom-btn:hover,
+.select-btn.zoom-btn:focus-visible { background: var(--white); color: var(--ink); box-shadow: inset 0 0 0 1px var(--white); }
+
+@media (max-width: 700px) {
+  .zoom-cta { --u: 1.9vw; }                     /* bigger collage on phones; the edges crop */
+}
+/* Reduced motion: no pinning or zoom — just the full-screen photo with the call to action */
+@media (prefers-reduced-motion: reduce) {
+  .zoom-cta { --cta: 1; height: auto; }
+  .zoom-pin { position: relative; }
+  .zoom-photo { display: none; }
+  .zoom-photo--centre { display: block; inset: 0; left: 0; top: 0; width: 100%; height: 100%; transform: none; }
+  .zoom-copy { pointer-events: auto; }
+}
