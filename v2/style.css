@@ -532,16 +532,16 @@ img { display: block; max-width: none; }
 /* Corner handles: same as the mentorship photos — 11px, 2px stroke, 5px
    outside the corner — and the same size at every scale. White fill,
    drawn above the outline. */
-.card .h {
+.card .h {                                       /* 7.7px: 30% smaller than the original 11px, still centred on the corner */
   z-index: 4;
-  width: 11px;
-  height: 11px;
+  width: 7.7px;
+  height: 7.7px;
   box-shadow: inset 0 0 0 1px var(--ink);
 }
-.card .tl { left: -5px;  top: -5px; }
-.card .tr { right: -5px; top: -5px; }
-.card .bl { left: -5px;  bottom: -5px; }
-.card .br { right: -5px; bottom: -5px; }
+.card .tl { left: -3.35px;  top: -3.35px; }
+.card .tr { right: -3.35px; top: -3.35px; }
+.card .bl { left: -3.35px;  bottom: -3.35px; }
+.card .br { right: -3.35px; bottom: -3.35px; }
 
 /* Listed cards: below 1024px, or when the visitor prefers reduced motion */
 @media (max-width: 1023px), (prefers-reduced-motion: reduce) {
@@ -617,17 +617,17 @@ img { display: block; max-width: none; }
   transition: opacity .6s ease-out;
 }
 .cursor-photo .h {
-  width: 11px;
-  height: 11px;
+  width: 7.7px;
+  height: 7.7px;
   box-shadow: inset 0 0 0 1px var(--blue);
   opacity: 0;
   z-index: 1;
   transition: opacity .6s ease-out;
 }
-.cursor-photo .tl { left: -5px; top: -5px; }
-.cursor-photo .tr { right: -5px; top: -5px; }
-.cursor-photo .bl { left: -5px; bottom: -5px; }
-.cursor-photo .br { right: -5px; bottom: -5px; }
+.cursor-photo .tl { left: -3.35px; top: -3.35px; }
+.cursor-photo .tr { right: -3.35px; top: -3.35px; }
+.cursor-photo .bl { left: -3.35px; bottom: -3.35px; }
+.cursor-photo .br { right: -3.35px; bottom: -3.35px; }
 
 .cursor {
   position: absolute;
