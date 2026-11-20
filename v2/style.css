@@ -409,7 +409,7 @@ img { display: block; max-width: none; }
 @media (prefers-reduced-motion: no-preference) {
   .statement [data-scroll-fill] { color: var(--grey-text); }
 }
-.sf-c.is-accent { color: var(--green); }
+.sf-c.is-accent { color: #0039a6; }              /* dark blue: the right end of the brand gradient */
 .sf-c.is-on { color: var(--ink); transition: color .1s linear; }
 
 @media (max-width: 1023px) {

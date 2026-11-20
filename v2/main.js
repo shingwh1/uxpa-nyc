@@ -760,15 +760,15 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
    Scroll fill (after Framer's "Text Scroll with 3 Colors",
    https://textscrollwith3colors.framer.website/): text marked
    data-scroll-fill rises in grey, then fills in letter by letter as you
-   scroll. Its progress runs from when its top is 70% of the way down
-   the window to when it reaches the top, trailing the scroll a little
+   scroll. Its progress runs from when its top is 20% of the way up
+   the window to when it is halfway up, trailing the scroll a little
    (the demo's "scrub"). Each letter flashes the accent colour for 50ms
    and then turns black; scrolling back up turns letters grey again.
    The letters are split only after the rise-in animation has finished,
    so the two effects never fight over the same markup.
    --------------------------------------------------------- */
 (() => {
-  const START = 0.7, END = 0;       // element top as a fraction of the window height
+  const START = 0.8, END = 0.5;     // element top as a fraction of the window height (0.8 = 20% up from the bottom)
   const ACCENT_MS = 50;             // how long a letter shows the accent colour
   const SCRUB = 0.3;                // seconds for the fill to catch up with the scroll
   const els = [...document.querySelectorAll('[data-scroll-fill]')];
