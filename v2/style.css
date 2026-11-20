@@ -1072,7 +1072,7 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
 /* =========================================================
    Velocity marquee (after Framer's "Velocity Marquee") under the
    "Impact on the Community" heading: the demo's band (hairlines above
-   and below, faded ends, ✦ between repeats) in the site's type and
+   and below, faded ends, a circle between words) in the site's type and
    colours. main.js moves and tilts the track.
    ========================================================= */
 .vmarquee {
@@ -1105,8 +1105,13 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
   align-items: center;
   white-space: pre;
 }
-.vmarquee-sep {
-  padding: 0 .55em;
+.vmarquee-sep {                                  /* a small filled circle between the words */
+  flex: none;
+  width: .32em;
+  height: .32em;
+  margin: 0 .7em;
+  border-radius: 50%;
+  background: currentColor;
   opacity: .62;
 }
 .vmarquee + .pgrid-rows { margin-top: 48px; }
