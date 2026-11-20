@@ -392,6 +392,7 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
     ['.community-title', 'chars'],
     ['.cta-join .cta-title', 'lines'],
     ['.pgrid .section-title', 'chars'],
+    ['.closer-title', 'chars'],
   ];
   const DURATION = 1;            // s
   const CHAR_GAP = 0.0175;       // s between letters

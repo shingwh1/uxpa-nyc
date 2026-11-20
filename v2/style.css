@@ -1228,3 +1228,27 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
 @media (max-width: 700px) {
   .pgrid-rows { --H: 34vw; --gap: 8px; }
 }
+
+/* =========================================================
+   Closer: the black section the parallax grid scrolls into
+   (as in Framer's Parallax Grid Scroll demo), with the community
+   headline and the Join Today link in white.
+   ========================================================= */
+.closer {
+  display: grid;
+  place-items: center;
+  min-height: 100svh;
+  padding: var(--section-gap) var(--gutter);
+  background: var(--ink);
+  color: var(--white);
+  text-align: center;
+}
+.closer-inner { display: flex; flex-direction: column; align-items: center; }
+.closer-title {
+  font-size: var(--h2);
+  line-height: 1.1;
+  font-weight: 300;
+}
+.closer .cta-join { margin-top: 40px; }
+.closer .cta-join .arrow { color: var(--white); }
+.pgrid + .closer { margin-top: 0; }             /* the grid's last row runs straight into it */
