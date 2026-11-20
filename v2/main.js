@@ -546,7 +546,9 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
 (() => {
   const bands = [...document.querySelectorAll('.pixel-band')];
   if (!bands.length) return;
-  const ACCENTS = ['#10bae7', '#64b32c', '#f9d441', '#df6429'];   // UXPA cyan, green, yellow, orange
+  // Accent colours pulled from the UXPA gradient (the hero grid's stripe colours, green → blue);
+  // each accent pixel gets one at random, not in gradient order.
+  const ACCENTS = GRID.hero.rects.filter(r => r[1] === 0).flatMap(r => [`#${r[4]}`, `#${r[5]}`]);
   const JITTER = 0.55;          // how ragged the front is (0 = straight line)
   const ACCENT_BAND = 0.07;     // how close to the front a pixel must be to flash an accent
   const ACCENT_SHARE = 0.22;    // share of those front pixels that do
@@ -572,7 +574,9 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
         for (let c = 0; c < cols; c++) {
           st.cells.push({
             x: c * size, y: h - (rows - r) * size,                      // rows hug the bottom edge
-            t: fromBottom * (1 - JITTER) + rand() * JITTER,             // when this pixel switches (0–1)
+            // when this pixel switches; kept below 1 − ACCENT_BAND so every accent has
+            // faded back by the time the band is complete
+            t: (fromBottom * (1 - JITTER) + rand() * JITTER) * (1 - ACCENT_BAND),
             accent: rand() < ACCENT_SHARE ? ACCENTS[Math.floor(rand() * ACCENTS.length)] : null,
           });
         }
@@ -600,10 +604,17 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
   };
 
   // Progress 0 → 1 while the band moves from the bottom of the window to about a quarter of the way down
+  // Into the section: 0 → 1 while the band's top moves from the bottom of the window to 25% down.
+  // Out of the section (data-timing="out"): the mirror image, 0 → 1 while the band's bottom moves
+  // from 75% down to the top of the window, so the black under "View All Events" matches the black
+  // above "Upcoming Events".
   const progress = st => {
     const r = st.el.getBoundingClientRect();
     const vh = window.innerHeight;
-    return Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.75)));
+    const p = st.el.dataset.timing === 'out'
+      ? (vh * 0.75 - r.bottom) / (vh * 0.75)
+      : (vh - r.top) / (vh * 0.75);
+    return Math.min(1, Math.max(0, p));
   };
 
   let ticking = false;
