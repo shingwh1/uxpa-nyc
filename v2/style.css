@@ -395,13 +395,12 @@ img { display: block; max-width: none; }
 .statement-title .line-5 { text-align: right; margin-right: calc(-1 * var(--hang)); }
 
 .statement-body { margin-top: 64px; }
-/* The paragraph is centred under the middle of "and research" (line 3).
-   That line starts at -0.5 × hang and is 7.257 × the headline size wide
-   in Outfit, so its middle is at -0.5 × hang + 3.6286 × size. It never
-   starts left of the text column. */
+/* The paragraph's left edge lines up with the middle of the "A" that
+   starts "and research" (line 3). That line starts at -0.5 × hang, and the
+   middle of the A's ink is 0.375 × the headline size in from there (Outfit). */
 .statement .lede {
   width: min(460px, 100%);
-  margin-left: max(0px, calc(-.5 * var(--hang) + 3.6286 * var(--t) - min(230px, 50%)));
+  margin-left: max(0px, calc(-.5 * var(--hang) + .375 * var(--t)));
   font-size: var(--body);
   line-height: 1.45;
   color: var(--accent);
