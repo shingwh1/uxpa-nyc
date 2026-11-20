@@ -391,6 +391,7 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
     ['.mentor-card .cta-body', 'lines'],
     ['.community-title', 'chars'],
     ['.cta-join .cta-title', 'lines'],
+    ['.pgrid .section-title', 'chars'],
   ];
   const DURATION = 1;            // s
   const CHAR_GAP = 0.0175;       // s between letters
@@ -721,6 +722,49 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
   render();
   window.addEventListener('scroll', () => { readScroll(); wake(); }, { passive: true });
   window.addEventListener('resize', () => { measure(); readScroll(); current = target; render(); });
+})();
+
+/* ---------------------------------------------------------
+   Parallax grid (after Framer's "Parallax Grid Scroll", vertical mode)
+   Each row's size depends on where it sits in the window: 40% size as
+   it enters at the bottom, full size once its top reaches 20% from the
+   top. Rows are stacked one after another at their current size, so
+   the grid stays packed, and each row drifts sideways while it grows
+   (alternate rows in opposite directions). Reduced motion: full size.
+   --------------------------------------------------------- */
+(() => {
+  const wrap = document.querySelector('.pgrid-rows');
+  if (!wrap) return;
+  const rows = [...wrap.querySelectorAll('.pgrid-row')].map(el => ({
+    el, strip: el.querySelector('.pgrid-strip'), dir: Number(el.dataset.dir) || 1,
+  }));
+  const MIN = 0.4;              // row size as it enters the window
+  const FULL_AT = 0.2;          // full size once the row's top is 20% from the top of the window
+  const DRIFT = 0.08;           // sideways drift, as a share of the window width
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ease = t => 1 - (1 - t) * (1 - t);
+
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    const cs = getComputedStyle(wrap);
+    const H = rows[0].el.offsetHeight;
+    const gap = parseFloat(cs.getPropertyValue('--gap')) || 0;
+    const vh = window.innerHeight, vw = window.innerWidth;
+    const top = wrap.getBoundingClientRect().top;
+    let y = 0;
+    rows.forEach(row => {
+      const t = reduced ? 1 : Math.min(1, Math.max(0, (vh - (top + y)) / (vh * (1 - FULL_AT))));
+      const g = MIN + (1 - MIN) * ease(t);
+      row.el.style.transform = `translateY(${y}px)`;
+      row.strip.style.transform = `translateX(${row.dir * (1 - ease(t)) * DRIFT * vw}px) scale(${g})`;
+      y += (H + gap) * g;
+    });
+  };
+  const request = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+  update();
+  window.addEventListener('scroll', request, { passive: true });
+  window.addEventListener('resize', request);
 })();
 
 /* ---------------------------------------------------------

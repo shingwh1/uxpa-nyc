@@ -1183,3 +1183,48 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
   .zoom-photo--centre { display: block; inset: 0; left: 0; top: 0; width: 100%; height: 100%; transform: none; }
   .zoom-copy { pointer-events: auto; }
 }
+
+/* =========================================================
+   Parallax grid (after Framer's "Parallax Grid Scroll", vertical
+   mode): six rows of community photos. Each row starts small at the
+   bottom of the window and grows to full size as it scrolls up,
+   drifting sideways (alternate rows in opposite directions). main.js
+   stacks the rows by their current size, so they stay tightly packed.
+   ========================================================= */
+.pgrid { margin-top: var(--section-gap); }
+.pgrid-head { text-align: center; }
+.pgrid-rows {
+  --H: 18vw;                                    /* full row height */
+  --gap: 12px;
+  position: relative;
+  height: calc(6 * (var(--H) + var(--gap)));    /* the rows at full size */
+  margin-top: 48px;
+  overflow-x: clip;
+}
+.pgrid-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: var(--H);
+  display: flex;
+  justify-content: center;
+  will-change: transform;
+}
+.pgrid-strip {
+  display: flex;
+  flex: none;
+  gap: var(--gap);
+  transform-origin: 50% 0;
+  will-change: transform;
+}
+.pgrid-strip img {
+  flex: none;
+  height: var(--H);
+  aspect-ratio: 3 / 2;
+  width: auto;
+  object-fit: cover;
+}
+@media (max-width: 700px) {
+  .pgrid-rows { --H: 34vw; --gap: 8px; }
+}
