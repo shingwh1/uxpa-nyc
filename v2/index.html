@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UXPA NYC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+
+  <!-- ============ HERO ============ -->
+  <header class="hero" id="top">
+    <div class="grid" data-grid="hero" aria-hidden="true"></div>
+
+    <div class="nav-bar">
+      <a class="logo" href="#top" aria-label="UXPA NYC home">
+        <img src="../assets/icons/logo.svg" width="81" height="48" alt="">
+      </a>
+
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav" aria-label="Open menu">
+        <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+        <i></i><i></i><i></i>
+      </button>
+
+      <nav class="nav" id="main-nav" aria-label="Main">
+        <div class="nav-selection" aria-hidden="true">
+          <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+        </div>
+        <ul class="nav-list">
+          <li class="nav-item" style="--w:103px">
+            <a href="#about">About</a>
+            <div class="dropdown" style="--dw:134px">
+              <a href="#">Our team</a>
+            </div>
+          </li>
+          <li class="nav-item" style="--w:160px">
+            <a href="#get-involved">Get Involved</a>
+            <div class="dropdown" style="--dw:161px">
+              <a href="#">Membership</a>
+              <a href="#">Volunteering</a>
+              <a href="#mentorship">Mentorship</a>
+            </div>
+          </li>
+          <li class="nav-item" style="--w:107px"><a href="#events">Events</a></li>
+          <li class="nav-item" style="--w:130px">
+            <a href="#sponsors">Sponsors</a>
+            <div class="dropdown" style="--dw:211px">
+              <a href="#">Become a sponsor</a>
+            </div>
+          </li>
+          <li class="nav-item" style="--w:88px"><a href="#faq">FAQ</a></li>
+          <li class="nav-item" style="--w:102px"><a href="#">Log in</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============ INTRO ============ -->
+  <section class="intro wrap" id="about">
+    <div class="wordmark">
+      <h1 class="wordmark-letters" aria-label="UXPA NYC">
+        <span aria-hidden="true" style="left:0">U</span>
+        <span aria-hidden="true" style="left:.645em">X</span>
+        <span aria-hidden="true" style="left:1.31em">P</span>
+        <span aria-hidden="true" style="left:1.775em">A</span>
+        <span aria-hidden="true" class="wordmark-nyc">NYC</span>
+      </h1>
+      <p class="wordmark-tagline">Real talk from professionals, students, and the companies backing them. Pushing for UX to have a seat at the table.</p>
+    </div>
+
+    <div class="intro-ctas">
+      <a class="cta" href="#get-involved">
+        <span class="cta-title"><span class="cta-label">Become a member</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
+        <span class="cta-body">Join our network of over 200 members!</span>
+      </a>
+      <a class="cta" href="#events">
+        <span class="cta-title"><span class="cta-label">Upcoming Events</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
+        <span class="cta-body">Explore our upcoming events from the NYC UXPA community!</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ SPONSORS ============ -->
+  <section class="sponsors" id="sponsors">
+    <h2 class="sponsors-title">Proudly Sponsored by</h2>
+    <div class="ticker">
+      <div class="ticker-track">
+        <!-- set is repeated 3x for a seamless loop; JS fills copies 2 and 3 -->
+        <div class="ticker-set">
+          <span class="logo-accenture"><img src="../assets/images/sponsors/accenture.png" width="228" height="60" alt="Accenture"></span>
+          <img src="../assets/images/sponsors/infragistics.png" width="307" height="45" alt="Infragistics">
+          <img src="../assets/images/sponsors/mastercard.png" width="67" height="52" alt="Mastercard">
+          <img src="../assets/images/sponsors/bloomberg.png" width="227" height="42" alt="Bloomberg">
+          <img src="../assets/images/sponsors/small-planet.png" width="77" height="100" alt="Small Planet">
+          <img src="../assets/images/sponsors/verizon.png" width="196" height="60" alt="Verizon">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ UPCOMING EVENTS ============ -->
+  <section class="events" id="events">
+    <!-- Scroll stack (after extrafazant.nl "Recent Werk"): the heading, the
+         cards and the link are pinned together; each scroll step drops the
+         front card away and brings the next one forward (see main.js) -->
+    <div class="stack" data-stack>
+      <div class="stack-pin">
+        <div class="wrap events-head">
+          <h2 class="section-title">Upcoming Events</h2>
+          <p class="section-eyebrow events-eyebrow">Our events range from roundtables, presentations, panels to workshops. Check out our in-person and virtual event lineup and look at what our community has been up to!</p>
+        </div>
+
+        <div class="stack-stage">
+          <div class="carousel">
+            <div class="card" data-index="0">
+              <div class="card-content">
+                <img src="../assets/images/events/happy-hour.jpg" alt="">
+                <p class="card-title">Happy Hour &amp; UX Bingo</p>
+              </div>
+              <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+            </div>
+            <div class="card" data-index="1">
+              <div class="card-content">
+                <img src="../assets/images/events/accessible-website-workshop.jpg" alt="">
+                <p class="card-title">Design an Accessible Website: <span class="nowrap">Hands-On</span> UX Workshop</p>
+              </div>
+              <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+            </div>
+            <div class="card" data-index="2">
+              <div class="card-content">
+                <img src="../assets/images/events/women-in-tech.png" alt="">
+                <p class="card-title">Women in Tech Panel</p>
+              </div>
+              <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+            </div>
+          </div>
+        </div>
+
+        <a class="cta cta-view-all" href="#">
+          <span class="cta-title"><span class="cta-label">View All Events</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MENTORSHIP ============ -->
+  <section class="mentorship wrap" id="mentorship">
+    <h2 class="section-title">Mentorship Program</h2>
+    <p class="section-eyebrow mentorship-eyebrow">The program pairs UX professionals looking to take the next step in their career with a mentor who has insight or experience with facing challenges and reaching their goals.</p>
+
+    <div class="mentor-cards">
+      <article class="mentor-card">
+        <div class="cursor-photo">
+          <img src="../assets/images/mentee.png" alt="Mentee placing sticky notes on a whiteboard">
+          <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+          <span class="cursor blue"  style="--x:22; --y:9;   --dx:29px;  --dy:24px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">Students</span></span>
+          <span class="cursor green" style="--x:140; --y:81;  --dx:-27px; --dy:-5px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">Career changers</span></span>
+          <span class="cursor blue"  style="--x:34; --y:145; --dx:19px;  --dy:-31px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">New designers</span></span>
+        </div>
+        <a class="cta" href="#">
+          <span class="cta-title"><span class="cta-label">Become a mentee</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
+          <span class="cta-body">Are you a student or a new designer? Get matched with a UX professional and grow your design skills.</span>
+        </a>
+      </article>
+
+      <article class="mentor-card">
+        <div class="cursor-photo">
+          <img src="../assets/images/mentor.png" alt="Audience at a UXPA NYC presentation">
+          <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+          <span class="cursor blue"  style="--x:16; --y:7;   --dx:20px;  --dy:25px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">Product designers</span></span>
+          <span class="cursor green" style="--x:130; --y:85;  --dx:-22px; --dy:-7px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">UX/UI designers</span></span>
+          <span class="cursor blue"  style="--x:30; --y:147; --dx:19px;  --dy:-31px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">UX researchers</span></span>
+        </div>
+        <a class="cta" href="#">
+          <span class="cta-title"><span class="cta-label">Become a mentor</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
+          <span class="cta-body">Have UX experience and want to support new designers? Become a mentor and give back to the community. </span>
+        </a>
+      </article>
+
+      <article class="mentor-card">
+        <div class="cursor-photo">
+          <img src="../assets/images/mentorship-faq.png" alt="Packed room at a UXPA NYC event">
+          <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+          <span class="cursor blue"  style="--x:18; --y:25;  --dx:17px;  --dy:17px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">Application process</span></span>
+          <span class="cursor green" style="--x:170; --y:121; --dx:-31px; --dy:-21px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">Eligibility</span></span>
+        </div>
+        <a class="cta" href="#faq">
+          <span class="cta-title"><span class="cta-label">Mentorship FAQ</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
+          <span class="cta-body">Our one-stop-shop for all mentorship related inquiries.</span>
+        </a>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ COMMUNITY ============ -->
+  <section class="community" id="get-involved">
+    <div class="ring">
+      <div class="float-photo" style="--l:1042; --t:676"><img src="../assets/images/community/photo-1.png" alt=""></div>
+      <div class="float-photo" style="--l:908; --t:908"><img src="../assets/images/community/photo-2.png" alt=""></div>
+      <div class="float-photo" style="--l:676; --t:1042"><img src="../assets/images/community/photo-3.png" alt=""></div>
+      <div class="float-photo" style="--l:407; --t:1042"><img src="../assets/images/community/photo-4.png" alt=""></div>
+      <div class="float-photo" style="--l:175; --t:908"><img src="../assets/images/community/photo-5.png" alt=""></div>
+      <div class="float-photo" style="--l:41; --t:676"><img src="../assets/images/community/photo-6.png" alt=""></div>
+      <div class="float-photo" style="--l:41; --t:407"><img src="../assets/images/community/photo-7.png" alt=""></div>
+      <div class="float-photo" style="--l:175; --t:175"><img src="../assets/images/community/photo-8.png" alt=""></div>
+      <div class="float-photo" style="--l:407; --t:41"><img src="../assets/images/community/photo-9.png" alt=""></div>
+      <div class="float-photo" style="--l:676; --t:41"><img src="../assets/images/community/photo-10.png" alt=""></div>
+      <div class="float-photo" style="--l:908; --t:175"><img src="../assets/images/community/photo-11.png" alt=""></div>
+      <div class="float-photo" style="--l:1042; --t:407"><img src="../assets/images/community/photo-12.png" alt=""></div>
+    </div>
+
+    <div class="community-center">
+      <h2 class="community-title">Where NYC’s UX<br>community<br>comes together</h2>
+      <a class="cta cta-join" href="#">
+        <span class="cta-title"><span class="cta-label">Join Today</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer" id="faq">
+    <div class="footer-cols wrap">
+      <div class="footer-col">
+        <h2 class="footer-heading">Work with us</h2>
+        <p class="footer-text footer-text-work">Want to give a talk or looking to host a workshop with UXPA NYC? We are always looking to collaborate!</p>
+        <a class="select-btn btn-contact" href="mailto:">
+          Contact UXPA NYC
+          <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+        </a>
+      </div>
+
+      <div class="footer-col">
+        <h2 class="footer-heading">Links</h2>
+        <ul class="footer-links">
+          <li><a href="#top">Discover</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#get-involved">Get Involved</a></li>
+          <li><a href="#events">Events</a></li>
+          <li><a href="#sponsors">Sponsors</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h2 class="footer-heading">Newsletter</h2>
+        <p class="footer-text footer-text-news">Sign up for our newsletter to keep up to date with what UXPA NYC is doing!</p>
+        <form class="newsletter" onsubmit="return false">
+          <input class="newsletter-input" type="email" aria-label="Email address">
+          <button class="select-btn" type="submit">
+            Subscribe
+            <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+          </button>
+        </form>
+      </div>
+
+      <ul class="socials">
+        <li><a class="social" href="mailto:" aria-label="Email"><img src="../assets/icons/mail.svg" width="44" height="44" alt=""></a></li>
+        <li><a class="social" href="#" aria-label="LinkedIn"><img src="../assets/icons/linkedin.svg" width="49" height="49" alt=""></a></li>
+        <li><a class="social" href="#" aria-label="Instagram"><img src="../assets/icons/instagram.svg" width="41" height="41" alt=""></a></li>
+        <li><a class="social" href="#" aria-label="Website"><img src="../assets/icons/globe.svg" width="48" height="48" alt=""></a></li>
+      </ul>
+    </div>
+
+    <div class="footer-grid">
+      <div class="grid" data-grid="foot" aria-hidden="true"></div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- Shared icons -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="arrow" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M1.93934 19.9393C1.35355 20.5251 1.35355 21.4749 1.93934 22.0607C2.52513 22.6464 3.47487 22.6464 4.06066 22.0607L3 21L1.93934 19.9393ZM3 21L4.06066 22.0607L22.0607 4.06066L21 3L19.9393 1.93934L1.93934 19.9393L3 21ZM22.5 3C22.5 2.17157 21.8284 1.5 21 1.5H7.5C6.67157 1.5 6 2.17157 6 3C6 3.82843 6.67157 4.5 7.5 4.5H19.5V16.5C19.5 17.3284 20.1716 18 21 18C21.8284 18 22.5 17.3284 22.5 16.5V3Z"/>
+  </symbol>
+  <symbol id="pointer" viewBox="0 0 28 29">
+    <path d="M9.44852 23.4075L3.59511 2.87363L22.9877 12.1509L14.1143 15.2949L9.44852 23.4075Z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+  </symbol>
+</svg>
+
+<script src="main.js"></script>
+</body>
+</html>

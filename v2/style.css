@@ -1,0 +1,1015 @@
+/* =========================================================
+   UXPA NYC v2 — recreated from Figma frame "11/13 Version3" (1440 × 5226)
+   At a 1440px-wide window every measurement matches the Figma file 1:1.
+   Narrower windows reflow (breakpoints: 1024, 960, 700, 600);
+   wider windows keep content at 1440px while the colour grids run edge to edge.
+   ========================================================= */
+
+:root {
+  --ink: #000;
+  --white: #fff;
+  --grey-text: #7a7a7a;
+  --grey-line: #9e9e9e;
+  --grey-hover: #5c5c5c;
+
+  --blue: #10bae7;
+  --blue-tint: #cff1fa;
+  --green: #64b32c;
+  --green-tint: #e0f0d5;
+
+  --brand-gradient: linear-gradient(90deg, #62b331 0%, #12b6df 50%, #0039a6 100%);
+
+  /* Fluid scale — each value hits the Figma size at 1440px */
+  --gutter: clamp(20px, 9.7917vw, 141px);        /* content edge: x 141 at 1440 */
+  --section-gap: clamp(128px, 16.6667vw, 240px);   /* space between every section (240px at 1440) */
+  --h2: clamp(40px, 5.5556vw, 80px);
+  --h3: clamp(24px, 2.2222vw, 32px);
+  --body: 20px;
+  --grid-scale: 1;                               /* colour-grid cell size: 48px × scale */
+
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;                     /* opening the menu hides the scrollbar without shifting the page */
+}
+
+body {
+  margin: 0;
+  background: var(--white);
+  color: var(--ink);
+  font-family: "Outfit", system-ui, sans-serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, p, ul { margin: 0; padding: 0; }
+ul { list-style: none; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+img { display: block; max-width: none; }
+
+.page { position: relative; width: 100%; overflow-x: clip; }
+
+/* Content column: 1158px wide, centred, with fluid side gutters */
+.wrap {
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Corner handles used by selection boxes */
+.h { position: absolute; display: block; background: var(--white); }
+
+/* Arrow icon (Icon / Arrow, Up Right) */
+.arrow { width: 24px; height: 24px; flex: none; color: var(--ink); }
+
+/* =========================================================
+   Hero / footer colour grid
+   main.js fills .grid-inner with 48px columns; at 1440px that is the
+   exact Figma grid, other widths add or drop columns.
+   ========================================================= */
+.grid { position: absolute; inset: 0; overflow: hidden; }
+.grid-inner {
+  position: absolute;
+  left: 50%;
+  height: 480px;
+  transform: scale(var(--grid-scale));
+}
+.grid-inner > div { position: absolute; width: 48px; height: 48px; }
+.grid-inner .white { background: var(--white); }
+.grid-inner .tile {
+  background: var(--c);
+  opacity: 0;
+  transition: opacity .6s ease-in-out;          /* mouse leave: 600 ms */
+}
+.grid-inner .tile.is-off { pointer-events: none; }   /* behind the logo / menu button */
+.grid-inner .tile.is-tapped {
+  opacity: 1;
+  transition: opacity .15s ease-out;            /* mouse enter: 150 ms */
+}
+@media (hover: hover) {
+  .grid-inner .tile:hover {
+    opacity: 1;
+    transition: opacity .15s ease-out;
+  }
+}
+
+/* =========================================================
+   Hero + navigation
+   ========================================================= */
+.hero {
+  position: relative;
+  height: 480px;
+  z-index: 10;                                  /* above the carousel cards, so the full-screen menu covers them */
+}
+.hero .grid-inner { bottom: 0; transform-origin: 50% 100%; }   /* anchored to the bottom; the solid top extends upward */
+
+.nav-bar {
+  position: absolute;
+  top: 36px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 46px;                                    /* logo x 312, nav x 438 at 1440 */
+}
+.logo { flex: none; }
+
+.nav {
+  position: relative;
+  width: 690px;
+  height: 48px;
+}
+.nav-list { display: flex; height: 48px; }
+.nav-item { position: relative; width: var(--w); height: 48px; }
+.nav-item > a {
+  display: block;
+  height: 48px;
+  padding: 12px 24px 0;
+  font-size: var(--body);                       /* same size as the section intro text */
+  line-height: 25.2px;
+  font-weight: 400;
+  color: var(--white);
+  white-space: nowrap;
+}
+
+.nav-selection {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 103px;
+  height: 48px;
+  background: rgba(255, 255, 255, .2);
+  box-shadow: inset 0 0 0 1px var(--white);
+  opacity: 0;
+  pointer-events: none;
+  transition: left .2s ease-out, width .2s ease-out, opacity .2s ease-out;
+}
+.nav-selection .h,
+.menu-toggle .h { width: 6px; height: 6px; }
+.nav-selection .tl, .menu-toggle .tl { left: -3px; top: -3px; }
+.nav-selection .tr, .menu-toggle .tr { right: -3px; top: -3px; }
+.nav-selection .bl, .menu-toggle .bl { left: -3px; bottom: -3px; }
+.nav-selection .br, .menu-toggle .br { right: -3px; bottom: -3px; }
+.nav.is-hovering .nav-selection { opacity: 1; }
+
+.dropdown {
+  position: absolute;
+  top: 48px;
+  left: 0;
+  width: var(--dw);
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 5.5px 12px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .2s ease-out, visibility 0s linear .2s;
+}
+.nav-item.is-active .dropdown,
+.nav-item:focus-within .dropdown {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .2s ease-out;
+}
+.dropdown a {
+  display: block;
+  padding: 6px 12px;
+  font-size: var(--body);
+  line-height: 25.2px;
+  font-weight: 400;
+  color: var(--grey-line);
+  white-space: nowrap;
+  transition: color .15s ease-out;
+}
+.dropdown a:hover,
+.dropdown a:focus-visible { color: var(--grey-hover); }
+
+/* Hamburger button — styled like the nav's white selection box */
+.menu-toggle {
+  display: none;
+  position: relative;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0);
+  transition: background .2s ease-out, box-shadow .2s ease-out;
+}
+.menu-toggle .h { opacity: 0; transition: opacity .2s ease-out; }
+.menu-toggle i {
+  position: absolute;
+  left: 12px;
+  width: 24px;
+  height: 2px;
+  background: var(--white);
+  transition: transform .2s ease-out, opacity .2s ease-out;
+}
+.menu-toggle i:nth-of-type(1) { top: 16px; }
+.menu-toggle i:nth-of-type(2) { top: 23px; }
+.menu-toggle i:nth-of-type(3) { top: 30px; }
+.menu-toggle[aria-expanded="true"],
+.menu-toggle:focus-visible {
+  background: rgba(255, 255, 255, .2);
+  box-shadow: inset 0 0 0 1px var(--white);
+  outline: none;
+}
+.menu-toggle[aria-expanded="true"] .h,
+.menu-toggle:focus-visible .h { opacity: 1; }
+.menu-toggle[aria-expanded="true"] i:nth-of-type(1) { transform: translateY(7px) rotate(45deg); }
+.menu-toggle[aria-expanded="true"] i:nth-of-type(2) { opacity: 0; }
+.menu-toggle[aria-expanded="true"] i:nth-of-type(3) { transform: translateY(-7px) rotate(-45deg); }
+@media (hover: hover) {
+  .menu-toggle:hover { background: rgba(255, 255, 255, .2); box-shadow: inset 0 0 0 1px var(--white); }
+  .menu-toggle:hover .h { opacity: 1; }
+}
+
+/* While the full-screen menu is open the bar sits on white: logo and button turn black */
+.logo, .menu-toggle { position: relative; z-index: 2; }
+.logo img { transition: filter .2s ease-out; }
+.nav-bar.is-menu-open .logo img { filter: invert(1); }
+.menu-toggle[aria-expanded="true"],
+.menu-toggle[aria-expanded="true"]:hover {
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+.menu-toggle[aria-expanded="true"] .h { box-shadow: inset 0 0 0 1px var(--ink); }
+.menu-toggle[aria-expanded="true"] i { background: var(--ink); }
+
+/* =========================================================
+   Intro: UXPA wordmark + CTAs
+   ========================================================= */
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 728fr) minmax(416px, 430fr);   /* CTAs at x 869 */
+  padding-top: clamp(40px, 5.1389vw, 74px);
+  padding-bottom: calc(var(--section-gap) / 2);   /* half gap: intro → sponsors */
+}
+
+.wordmark { container-type: inline-size; min-width: 0; }
+.wordmark-letters {
+  position: relative;
+  height: 1.08em;                               /* tagline sits 216px below the letters' top */
+  margin-left: -.06em;                          /* "U" text box starts 12px left of the column */
+  font-size: min(200px, 29.76cqw);              /* 672px-wide lockup scales to fit */
+  line-height: 1.26;
+  font-weight: 400;
+}
+.wordmark-letters span { position: absolute; top: 0; }
+.wordmark-letters .wordmark-nyc {
+  left: 7.922em;                                /* 507px at 64px */
+  top: 2.125em;                                 /* 136px at 64px */
+  font-size: .32em;
+  font-weight: 100;
+}
+/* Beside the CTAs the logline is exactly as wide as the visible "UXPA NYC"
+   lockup (U's left edge → C's right edge = 3.0889 × letter size from the
+   column), so it never runs past it as the lockup scales. */
+.wordmark-tagline {
+  width: calc(min(200px, 29.76cqw) * 3.0889 - 1px);
+  margin-left: 1px;
+  font-size: var(--body);
+  line-height: 31px;
+}
+
+.intro-ctas {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  padding-top: 11px;
+}
+.intro-ctas .cta { max-width: 416px; }
+
+/* CTA / Text Link Hover */
+.cta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.cta-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 1.25em;                               /* 40px row; the 40.3px label overhangs as in Figma */
+  font-size: var(--h3);
+}
+.cta-label {
+  position: relative;
+  font-size: var(--h3);
+  line-height: 1.26;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.cta-label::after {                       /* Underline: 2 px gradient, 2 px below the text box */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 2px);
+  height: 2px;
+  background: var(--brand-gradient);
+  opacity: 0;
+  transition: opacity .2s ease-out;
+}
+.cta:hover .cta-label::after,
+.cta:focus-visible .cta-label::after { opacity: 1; }
+.cta-body {
+  font-size: var(--body);
+  line-height: 31px;
+}
+/* Text was reduced from 24px to 20px; reserve the space the 24px text used */
+.intro-ctas .cta-body { min-height: 62px; }                      /* 2 lines */
+.mentor-card .cta-body { min-height: 124px; }                    /* 4 lines */
+.mentor-card:nth-child(3) .cta-body { min-height: 62px; }        /* 2 lines */
+
+/* =========================================================
+   Sponsors ticker
+   ========================================================= */
+.sponsors {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;                                    /* title → ticker */
+}
+.sponsors-title {
+  font-size: var(--h3);
+  line-height: 1.26;
+  font-weight: 400;
+}
+.ticker {                                       /* hairlines above and below, as in v3, in v2 grey */
+  width: 100%;
+  padding-block: 24px;
+  overflow: hidden;
+  border-block: 1px solid var(--grey-line);
+}
+.ticker-track {
+  display: flex;
+  gap: 48px;
+  width: max-content;
+  height: 100px;
+  animation: ticker 30s linear infinite;
+}
+.ticker-set {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  height: 100px;
+}
+.logo-accenture { width: 228px; height: 88px; }
+@keyframes ticker {
+  to { transform: translateX(-1390px); }    /* width of one logo set + gap */
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track { animation: none; }
+}
+
+/* =========================================================
+   Shared section headings
+   ========================================================= */
+.section-title {
+  font-size: var(--h2);
+  line-height: 1.26;
+  font-weight: 300;
+}
+.section-eyebrow {
+  margin-top: 16px;
+  font-size: var(--body);
+  line-height: 30.2px;
+}
+
+/* =========================================================
+   Upcoming events
+   ========================================================= */
+.events { margin-top: var(--section-gap); }
+.events .section-title { text-align: center; }
+.events .events-eyebrow { max-width: 760px; margin-inline: auto; text-align: center; }   /* same width as v3, centred under the heading */
+
+/* Upcoming events — scroll stack (after extrafazant.nl "Recent Werk").
+   ≥ 1024px: the stack pins in the middle of the window for 1.2 window-heights
+   of scrolling per card. Each step drops the front card away and moves the
+   others forward; main.js drives the motion. Depth positions are the Figma
+   cards (front / middle / back) inside the 1387 × 731 box.
+   < 1024px (or reduced motion): the cards are simply listed. */
+/* As on extrafazant, the heading, the cards and the link are pinned together
+   and fill the window, so the title and intro stay in view while the cards
+   change. The front card is half the window wide (720px at 1440) and the
+   stack shrinks further if the window is short. */
+.stack {
+  --travel: 1.2;                                          /* window-heights of scrolling per card */
+  height: calc(100svh + var(--travel) * 2 * 100svh);
+}
+.stack-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 4.5svh, 48px);
+  padding-block: clamp(24px, 5svh, 56px);
+}
+.events-head { width: 100%; flex: none; }
+.stack-stage {                                            /* the room left for the cards */
+  position: relative;
+  z-index: 2;                                             /* a falling card passes over the link below */
+  flex: 0 1 31.7vw;                                       /* a 60vw-wide stack, if it fits */
+  min-height: 0;
+  width: 100%;
+  container-type: size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.carousel {
+  position: relative;
+  width: min(100cqw, 100cqh * 1387 / 731);
+  aspect-ratio: 1387 / 731;
+  container-type: inline-size;
+}
+.card { position: absolute; }
+.card[data-index="0"] { left: 8.435%;  top: 13.133%; width: 83.129%; height: 86.867%; z-index: 3; }   /* front  */
+.card[data-index="1"] { left: 11.680%; top: 6.566%;  width: 76.568%; height: 79.891%; z-index: 2; }   /* middle */
+.card[data-index="2"] { left: 14.564%; top: 0;       width: 70.872%; height: 74.145%; z-index: 1; }   /* back   */
+
+.card-content {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.card-content img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.card-content::before {                         /* Title Shade */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 45%;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .55) 100%);
+  opacity: var(--front, 0);
+}
+.card-content::after {                          /* Selection box: 2px inside stroke, same as the mentorship photos */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+.card-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 3.078cqw;                             /* 42.7px at 1387 */
+  z-index: 2;
+  font-size: max(18px, 4.616cqw);               /* 64px at 1387 */
+  line-height: 1.26;
+  font-weight: 500;
+  color: var(--white);
+  text-align: center;
+  opacity: var(--front, 0);                     /* only the front card shows its title */
+}
+.nowrap { white-space: nowrap; }
+.card[data-index="0"] { --front: 1; }
+
+/* Corner handles: same as the mentorship photos — 11px, 2px stroke, 5px
+   outside the corner — and the same size at every scale. White fill,
+   drawn above the outline. */
+.card .h {
+  z-index: 4;
+  width: 11px;
+  height: 11px;
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+.card .tl { left: -5px;  top: -5px; }
+.card .tr { right: -5px; top: -5px; }
+.card .bl { left: -5px;  bottom: -5px; }
+.card .br { right: -5px; bottom: -5px; }
+
+/* Listed cards: below 1024px, or when the visitor prefers reduced motion */
+@media (max-width: 1023px), (prefers-reduced-motion: reduce) {
+  .stack { height: auto; }
+  .stack-pin { position: static; height: auto; display: block; padding: 0; }
+  .stack-stage { display: block; container-type: normal; margin-top: 40px; }
+  .stack-pin .cta-view-all { margin-top: 48px; }
+  .carousel {
+    width: auto;
+    max-width: 1153px;
+    aspect-ratio: auto;
+    margin: 0 auto;
+    padding-inline: var(--gutter);
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .card,
+  .card[data-index] {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1153 / 635;
+    --front: 1;
+  }
+  .card-title { font-size: max(18px, 4.8cqw); bottom: 4cqw; padding-inline: 16px; }
+}
+
+.cta-view-all {
+  flex: none;
+  width: max-content;
+  margin: 0 auto;                               /* centred on the page */
+}
+
+/* =========================================================
+   Mentorship
+   ========================================================= */
+.mentorship { margin-top: var(--section-gap); }
+.mentorship .section-title { margin-left: -2px; }
+.mentorship-eyebrow { max-width: 1155px; margin-left: 3px; }
+
+.mentor-cards {
+  display: grid;
+  grid-template-columns: 352fr 350fr 350fr;
+  column-gap: clamp(24px, 3.6111vw, 52px);
+  margin: 48px -2px 0 4px;                      /* x 145 → 1301 at 1440 */
+}
+.mentor-card { min-width: 0; }
+.mentor-card .cta { margin-top: 31px; }
+.mentor-card:first-child .cta { margin-top: 28px; }
+.mentor-card .cta-label { white-space: normal; }
+
+/* Cursor Photo / Mentorship */
+.cursor-photo {
+  position: relative;
+  width: min(347px, 100%);
+  aspect-ratio: 347 / 231;
+}
+.cursor-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cursor-photo::after {                     /* 2 px inside outline */
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 2px var(--blue);
+  opacity: 0;
+  transition: opacity .6s ease-out;
+}
+.cursor-photo .h {
+  width: 11px;
+  height: 11px;
+  box-shadow: inset 0 0 0 2px var(--blue);
+  opacity: 0;
+  z-index: 1;
+  transition: opacity .6s ease-out;
+}
+.cursor-photo .tl { left: -5px; top: -5px; }
+.cursor-photo .tr { right: -5px; top: -5px; }
+.cursor-photo .bl { left: -5px; bottom: -5px; }
+.cursor-photo .br { right: -5px; bottom: -5px; }
+
+.cursor {
+  position: absolute;
+  left: calc(var(--x) / 347 * 100%);
+  top: calc(var(--y) / 231 * 100%);
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  transform: translate(var(--dx), var(--dy));
+  transition: transform .6s ease-out, opacity .6s ease-out;
+  pointer-events: none;
+}
+.cursor svg {
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  width: 28px;
+  height: 29px;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .08)) drop-shadow(0 2px 6px rgba(0, 0, 0, .35));   /* lifts the pointer off the photo */
+}
+.cursor-label {
+  --label-shadow: 0 2px 8px rgba(0, 0, 0, .35);   /* separates the label from the photo */
+  position: absolute;
+  left: 22px;
+  top: 33px;
+  padding: 6px 14px;
+  font-size: 20px;
+  line-height: 25.2px;
+  font-weight: 400;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.cursor.blue  { color: var(--blue); }
+.cursor.blue  .cursor-label { background: var(--blue-tint);  box-shadow: inset 0 0 0 2px var(--blue),  var(--label-shadow); }
+.cursor.green { color: var(--green); }
+.cursor.green .cursor-label { background: var(--green-tint); box-shadow: inset 0 0 0 2px var(--green), var(--label-shadow); }
+
+.cursor-photo.is-tapped::after,
+.cursor-photo.is-tapped .h,
+.cursor-photo.is-tapped .cursor { opacity: 1; }
+.cursor-photo.is-tapped .cursor { transform: none; }
+@media (hover: hover) {
+  .cursor-photo:hover::after,
+  .cursor-photo:hover .h,
+  .cursor-photo:hover .cursor { opacity: 1; }
+  .cursor-photo:hover .cursor { transform: none; }
+}
+
+/* =========================================================
+   Community circle — a 1227px square that scales with the window
+   ========================================================= */
+.community {
+  --size: min(1227px, calc(100vw - 2 * var(--gutter) + 82px));   /* ring's photos line up with the content edges */
+  position: relative;
+  width: var(--size);
+  aspect-ratio: 1;
+  margin: calc(var(--section-gap) / 2) auto 0;   /* half gap: mentorship → circle */
+  container-type: inline-size;
+}
+
+/* The photos slowly orbit the headline. The ring turns while each photo
+   turns back the same amount, so the photos stay upright. No hover effect. */
+.ring {
+  position: absolute;
+  inset: 0;
+  animation: orbit 90s linear infinite;
+}
+.float-photo {
+  position: absolute;
+  left: calc(var(--l) / 1227 * 100%);
+  top: calc(var(--t) / 1227 * 100%);
+  width: 11.736%;                               /* 144 / 1227 */
+  aspect-ratio: 1;
+  animation: orbit 90s linear infinite reverse;
+}
+.float-photo img {
+  width: 100%;
+  height: 100%;
+}
+@keyframes orbit {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ring, .float-photo { animation: none; }
+}
+
+.community-center {
+  position: absolute;
+  left: 26.08%;                                 /* 320 / 1227 */
+  top: 35.126%;                                 /* 431 / 1227 */
+  width: 47.84%;                                /* 587 / 1227 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.community-title {
+  font-size: 6.52cqw;                           /* 80px at 1227 */
+  line-height: 1.1;
+  font-weight: 300;
+  text-align: center;
+}
+.cta-join { margin-top: 4.156cqw; }             /* 51px at 1227 */
+
+/* =========================================================
+   Footer
+   ========================================================= */
+.footer { margin-top: calc(var(--section-gap) / 2); }   /* half gap: circle → footer */
+
+/* Four columns down to 961px. With a 56px gap the columns sit at x 144 / 606 /
+   818 / 1232 at 1440 (Figma); narrower windows shrink Work with us and
+   Newsletter first, while Links never gets narrower than its longest link.
+   If anything would still collide, main.js switches to the stacked footer. */
+.footer-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 406fr) minmax(max-content, 156fr) minmax(0, 358fr) 64px;
+  column-gap: clamp(24px, 3.8889vw, 56px);
+  min-height: 396px;                            /* grid starts 396px below the headings */
+  padding-inline: calc(var(--gutter) + 3px);    /* x 144 → 1296 at 1440 */
+}
+
+.footer-heading {
+  font-size: var(--h3);
+  line-height: 1.26;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.footer-text {
+  margin-top: 16px;
+  font-size: var(--body);
+  line-height: 30.2px;
+}
+.footer-text-work { max-width: 334px; min-height: 120.8px; }   /* reserves the 24px-era 4 lines */
+.footer-text-news { max-width: 336px; min-height: 90.6px; }    /* 3 lines */
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+.footer-links a {
+  display: block;
+  white-space: nowrap;
+  font-size: var(--body);
+  line-height: 30.2px;
+  color: var(--grey-text);
+  transition: color .15s ease-out;
+}
+.footer-links a:hover,
+.footer-links a:focus-visible { color: var(--ink); }
+
+/* Selection Button Grey Hover */
+.select-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 41px;
+  padding: 4px 8px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1.5px var(--grey-line);
+  font-size: var(--body);
+  line-height: 30.2px;
+  font-weight: 400;
+  color: var(--grey-line);
+  transition: color .2s ease-out, box-shadow .2s ease-out;
+}
+.select-btn .h {
+  width: 11px;
+  height: 11px;
+  box-shadow: inset 0 0 0 1.89px var(--grey-line);
+  transition: box-shadow .2s ease-out;
+}
+.select-btn .tl { left: -5px; top: -5px; }
+.select-btn .tr { right: -5px; top: -5px; }
+.select-btn .bl { left: -5px; bottom: -5px; }
+.select-btn .br { right: -5px; bottom: -5px; }
+.select-btn:hover,
+.select-btn:focus-visible { color: var(--ink); box-shadow: inset 0 0 0 1.89px var(--ink); }
+.select-btn:hover .h,
+.select-btn:focus-visible .h { box-shadow: inset 0 0 0 1.89px var(--ink); }
+
+.btn-contact { width: min(384px, 100%); margin-top: 32px; }
+
+.newsletter { margin-top: 22px; }
+.newsletter .select-btn { width: min(336px, 100%); }
+.newsletter-input {
+  display: block;
+  width: min(336px, 100%);
+  height: 40px;
+  margin-bottom: 24px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 0;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1.5px var(--grey-line);
+  font: 300 20px/1 "Outfit", sans-serif;
+  color: var(--ink);
+  outline: none;
+}
+.newsletter-input:focus { box-shadow: inset 0 0 0 1.5px var(--ink); }
+
+/* Social Tile */
+.socials { display: flex; flex-direction: column; }
+.socials li:nth-child(2) { margin-top: 7px; }
+.socials li:nth-child(3) { margin-top: 6px; }
+.socials li:nth-child(4) { margin-top: 7px; }
+.social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--grey-line);
+  transition: box-shadow .15s ease-out;
+}
+.social:hover,
+.social:focus-visible { box-shadow: inset 0 0 0 1px var(--ink); }
+
+.footer-grid {
+  position: relative;
+  height: 240px;
+  overflow: hidden;
+}
+.footer-grid .grid-inner { top: 0; transform-origin: 50% 0; }
+
+/* =========================================================
+   ≤ 1214px — the UXPA NYC lockup and logline sit above the two CTAs
+   ========================================================= */
+@media (max-width: 1214px) {
+  .intro {
+    grid-template-columns: 1fr;
+    row-gap: 56px;
+  }
+  .wordmark-tagline { width: auto; max-width: 659px; }
+  .intro-ctas {
+    flex-direction: row;
+    gap: 40px;
+    padding-top: 0;
+  }
+  .intro-ctas .cta { flex: 1; max-width: 416px; }
+  .intro-ctas .cta-body { min-height: 0; }
+}
+
+/* =========================================================
+   Stacked footer — at ≤ 960px, or whenever the four columns would collide
+   (main.js adds .is-stacked): Work with us on its own row, Newsletter +
+   Links side by side, social tiles below
+   ========================================================= */
+.footer-cols.is-stacked {
+  grid-template-columns: 1fr 1fr;
+  gap: 48px 32px;
+  min-height: 0;
+  padding-bottom: 72px;
+}
+.is-stacked .footer-col:first-child,
+.is-stacked .socials { grid-column: 1 / -1; }
+.is-stacked .footer-col:nth-child(3) { order: 1; }   /* Newsletter on the left */
+.is-stacked .footer-col:nth-child(2) { order: 2; }   /* Links on the right */
+.is-stacked .socials { order: 3; }
+.is-stacked .footer-text-work,
+.is-stacked .footer-text-news { min-height: 0; }
+.is-stacked .socials { flex-direction: row; gap: 12px; align-self: start; }
+.is-stacked .socials li:nth-child(n) { margin-top: 0; }
+
+/* =========================================================
+   ≤ 1023px — mentorship cards stack
+   ========================================================= */
+@media (max-width: 1023px) {
+  .mentor-cards {
+    grid-template-columns: 1fr;
+    row-gap: 56px;
+    max-width: 560px;
+    min-height: 0;
+    margin: 40px auto 0;                        /* single column is centred; text stays left-aligned under its photo */
+  }
+  .mentor-card .cta,
+  .mentor-card:first-child .cta { margin-top: 24px; }
+  .cursor-photo { width: 100%; }
+  .mentor-card .cta-body { min-height: 0; }
+}
+
+/* =========================================================
+   ≤ 960px — tablet: hamburger menu, stacked intro, 2-column footer
+   ========================================================= */
+@media (max-width: 960px) {
+  :root { --grid-scale: .75; }
+  .hero { height: 400px; }
+  .footer-grid { height: 180px; }
+
+  .nav-bar {
+    justify-content: space-between;
+    padding-inline: var(--gutter);
+  }
+  .menu-toggle { display: block; }
+
+  /* Full-screen menu: covers the whole window; logo and close button stay on top */
+  .nav {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    width: auto;
+    height: auto;
+    padding: 132px var(--gutter) 48px;         /* clears the 36px + 48px bar */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--white);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .2s ease-out, visibility 0s linear .2s;
+  }
+  .nav.is-open {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity .2s ease-out;
+  }
+  .nav-selection { display: none; }
+  .nav-list { flex-direction: column; height: auto; }
+  .nav-item { width: auto; height: auto; }
+  .nav-item > a {
+    height: auto;
+    padding: 12px 0;
+    line-height: 1.26;
+    color: var(--ink);
+  }
+  .dropdown,
+  .nav-item.is-active .dropdown,
+  .nav-item:focus-within .dropdown {
+    position: static;
+    width: auto;
+    gap: 0;
+    padding: 0 0 8px 16px;
+    box-shadow: none;
+    opacity: 1;
+    visibility: visible;
+    transition: none;
+  }
+  .dropdown a { padding: 6px 0; color: var(--grey-text); }
+}
+
+/* =========================================================
+   ≤ 700px — community photos become a grid under the headline
+   ========================================================= */
+@media (max-width: 700px) {
+  .community {
+    width: auto;
+    aspect-ratio: auto;
+    margin-inline: var(--gutter);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    container-type: normal;
+  }
+  .community-center {
+    position: static;
+    grid-column: 1 / -1;
+    order: -1;
+    width: auto;
+    margin-bottom: 32px;
+  }
+  .community-title { font-size: clamp(36px, 9vw, 56px); }
+  .cta-join { margin-top: 32px; }
+  .ring { display: contents; animation: none; }   /* photos become grid items; no orbit here */
+  .float-photo { position: relative; left: auto; top: auto; width: auto; animation: none; }
+
+  /* Instead of orbiting, a wave runs diagonally from the
+     top-left photo to the bottom-right one: each photo rests at 50% opacity
+     and brightens to 100% as a whole when the wave reaches it. */
+  .float-photo img {
+    opacity: .5;
+    animation: photo-wave 4s ease-in-out infinite;
+  }
+  /* delay = (row + column) × 0.3s */
+  .float-photo:nth-child(2) img { animation-delay: 0.3s; }
+  .float-photo:nth-child(3) img { animation-delay: 0.6s; }
+  .float-photo:nth-child(4) img { animation-delay: 0.3s; }
+  .float-photo:nth-child(5) img { animation-delay: 0.6s; }
+  .float-photo:nth-child(6) img { animation-delay: 0.9s; }
+  .float-photo:nth-child(7) img { animation-delay: 0.6s; }
+  .float-photo:nth-child(8) img { animation-delay: 0.9s; }
+  .float-photo:nth-child(9) img { animation-delay: 1.2s; }
+  .float-photo:nth-child(10) img { animation-delay: 0.9s; }
+  .float-photo:nth-child(11) img { animation-delay: 1.2s; }
+  .float-photo:nth-child(12) img { animation-delay: 1.5s; }
+}
+@keyframes photo-wave {
+  0%   { opacity: .5; }
+  12%  { opacity: 1; }
+  24%  { opacity: .5; }
+  100% { opacity: .5; }
+}
+@media (max-width: 700px) and (prefers-reduced-motion: reduce) {
+  .float-photo img { animation: none; opacity: 1; }
+}
+
+/* =========================================================
+   ≤ 600px — phone
+   ========================================================= */
+@media (max-width: 600px) {
+  :root {
+    --gutter: 20px;
+    --body: 18px;
+    --grid-scale: .5;
+  }
+  .hero { height: 312px; }
+  .nav-bar { top: 24px; }
+  .nav { padding-top: 112px; }                  /* clears the 24px + 48px bar */
+
+  .wordmark-tagline,
+  .cta-body { line-height: 1.5; }
+
+  .intro-ctas { flex-direction: column; gap: 32px; }
+
+  .ticker-track { zoom: .6; }
+
+  .section-eyebrow { line-height: 1.5; margin-left: 0; }
+  .mentorship .section-title { margin-left: 0; }
+
+
+  .cursor-label { font-size: 16px; line-height: 20px; padding: 4px 10px; }
+
+  .footer-cols.is-stacked {
+    grid-template-columns: 1fr auto;          /* Newsletter takes the room, Links as wide as it needs */
+    gap: 40px 24px;
+  }
+  .footer-cols { padding-inline: var(--gutter); }
+  .footer-heading { white-space: normal; }
+  .footer-text { line-height: 1.5; }
+  .footer-grid { height: 120px; }
+}
