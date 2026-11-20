@@ -418,16 +418,31 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
   // Rebuild an element's content with masked pieces; returns the moving pieces in order.
   function split(el, mode) {
     const pieces = [];
+    const targets = [];          // chars mode: where each letter sits in the real (kerned) text
+    const wordStart = [];        // chars mode: index of the first letter of each letter's word
+    const range = document.createRange();
     const build = node => {
       if (node.nodeType === Node.TEXT_NODE) {
         const out = [];
+        let offset = 0;
         node.textContent.split(/(\s+)/).forEach(part => {
+          const start = offset;
+          offset += part.length;
           if (!part) return;
           if (/^\s+$/.test(part)) { out.push(document.createTextNode(part)); return; }
           if (mode === 'chars') {
             const word = document.createElement('span');
             word.className = 'rv-m';
-            [...part].forEach(ch => { const p = piece(ch); pieces.push(p); word.append(p); });
+            let o = start;
+            const first = pieces.length;
+            [...part].forEach(ch => {
+              wordStart.push(first);
+              range.setStart(node, o);
+              range.setEnd(node, o + ch.length);
+              targets.push(range.getBoundingClientRect().left);
+              o += ch.length;
+              const p = piece(ch); pieces.push(p); word.append(p);
+            });
             out.push(word);
           } else {
             const p = piece(part); pieces.push(p); out.push(mask(p));
@@ -448,6 +463,19 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
     const built = [];
     original.forEach(c => built.push(...build(c)));
     el.replaceChildren(...built);
+    // Separate letter boxes lose the font's kerning (e.g. "YC"), so restore the
+    // kerned spacing inside each word. Words keep their real width, so line
+    // breaks and centring match the real text and every letter rises straight
+    // into its final place.
+    if (mode === 'chars') {
+      pieces.forEach((p, i) => {
+        const f = wordStart[i];
+        if (f === i) return;
+        const want = targets[i] - targets[f];
+        const now = p.getBoundingClientRect().left - pieces[f].getBoundingClientRect().left;
+        if (Math.abs(want - now) > 0.05) p.style.marginLeft = `${want - now}px`;
+      });
+    }
     return { pieces, original };
   }
 
