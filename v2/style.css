@@ -495,15 +495,20 @@ img { display: block; max-width: none; }
   height: 100%;
   object-fit: cover;
 }
-.card-content::before {                         /* Title Shade */
+.card-content::before {                         /* Title shade: dark at the bottom, fading upwards, so the white title reads on any photo */
   content: "";
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 45%;
+  height: 65%;
   z-index: 1;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .55) 100%);
+  background: linear-gradient(180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, .12) 25%,
+    rgba(0, 0, 0, .34) 50%,
+    rgba(0, 0, 0, .6) 75%,
+    rgba(0, 0, 0, .8) 100%);
   opacity: var(--front, 0);
 }
 .card-content::after {                          /* Selection box: 1px inside stroke, same as the mentorship photos */
