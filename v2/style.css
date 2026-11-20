@@ -404,6 +404,14 @@ img { display: block; max-width: none; }
   color: var(--accent);
 }
 
+/* Scroll fill (main.js): the text rises in grey, then each letter flashes
+   the accent colour and turns black as you scroll. Reduced motion: black. */
+@media (prefers-reduced-motion: no-preference) {
+  .statement [data-scroll-fill] { color: var(--grey-text); }
+}
+.sf-c.is-accent { color: var(--green); }
+.sf-c.is-on { color: var(--ink); transition: color .1s linear; }
+
 @media (max-width: 1023px) {
   .statement-body { padding-left: 0; }
 }

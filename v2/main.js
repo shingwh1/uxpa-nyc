@@ -501,7 +501,10 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
     void el.offsetHeight;                                        // commit the hidden start position…
     pieces.forEach((p, i) => { p.style.setProperty('--rv-delay', `${delays[i]}s`); p.classList.add('rv-go'); });   // …then slide
     const total = (Math.max(0, ...delays) + DURATION) * 1000 + 100;
-    setTimeout(() => el.replaceChildren(...original), total);   // back to the real markup
+    setTimeout(() => {                                          // back to the real markup
+      el.replaceChildren(...original);
+      el.dispatchEvent(new CustomEvent('reveal:done'));
+    }, total);
   }
 
   const sectionOf = el => el.closest('section, header, footer, nav') || document.body;
@@ -750,6 +753,97 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
     e.preventDefault();
     lenis.scrollTo(target, { force: true });
     history.pushState(null, '', id);
+  });
+})();
+
+/* ---------------------------------------------------------
+   Scroll fill (after Framer's "Text Scroll with 3 Colors",
+   https://textscrollwith3colors.framer.website/): text marked
+   data-scroll-fill rises in grey, then fills in letter by letter as you
+   scroll. Its progress runs from when its top is 70% of the way down
+   the window to when it reaches the top, trailing the scroll a little
+   (the demo's "scrub"). Each letter flashes the accent colour for 50ms
+   and then turns black; scrolling back up turns letters grey again.
+   The letters are split only after the rise-in animation has finished,
+   so the two effects never fight over the same markup.
+   --------------------------------------------------------- */
+(() => {
+  const START = 0.7, END = 0;       // element top as a fraction of the window height
+  const ACCENT_MS = 50;             // how long a letter shows the accent colour
+  const SCRUB = 0.3;                // seconds for the fill to catch up with the scroll
+  const els = [...document.querySelectorAll('[data-scroll-fill]')];
+  if (!els.length) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;   // CSS shows it black
+
+  const splitLetters = el => {
+    const chars = [];
+    const walk = node => {
+      [...node.childNodes].forEach(child => {
+        if (child.nodeType === Node.ELEMENT_NODE) { walk(child); return; }
+        if (child.nodeType !== Node.TEXT_NODE) return;
+        const frag = document.createDocumentFragment();
+        child.textContent.split(/(\s+)/).forEach(part => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.append(part); return; }
+          const word = document.createElement('span');
+          word.className = 'sf-w';
+          [...part].forEach(ch => {
+            const c = document.createElement('span');
+            c.className = 'sf-c';
+            c.textContent = ch;
+            word.append(c);
+            chars.push(c);
+          });
+          frag.append(word);
+        });
+        child.replaceWith(frag);
+      });
+    };
+    walk(el);
+    return chars;
+  };
+
+  const setup = el => {
+    const chars = splitLetters(el);
+    const timers = new Map();
+    let shown = -1;          // index of the last filled letter
+    let progress = null, last = 0, raf = 0;
+
+    const fill = i => {
+      const c = chars[i];
+      c.classList.remove('is-on');
+      c.classList.add('is-accent');
+      timers.set(i, setTimeout(() => { c.classList.replace('is-accent', 'is-on'); timers.delete(i); }, ACCENT_MS));
+    };
+    const clear = i => {
+      clearTimeout(timers.get(i)); timers.delete(i);
+      chars[i].classList.remove('is-accent', 'is-on');
+    };
+
+    const frame = now => {
+      raf = 0;
+      const vh = window.innerHeight;
+      const top = el.getBoundingClientRect().top;
+      const target = Math.min(1, Math.max(0, (START * vh - top) / ((START - END) * vh)));
+      const dt = last ? Math.min(0.1, (now - last) / 1000) : 0;
+      last = now;
+      progress = progress === null ? target : progress + (target - progress) * (1 - Math.exp(-dt / SCRUB));
+      if (Math.abs(target - progress) < 0.0005) progress = target;
+      const want = Math.min(chars.length, Math.floor(progress * chars.length)) - 1;   // last letter to fill
+      if (want > shown) for (let i = shown + 1; i <= want; i++) fill(i);
+      else if (want < shown) for (let i = shown; i > want; i--) clear(i);
+      shown = want;
+      if (progress !== target) request(); else last = 0;
+    };
+    const request = () => { if (!raf) raf = requestAnimationFrame(frame); };
+    request();
+    window.addEventListener('scroll', request, { passive: true });
+    window.addEventListener('resize', request);
+  };
+
+  els.forEach(el => {
+    if (el.dataset.rv) el.addEventListener('reveal:done', () => setup(el), { once: true });   // waits for the rise-in
+    else setup(el);
   });
 })();
 
