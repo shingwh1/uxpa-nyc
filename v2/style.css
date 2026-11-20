@@ -850,7 +850,7 @@ img { display: block; max-width: none; }
 
 .footer-grid {
   position: relative;
-  height: 240px;
+  height: calc(432px * var(--grid-scale));       /* 9 rows: the pixel pattern plus 4 rows of gradient pixels below it */
   overflow: hidden;
 }
 .footer-grid .grid-inner { top: 0; transform-origin: 50% 0; }
@@ -917,7 +917,6 @@ img { display: block; max-width: none; }
 @media (max-width: 960px) {
   :root { --grid-scale: .75; }
   .hero { height: 400px; }
-  .footer-grid { height: 180px; }
 
   .nav-bar {
     justify-content: space-between;
@@ -1057,7 +1056,6 @@ img { display: block; max-width: none; }
   .footer-cols { padding-inline: var(--gutter); }
   .footer-heading { white-space: normal; }
   .footer-text { line-height: 1.5; }
-  .footer-grid { height: 120px; }
 }
 
 /* =========================================================
