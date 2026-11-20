@@ -536,6 +536,90 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
 })();
 
 /* ---------------------------------------------------------
+   Pixel transitions (after Framer's "Pixel Scroll")
+   Each .pixel-band starts in its data-from colour; as it scrolls up
+   through the window, pixels switch to data-to from the bottom up, in a
+   ragged random front. A few pixels right at the front flash a UXPA
+   accent colour. The pattern is fixed per page load, so scrolling back
+   up plays it in reverse.
+   --------------------------------------------------------- */
+(() => {
+  const bands = [...document.querySelectorAll('.pixel-band')];
+  if (!bands.length) return;
+  const ACCENTS = ['#10bae7', '#64b32c', '#f9d441', '#df6429'];   // UXPA cyan, green, yellow, orange
+  const JITTER = 0.55;          // how ragged the front is (0 = straight line)
+  const ACCENT_BAND = 0.07;     // how close to the front a pixel must be to flash an accent
+  const ACCENT_SHARE = 0.22;    // share of those front pixels that do
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const state = bands.map(el => ({ el, canvas: el.querySelector('canvas'), cells: [], cols: 0, rows: 0, size: 0, last: -1 }));
+
+  // Random but stable numbers per cell
+  const rand = (() => { let s = 1234567; return () => ((s = Math.imul(s ^ (s >>> 15), 2246822519) + 0x9e3779b9 | 0) >>> 0) / 4294967296; })();
+
+  const layout = st => {
+    const scale = parseFloat(getComputedStyle(st.el).getPropertyValue('--grid-scale')) || 1;
+    const size = Math.round(24 * scale);
+    const w = st.el.clientWidth, h = st.el.clientHeight;
+    const dpr = window.devicePixelRatio || 1;
+    st.canvas.width = Math.round(w * dpr);
+    st.canvas.height = Math.round(h * dpr);
+    const cols = Math.ceil(w / size), rows = Math.ceil(h / size);
+    if (cols !== st.cols || rows !== st.rows || size !== st.size) {
+      st.cells = [];
+      for (let r = 0; r < rows; r++) {
+        const fromBottom = (rows - 1 - r) / Math.max(1, rows - 1);          // 0 at the bottom edge
+        for (let c = 0; c < cols; c++) {
+          st.cells.push({
+            x: c * size, y: h - (rows - r) * size,                      // rows hug the bottom edge
+            t: fromBottom * (1 - JITTER) + rand() * JITTER,             // when this pixel switches (0–1)
+            accent: rand() < ACCENT_SHARE ? ACCENTS[Math.floor(rand() * ACCENTS.length)] : null,
+          });
+        }
+      }
+      st.cols = cols; st.rows = rows; st.size = size;
+    }
+    st.dpr = dpr;
+    st.last = -1;
+  };
+
+  const draw = (st, p) => {
+    if (Math.abs(p - st.last) < 0.001) return;
+    st.last = p;
+    const g = st.canvas.getContext('2d');
+    g.setTransform(st.dpr, 0, 0, st.dpr, 0, 0);
+    g.fillStyle = st.el.dataset.from;
+    g.fillRect(0, 0, st.canvas.width, st.canvas.height);
+    const to = st.el.dataset.to;
+    for (const cell of st.cells) {
+      const lead = p - cell.t;                       // > 0 once this pixel has switched
+      if (lead <= 0) continue;
+      g.fillStyle = cell.accent && lead < ACCENT_BAND ? cell.accent : to;
+      g.fillRect(cell.x, cell.y, st.size, st.size);
+    }
+  };
+
+  // Progress 0 → 1 while the band moves from the bottom of the window to about a quarter of the way down
+  const progress = st => {
+    const r = st.el.getBoundingClientRect();
+    const vh = window.innerHeight;
+    return Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.75)));
+  };
+
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    state.forEach(st => draw(st, reduced ? 0.5 : progress(st)));
+  };
+  const request = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+
+  const relayout = () => { state.forEach(layout); update(); };
+  relayout();
+  window.addEventListener('scroll', request, { passive: true });
+  window.addEventListener('resize', relayout);
+})();
+
+/* ---------------------------------------------------------
    Sponsor ticker: Figma track holds the logo set three times
    --------------------------------------------------------- */
 (() => {
