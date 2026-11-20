@@ -725,65 +725,66 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
 })();
 
 /* ---------------------------------------------------------
-   Parallax grid (after Framer's "Parallax Grid Scroll", vertical mode)
-   A row's height depends on how high it sits in the window and keeps
-   growing all the way up, on a smooth S-curve: about 14% of the window
-   height as it enters at the bottom, 45% at the top, about 60% once it
-   is well above the screen. Each row is wide enough to fill the window
-   at every size. The sizes ease toward their targets, so the scaling
-   stays smooth even when the wheel scrolls in steps. Rows sit in normal
-   flow, so the black closing section stays attached to the last row and
-   rises with it. Alternate rows drift sideways in opposite directions.
+   Parallax grid: the vertical mode of Framer's "Parallax Grid Scroll"
+   (https://vivacious-growth-537515.framer.app/), using the same maths
+   and the demo's settings. Each row's width is a percentage of the
+   section: 125% when the row's top enters at the bottom of the window,
+   growing in a straight line to 500% when its bottom leaves at the top
+   (250% → 750% below 1000px wide). The tiles share the row's width at
+   7:5, so a wider row is a taller row. The rows are centred, so they
+   always overflow both edges. The section's height is fixed at the
+   height of all the rows at full size, so whatever comes after it (the
+   black closing section) scrolls up at the same speed as the page.
    --------------------------------------------------------- */
 (() => {
   const wrap = document.querySelector('.pgrid-rows');
   if (!wrap) return;
-  const rows = [...wrap.querySelectorAll('.pgrid-row')].map(el => ({
-    el, strip: el.querySelector('.pgrid-strip'), dir: Number(el.dataset.dir) || 1, h: 0,
-  }));
-  const MIN = 0.13, MAX = 0.62;     // row height limits (× base)
-  const FROM = 1.15, TO = -0.75;    // curve runs from just below the window to well above it
-  const DRIFT = 0.04;               // sideways drift per window-height travelled (× window width)
-  const LAG = 0.12;                 // seconds for the sizes to catch up with the scroll
+  const rows = [...wrap.querySelectorAll('.pgrid-row')];
+  const PER_ROW = rows[0].children.length;
+  const RATIO = 7 / 5;
+  const SIZES = { desktop: [125, 500], mobile: [250, 750], breakpoint: 1000 };
+  const SMOOTHING = 1;          // 1 follows the scroll exactly (the demo's setting); lower adds an eased lag
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const smooth = x => x * x * (3 - 2 * x);
+  const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
+  const sizes = () => (window.innerWidth < SIZES.breakpoint ? SIZES.mobile : SIZES.desktop);
+  const current = [];
 
-  let base = 0, gap = 0;
-  const measure = () => {
-    base = Math.min(window.innerHeight, window.innerWidth * 1.1);   // keeps phones in proportion
-    gap = parseFloat(getComputedStyle(wrap).getPropertyValue('--gap')) || 0;
-  };
-  const target = t => {
-    if (reduced) return 0.45 * base;
-    const x = Math.min(1, Math.max(0, (FROM - t) / (FROM - TO)));
-    return (MIN + (MAX - MIN) * smooth(x)) * base;
+  const setHeight = () => {
+    const cs = getComputedStyle(wrap);
+    const gap = parseFloat(cs.rowGap) || 0;
+    const pad = parseFloat(cs.paddingTop) || 0;
+    const [start, end] = sizes();
+    const rowW = wrap.clientWidth * Math.max(start, end) / 100;
+    const tileH = Math.max(1, (rowW - gap * (PER_ROW - 1)) / PER_ROW) / RATIO;
+    wrap.style.height = `${tileH * rows.length + gap * (rows.length - 1) + pad * 2}px`;
   };
 
-  let raf = 0, last = 0;
-  const frame = now => {
+  let raf = 0;
+  const update = () => {
     raf = 0;
-    const dt = last ? Math.min(0.05, (now - last) / 1000) : 1;
-    last = now;
-    const k = 1 - Math.exp(-dt / LAG);
-    const vh = window.innerHeight, vw = window.innerWidth;
-    let y = wrap.getBoundingClientRect().top;
+    const [start, end] = sizes();
+    const vh = window.innerHeight;
     let moving = false;
-    rows.forEach(row => {
-      const t = y / vh;                                  // 0 = window top, 1 = bottom
-      const goal = target(t);
-      row.h = row.h ? row.h + (goal - row.h) * k : goal;
-      if (Math.abs(goal - row.h) > 0.3) moving = true; else row.h = goal;
-      row.el.style.setProperty('--h', `${row.h.toFixed(2)}px`);
-      row.strip.style.transform = `translateX(${reduced ? 0 : (row.dir * t * DRIFT * vw).toFixed(1)}px)`;
-      y += row.h + gap;
+    rows.forEach((row, i) => {
+      const r = row.getBoundingClientRect();
+      const s = clamp((vh - r.top) / (vh + r.height), 0, 1);
+      const goal = start + (end - start) * s;
+      const prev = current[i] ?? goal;
+      const next = SMOOTHING >= 1 ? goal : prev + (goal - prev) * SMOOTHING;
+      if (SMOOTHING < 1 && Math.abs(goal - next) > 0.01) moving = true;
+      current[i] = next;
+      row.style.width = `${next}%`;
     });
-    if (moving) request(); else last = 0;
+    if (moving) request();
   };
-  const request = () => { if (!raf) raf = requestAnimationFrame(frame); };
-  measure();
-  frame(0);
+  const request = () => { if (!raf) raf = requestAnimationFrame(update); };
+
+  // Reduced motion: rows stay at a middle size and the section fits them (no empty space)
+  if (reduced) { rows.forEach(row => { row.style.width = `${(sizes()[0] + sizes()[1]) / 3}%`; }); return; }
+  setHeight();
+  update();
   window.addEventListener('scroll', request, { passive: true });
-  window.addEventListener('resize', () => { measure(); request(); });
+  window.addEventListener('resize', () => { setHeight(); request(); });
 })();
 
 /* ---------------------------------------------------------

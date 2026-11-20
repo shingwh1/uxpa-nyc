@@ -1075,43 +1075,44 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
 }
 
 /* =========================================================
-   Parallax grid (after Framer's "Parallax Grid Scroll", vertical
-   mode): six rows of community photos. Each row is small as it enters
-   at the bottom of the window and keeps growing as it rises, drifting
-   sideways (alternate rows in opposite directions). main.js sets each
-   row's height (--h); the rows are wide enough to fill the window.
+   Parallax grid: vertical mode of Framer's "Parallax Grid Scroll",
+   with the demo's layout. Rows sit in a centred column; main.js sets
+   each row's width (125% → 500% of the section) from its position in
+   the window, and the tiles share that width at 7:5. The section's
+   height is fixed at all rows at full size (also set by main.js).
    ========================================================= */
 .pgrid { margin-top: var(--section-gap); }
 .pgrid-head { text-align: center; }
 .pgrid-rows {
-  --gap: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;                          /* wide rows overflow both edges equally */
+  gap: 16px;
+  padding: 8px 0;
   margin-top: 48px;
-  overflow-x: clip;
-  overflow-anchor: none;                        /* heights change with scroll; don't let the browser compensate */
+  overflow: hidden;
+  overflow-anchor: none;
 }
 .pgrid-row {
-  --h: 30vh;                                    /* main.js updates this as the row moves */
-  height: var(--h);
   display: flex;
-  justify-content: center;
-  margin-bottom: var(--gap);
+  flex-shrink: 0;
+  gap: 16px;
+  width: 125%;                                  /* main.js updates this as the row moves */
+  will-change: width;
 }
-.pgrid-row:last-child { margin-bottom: 0; }
-.pgrid-strip {
-  display: flex;
-  flex: none;
-  gap: var(--gap);
-  will-change: transform;
+.pgrid-tile {
+  flex: 1 1 0px;
+  min-width: 0;
+  aspect-ratio: 7 / 5;
+  overflow: hidden;
 }
-.pgrid-strip img {
-  flex: none;
-  height: var(--h);
-  aspect-ratio: 3 / 2;
-  width: auto;
+.pgrid-tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-}
-@media (max-width: 700px) {
-  .pgrid-rows { --gap: 8px; }
+  user-select: none;
+  pointer-events: none;
 }
 
 /* =========================================================
