@@ -383,10 +383,13 @@ img { display: block; max-width: none; }
   letter-spacing: -.01em;
   text-transform: uppercase;
   color: var(--accent);
+  --hang: min(.5em, var(--gutter) * .6);       /* how far lines hang into the page margins */
 }
 .statement-title .line { display: block; }
-.statement-title .line-2 { padding-left: 8%; }
-.statement-title .line-3 { text-align: right; }
+/* Lines 1 and 3 hang out past the text column's left edge and line 2 past its right edge (into the page margins), so the long lines stagger more while still overlapping */
+.statement-title .line-1 { margin-left: calc(-1 * var(--hang)); }
+.statement-title .line-2 { text-align: right; margin-right: calc(-1 * var(--hang)); }
+.statement-title .line-3 { margin-left: calc(-.5 * var(--hang)); }
 .statement-title .line-4 { padding-left: 24%; }
 .statement-title .line-5 { text-align: right; }
 
@@ -406,7 +409,6 @@ img { display: block; max-width: none; }
 }
 @media (max-width: 600px) {
   .statement-title { font-size: 10vw; }         /* the longest line ("and research") stays on one line */
-  .statement-title .line-2 { padding-left: 0; }
   .statement-title .line-4 { padding-left: 12%; }
 }
 
