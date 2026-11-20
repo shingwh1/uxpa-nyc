@@ -682,61 +682,6 @@ img { display: block; max-width: none; }
 }
 
 /* =========================================================
-   Community circle — a 1227px square that scales with the window
-   ========================================================= */
-.community {
-  --size: min(1227px, calc(100vw - 2 * var(--gutter) + 82px));   /* ring's photos line up with the content edges */
-  position: relative;
-  width: var(--size);
-  aspect-ratio: 1;
-  margin: var(--section-gap) auto 0;
-  container-type: inline-size;
-}
-
-/* The photos slowly orbit the headline. The ring turns while each photo
-   turns back the same amount, so the photos stay upright. No hover effect. */
-.ring {
-  position: absolute;
-  inset: 0;
-  animation: orbit 90s linear infinite;
-}
-.float-photo {
-  position: absolute;
-  left: calc(var(--l) / 1227 * 100%);
-  top: calc(var(--t) / 1227 * 100%);
-  width: 11.736%;                               /* 144 / 1227 */
-  aspect-ratio: 1;
-  animation: orbit 90s linear infinite reverse;
-}
-.float-photo img {
-  width: 100%;
-  height: 100%;
-}
-@keyframes orbit {
-  to { transform: rotate(360deg); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ring, .float-photo { animation: none; }
-}
-
-.community-center {
-  position: absolute;
-  left: 26.08%;                                 /* 320 / 1227 */
-  top: 35.126%;                                 /* 431 / 1227 */
-  width: 47.84%;                                /* 587 / 1227 */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.community-title {
-  font-size: 6.52cqw;                           /* 80px at 1227 */
-  line-height: 1.1;
-  font-weight: 300;
-  text-align: center;
-}
-.cta-join { margin-top: 4.156cqw; }             /* 51px at 1227 */
-
-/* =========================================================
    Footer
    ========================================================= */
 .footer { margin-top: var(--section-gap); }
@@ -974,61 +919,6 @@ img { display: block; max-width: none; }
 }
 
 /* =========================================================
-   ≤ 700px — community photos become a grid under the headline
-   ========================================================= */
-@media (max-width: 700px) {
-  .community {
-    width: auto;
-    aspect-ratio: auto;
-    margin-inline: var(--gutter);
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    container-type: normal;
-  }
-  .community-center {
-    position: static;
-    grid-column: 1 / -1;
-    order: -1;
-    width: auto;
-    margin-bottom: 32px;
-  }
-  .community-title { font-size: clamp(36px, 9vw, 56px); }
-  .cta-join { margin-top: 32px; }
-  .ring { display: contents; animation: none; }   /* photos become grid items; no orbit here */
-  .float-photo { position: relative; left: auto; top: auto; width: auto; animation: none; }
-
-  /* Instead of orbiting, a wave runs diagonally from the
-     top-left photo to the bottom-right one: each photo rests at 50% opacity
-     and brightens to 100% as a whole when the wave reaches it. */
-  .float-photo img {
-    opacity: .5;
-    animation: photo-wave 4s ease-in-out infinite;
-  }
-  /* delay = (row + column) × 0.3s */
-  .float-photo:nth-child(2) img { animation-delay: 0.3s; }
-  .float-photo:nth-child(3) img { animation-delay: 0.6s; }
-  .float-photo:nth-child(4) img { animation-delay: 0.3s; }
-  .float-photo:nth-child(5) img { animation-delay: 0.6s; }
-  .float-photo:nth-child(6) img { animation-delay: 0.9s; }
-  .float-photo:nth-child(7) img { animation-delay: 0.6s; }
-  .float-photo:nth-child(8) img { animation-delay: 0.9s; }
-  .float-photo:nth-child(9) img { animation-delay: 1.2s; }
-  .float-photo:nth-child(10) img { animation-delay: 0.9s; }
-  .float-photo:nth-child(11) img { animation-delay: 1.2s; }
-  .float-photo:nth-child(12) img { animation-delay: 1.5s; }
-}
-@keyframes photo-wave {
-  0%   { opacity: .5; }
-  12%  { opacity: 1; }
-  24%  { opacity: .5; }
-  100% { opacity: .5; }
-}
-@media (max-width: 700px) and (prefers-reduced-motion: reduce) {
-  .float-photo img { animation: none; opacity: 1; }
-}
-
-/* =========================================================
    ≤ 600px — phone
    ========================================================= */
 @media (max-width: 600px) {
@@ -1102,3 +992,149 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
 .pixel-band canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .pixel-band + .events { margin-top: 0; }        /* the band runs straight into the black section */
 .events + .pixel-band { margin-top: 0; }        /* …and straight out of it */
+
+/* =========================================================
+   Bottom CTA — scroll scale gallery (after Framer's "Scroll Scale
+   Gallery"). The section pins for 1.6 window-heights of scrolling;
+   main.js scales every photo up from the centre of the screen: the
+   outer ones fly off the edges and the centre photo grows to fill the
+   screen, then the call to action fades in over it.
+   Positions and sizes are in --u units (≈1% of the window width).
+   ========================================================= */
+.zoom-cta {
+  --u: min(1vw, 1.55svh);                       /* collage fits short windows too */
+  --cta: 0;                                     /* 0 → 1: call-to-action visibility */
+  position: relative;
+  height: calc(100svh + 160svh);
+  margin-top: var(--section-gap);
+}
+.zoom-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+.zoom-stage { position: absolute; inset: 0; }
+.zoom-photo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: calc(var(--w) * var(--u));
+  aspect-ratio: var(--ar);
+  margin: 0;
+  transform: translate(-50%, -50%) translate(calc(var(--x) * var(--u)), calc(var(--y) * var(--u)));
+  will-change: transform;
+}
+.zoom-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.zoom-photo--centre { z-index: 2; }
+.zoom-photo--centre::after {                    /* shade so the white copy reads, as on the event cards */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 45% at 50% 50%, rgba(0, 0, 0, .35), rgba(0, 0, 0, 0)),   /* extra behind the copy */
+    rgba(0, 0, 0, .5);
+  opacity: var(--cta);
+}
+.zoom-copy {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-inline: var(--gutter);
+  color: var(--white);
+  text-align: center;
+  opacity: var(--cta);
+  transform: translateY(calc((1 - var(--cta)) * 24px));
+  pointer-events: none;
+}
+.zoom-cta.is-ready .zoom-copy { pointer-events: auto; }
+.zoom-title {
+  font-size: var(--h2);                         /* same three lines as the circle's headline */
+  line-height: 1.1;
+  font-weight: 300;
+}
+/* The "Join Today" link from the community circle, in white for the dark photo */
+.zoom-copy .cta-join { margin-top: 40px; }
+.zoom-copy .cta-join .arrow { color: var(--white); }
+
+@media (max-width: 700px) {
+  .zoom-cta { --u: 1.9vw; }                     /* bigger collage on phones; the edges crop */
+}
+/* Reduced motion: no pinning or zoom — just the full-screen photo with the call to action */
+@media (prefers-reduced-motion: reduce) {
+  .zoom-cta { --cta: 1; height: auto; }
+  .zoom-pin { position: relative; }
+  .zoom-photo { display: none; }
+  .zoom-photo--centre { display: block; inset: 0; left: 0; top: 0; width: 100%; height: 100%; transform: none; }
+  .zoom-copy { pointer-events: auto; }
+}
+
+/* =========================================================
+   Parallax grid (after Framer's "Parallax Grid Scroll", vertical
+   mode): six rows of community photos. Each row is small as it enters
+   at the bottom of the window and keeps growing as it rises, drifting
+   sideways (alternate rows in opposite directions). main.js sets each
+   row's height (--h); the rows are wide enough to fill the window.
+   ========================================================= */
+.pgrid { margin-top: var(--section-gap); }
+.pgrid-head { text-align: center; }
+.pgrid-rows {
+  --gap: 12px;
+  margin-top: 48px;
+  overflow-x: clip;
+  overflow-anchor: none;                        /* heights change with scroll; don't let the browser compensate */
+}
+.pgrid-row {
+  --h: 30vh;                                    /* main.js updates this as the row moves */
+  height: var(--h);
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--gap);
+}
+.pgrid-row:last-child { margin-bottom: 0; }
+.pgrid-strip {
+  display: flex;
+  flex: none;
+  gap: var(--gap);
+  will-change: transform;
+}
+.pgrid-strip img {
+  flex: none;
+  height: var(--h);
+  aspect-ratio: 3 / 2;
+  width: auto;
+  object-fit: cover;
+}
+@media (max-width: 700px) {
+  .pgrid-rows { --gap: 8px; }
+}
+
+/* =========================================================
+   Closer: the black section the parallax grid scrolls into
+   (as in Framer's Parallax Grid Scroll demo), with the community
+   headline and the Join Today link in white.
+   ========================================================= */
+.closer {
+  display: grid;
+  justify-items: center;
+  align-content: start;                         /* the copy rides just under the gallery's last row */
+  min-height: 100svh;
+  padding: 96px var(--gutter) var(--section-gap);
+  background: var(--ink);
+  color: var(--white);
+  text-align: center;
+}
+.closer-inner { display: flex; flex-direction: column; align-items: center; }
+.closer-title {
+  font-size: var(--h2);
+  line-height: 1.1;
+  font-weight: 300;
+}
+.closer .cta-join { margin-top: 40px; }
+.closer .cta-join .arrow { color: var(--white); }
+.pgrid + .closer { margin-top: 0; }             /* the grid's last row runs straight into it */
