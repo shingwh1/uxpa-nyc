@@ -40,15 +40,15 @@
           <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
         </div>
         <ul class="nav-list">
-          <li class="nav-item" style="--w:103px">
+          <li class="nav-item" style="--w:127px">
             <a href="#about">About</a>
-            <div class="dropdown" style="--dw:134px">
+            <div class="dropdown">
               <a href="#">Our team</a>
             </div>
           </li>
           <li class="nav-item" style="--w:160px">
             <a href="#get-involved">Get Involved</a>
-            <div class="dropdown" style="--dw:161px">
+            <div class="dropdown">
               <a href="#">Membership</a>
               <a href="#">Volunteering</a>
               <a href="#mentorship">Mentorship</a>
@@ -57,7 +57,7 @@
           <li class="nav-item" style="--w:107px"><a href="#events">Events</a></li>
           <li class="nav-item" style="--w:130px">
             <a href="#sponsors">Sponsors</a>
-            <div class="dropdown" style="--dw:211px">
+            <div class="dropdown">
               <a href="#">Become a sponsor</a>
             </div>
           </li>
@@ -140,30 +140,45 @@
           <p class="section-eyebrow events-eyebrow">Our events range from roundtables, presentations, panels to workshops. Check out our in-person and virtual event lineup and look at what our community has been up to!</p>
         </div>
 
+        <!-- PLACEHOLDER event details (dates, times, in person / virtual, sign-up links):
+             replace with the client's real events. -->
         <div class="stack-stage">
           <div class="carousel">
             <div class="card" data-index="0">
               <div class="card-content">
                 <img src="../assets/images/events/happy-hour.jpg" alt="">
+                <p class="card-meta"><span class="card-date">Thu, Dec 4 · 6:30 PM</span><span class="card-type">In person</span></p>
                 <p class="card-title">Happy Hour &amp; UX Bingo</p>
+                <a class="card-signup" href="#">Sign up<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></a>
               </div>
               <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
             </div>
             <div class="card" data-index="1">
               <div class="card-content">
                 <img src="../assets/images/events/accessible-website-workshop.jpg" alt="">
+                <p class="card-meta"><span class="card-date">Sat, Dec 13 · 11:00 AM</span><span class="card-type">In person</span></p>
                 <p class="card-title">Design an Accessible Website: <span class="nowrap">Hands-On</span> UX Workshop</p>
+                <a class="card-signup" href="#">Sign up<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></a>
               </div>
               <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
             </div>
             <div class="card" data-index="2">
               <div class="card-content">
                 <img src="../assets/images/events/women-in-tech.png" alt="">
+                <p class="card-meta"><span class="card-date">Wed, Jan 14 · 7:00 PM</span><span class="card-type">Virtual</span></p>
                 <p class="card-title">Women in Tech Panel</p>
+                <a class="card-signup" href="#">Sign up<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></a>
               </div>
               <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
             </div>
           </div>
+        </div>
+
+        <!-- Where you are in the stack: "01 / 03" and a gradient bar that fills
+             as you scroll through the cards (main.js updates both) -->
+        <div class="stack-progress" aria-hidden="true">
+          <span class="stack-count"><span class="stack-now">01</span> / <span class="stack-total">03</span></span>
+          <span class="stack-bar"><span></span></span>
         </div>
 
         <a class="cta cta-view-all" href="#">
@@ -233,6 +248,15 @@
     <div class="wrap pgrid-head">
       <h2 class="section-title" id="pgrid-title">Impact on the Community</h2>
     </div>
+    <!-- Impact numbers: each one counts up from 0 when the row scrolls into view (see main.js).
+         PLACEHOLDER figures (only "200+ members" comes from the current site):
+         replace with the client's real numbers. Change data-count and the text together. -->
+    <ul class="stats wrap" aria-label="UXPA NYC in numbers">
+      <li class="stat"><span class="stat-num" data-count="200" data-suffix="+">200+</span><span class="stat-label">Members</span></li>
+      <li class="stat"><span class="stat-num" data-count="50" data-suffix="+">50+</span><span class="stat-label">Events hosted</span></li>
+      <li class="stat"><span class="stat-num" data-count="30" data-suffix="+">30+</span><span class="stat-label">Mentor pairs</span></li>
+      <li class="stat"><span class="stat-num" data-count="20" data-suffix="+">20+</span><span class="stat-label">Years in NYC</span></li>
+    </ul>
     <!-- Velocity marquee (after Framer's "Velocity Marquee"): drifts left, speeds up and leans
          with the scroll speed, runs backwards when scrolling up. main.js repeats the item. -->
     <div class="vmarquee" role="group" aria-label="Who our community is">
@@ -242,77 +266,27 @@
         </div>
       </div>
     </div>
-    <div class="pgrid-rows">
-      <div class="pgrid-row">
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="Tamora Petitt is welcomed as President of NYC UXPA by former President Melissa McGrath and former Vice President Barry Gottlieb" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="Members networking at a NYC UXPA event" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="NYC UXPA members at an event" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-      </div>
-      <div class="pgrid-row">
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-      </div>
-      <div class="pgrid-row">
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-      </div>
-      <div class="pgrid-row">
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-      </div>
-      <div class="pgrid-row">
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-      </div>
-      <div class="pgrid-row">
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
-        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+    <!-- Sideways photo strip: the strip stays on screen while you scroll down,
+         and the photos slide left in one line (see main.js). The gradient bar
+         under it shows how far along you are.
+         PLACEHOLDER: these are the photos we already have. Add more event photos
+         from the client by copying a <figure> line and changing the src and alt. -->
+    <div class="hgal" data-hgal>
+      <div class="hgal-pin">
+        <div class="hgal-track">
+          <figure class="hgal-tile"><img src="../assets/images/about/president-welcome.jpg" alt="Tamora Petitt is welcomed as President of NYC UXPA by former President Melissa McGrath and former Vice President Barry Gottlieb" loading="lazy" decoding="async"></figure>
+          <figure class="hgal-tile"><img src="../assets/images/about/members-networking.png" alt="Members networking at a NYC UXPA event" loading="lazy" decoding="async"></figure>
+          <figure class="hgal-tile"><img src="../assets/images/statement-talk.webp" alt="A talk at a UXPA NYC event" loading="lazy" decoding="async"></figure>
+          <figure class="hgal-tile"><img src="../assets/images/about/community-group.jpg" alt="NYC UXPA members at an event" loading="lazy" decoding="async"></figure>
+          <figure class="hgal-tile"><img src="../assets/images/mentorship-faq.png" alt="Packed room at a UXPA NYC event" loading="lazy" decoding="async"></figure>
+          <figure class="hgal-tile"><img src="../assets/images/mentor.png" alt="Audience at a UXPA NYC presentation" loading="lazy" decoding="async"></figure>
+        </div>
+        <div class="hgal-progress" aria-hidden="true"><span></span></div>
       </div>
     </div>
   </section>
 
-  <!-- ============ CLOSER: the section the parallax grid scrolls into ============ -->
+  <!-- ============ CLOSER: the section the photo strip leads into ============ -->
   <section class="closer" aria-labelledby="closer-title">
     <div class="closer-inner">
       <h2 class="closer-title" id="closer-title">Where NYC’s UX<br>community<br>comes together</h2>

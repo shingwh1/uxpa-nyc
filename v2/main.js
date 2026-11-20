@@ -225,6 +225,11 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
   const pin = stack.querySelector('.stack-pin');
   const carousel = stack.querySelector('.carousel');
   const cards = [...stack.querySelectorAll('.card')];
+  const now = stack.querySelector('.stack-now');
+  const total = stack.querySelector('.stack-total');
+  const bar = stack.querySelector('.stack-bar span');
+  const pad = n => String(n).padStart(2, '0');
+  if (total) total.textContent = pad(cards.length);
   const active = window.matchMedia('(min-width: 1024px) and (prefers-reduced-motion: no-preference)');
 
   // Figma card boxes (% of the 1387 × 731 stack) at depth 0 (front), 1, 2 (back)
@@ -276,6 +281,8 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
       card.style.setProperty('--front', clamp(1 - depth, 0, 1));
     });
     carousel.style.transform = `perspective(1400px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`;
+    if (now) now.textContent = pad(Math.min(cards.length, Math.round(current) + 1));
+    if (bar) bar.style.setProperty('--p', cards.length > 1 ? current / (cards.length - 1) : 1);
   };
 
   const tick = now => {
@@ -659,66 +666,38 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
 })();
 
 /* ---------------------------------------------------------
-   Parallax grid: the vertical mode of Framer's "Parallax Grid Scroll"
-   (https://vivacious-growth-537515.framer.app/), using the same maths
-   and the demo's settings. Each row's width is a percentage of the
-   section: 125% when the row's top enters at the bottom of the window,
-   growing in a straight line to 500% when its bottom leaves at the top
-   (250% → 750% below 1000px wide). The tiles share the row's width at
-   7:5, so a wider row is a taller row. The rows are centred, so they
-   always overflow both edges. The section's height is fixed at the
-   height of all the rows at full size, so whatever comes after it (the
-   black closing section) scrolls up at the same speed as the page.
+   Impact on the Community: sideways photo strip. While the strip is
+   pinned, scrolling down slides the photos left by the same amount
+   (1 px down = 1 px left), so the movement stays calm and predictable.
+   The section is made tall enough for the whole strip to pass:
+   window height + how far the strip has to travel.
    --------------------------------------------------------- */
 (() => {
-  const wrap = document.querySelector('.pgrid-rows');
-  if (!wrap) return;
-  const rows = [...wrap.querySelectorAll('.pgrid-row')];
-  const PER_ROW = rows[0].children.length;
-  const RATIO = 7 / 5;
-  const SIZES = { desktop: [125, 500], mobile: [250, 750], breakpoint: 1000 };
-  const SMOOTHING = 1;          // 1 follows the scroll exactly (the demo's setting); lower adds an eased lag
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
-  const sizes = () => (window.innerWidth < SIZES.breakpoint ? SIZES.mobile : SIZES.desktop);
-  const current = [];
+  const gal = document.querySelector('[data-hgal]');
+  if (!gal) return;
+  const pin = gal.querySelector('.hgal-pin');
+  const track = gal.querySelector('.hgal-track');
+  const bar = gal.querySelector('.hgal-progress span');
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;   // CSS: plain sideways row
 
-  const setHeight = () => {
-    const cs = getComputedStyle(wrap);
-    const gap = parseFloat(cs.rowGap) || 0;
-    const pad = parseFloat(cs.paddingTop) || 0;
-    const [start, end] = sizes();
-    const rowW = wrap.clientWidth * Math.max(start, end) / 100;
-    const tileH = Math.max(1, (rowW - gap * (PER_ROW - 1)) / PER_ROW) / RATIO;
-    wrap.style.height = `${tileH * rows.length + gap * (rows.length - 1) + pad * 2}px`;
+  let travel = 0, raf = 0;
+  const measure = () => {
+    travel = Math.max(0, track.scrollWidth - pin.clientWidth);
+    gal.style.height = `${pin.offsetHeight + travel}px`;
+    update();
   };
-
-  let raf = 0;
   const update = () => {
     raf = 0;
-    const [start, end] = sizes();
-    const vh = window.innerHeight;
-    let moving = false;
-    rows.forEach((row, i) => {
-      const r = row.getBoundingClientRect();
-      const s = clamp((vh - r.top) / (vh + r.height), 0, 1);
-      const goal = start + (end - start) * s;
-      const prev = current[i] ?? goal;
-      const next = SMOOTHING >= 1 ? goal : prev + (goal - prev) * SMOOTHING;
-      if (SMOOTHING < 1 && Math.abs(goal - next) > 0.01) moving = true;
-      current[i] = next;
-      row.style.width = `${next}%`;
-    });
-    if (moving) request();
+    const scrolled = Math.min(Math.max(-gal.getBoundingClientRect().top, 0), travel);
+    track.style.transform = `translate3d(${-scrolled}px, 0, 0)`;
+    if (bar) bar.style.setProperty('--p', travel ? scrolled / travel : 0);
   };
-  const request = () => { if (!raf) raf = requestAnimationFrame(update); };
+  const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
 
-  // Reduced motion: rows stay at a middle size and the section fits them (no empty space)
-  if (reduced) { rows.forEach(row => { row.style.width = `${(sizes()[0] + sizes()[1]) / 3}%`; }); return; }
-  setHeight();
-  update();
-  window.addEventListener('scroll', request, { passive: true });
-  window.addEventListener('resize', () => { setHeight(); request(); });
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', measure);
+  track.querySelectorAll('img').forEach(img => img.complete || img.addEventListener('load', measure, { once: true }));
+  measure();
 })();
 
 /* ---------------------------------------------------------
@@ -932,4 +911,50 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
     copy.querySelectorAll('img').forEach(img => (img.alt = ''));
     track.appendChild(copy);
   }
+})();
+
+/* ---------------------------------------------------------
+   Impact numbers: when the row is 35% in view, each number counts
+   up from 0 (ease-out, 1.6 s), one after another, and its gradient
+   line grows with it. Plays once. With reduced motion the final
+   numbers simply show. Screen readers get the final number only.
+   --------------------------------------------------------- */
+(() => {
+  const row = document.querySelector('.stats');
+  if (!row) return;
+  const nums = [...row.querySelectorAll('.stat-num[data-count]')];
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const DURATION = 1600;         // ms per number
+  const STAGGER = 180;           // ms between numbers
+  const ease = t => 1 - Math.pow(1 - t, 4);                       // easeOutQuart
+
+  nums.forEach(el => {
+    el.setAttribute('aria-label', el.textContent.trim());          // read the final figure
+    el.textContent = `0${el.dataset.suffix || ''}`;
+    el.style.setProperty('--p', 0);
+  });
+
+  const play = () => {
+    const t0 = performance.now();
+    const frame = now => {
+      let running = false;
+      nums.forEach((el, i) => {
+        const t = Math.min(1, Math.max(0, (now - t0 - i * STAGGER) / DURATION));
+        const p = ease(t);
+        el.textContent = `${Math.round(p * Number(el.dataset.count))}${el.dataset.suffix || ''}`;
+        el.style.setProperty('--p', p);
+        if (t < 1) running = true;
+      });
+      if (running) requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  };
+
+  const io = new IntersectionObserver(entries => {
+    if (!entries.some(e => e.isIntersecting)) return;
+    io.disconnect();
+    play();
+  }, { threshold: 0.35 });
+  io.observe(row);
 })();
