@@ -86,14 +86,21 @@ function renderGrid(el, index, extendTop, fullTiles) {
         b = mix(r.c0, r.c1, Math.min(1, Math.max(0, x1 - s)));
       }
       const top = extendTop && r.y === 0 ? -extendTop : r.y;
-      html += `<div style="left:${left}px;top:${top}px;height:${r.h + r.y - top}px;background:linear-gradient(90deg,#${a},#${b})"></div>`;
+      // The "white" squares are holes: leave them out of the stripe so they're transparent
+      const gaps = index.cols[s].whites.filter(y => y >= top && y < r.y + r.h).sort((m, n) => m - n);
+      let from = top;
+      for (const y of [...gaps, r.y + r.h]) {
+        if (y > from) html += `<div style="left:${left}px;top:${from}px;height:${y - from}px;background:linear-gradient(90deg,#${a},#${b})"></div>`;
+        from = y + CELL;
+      }
     }
-    for (const y of index.cols[s].whites) html += `<div class="white" style="left:${left}px;top:${y}px"></div>`;
+    // Hover tiles everywhere except the transparent squares, which stay empty
+    const holes = new Set(index.cols[s].whites);
     if (fullTiles) {
       const c = index.cols[s].tiles[0].c;        // the column's hover colour
-      for (let y = -extendTop; y < 480; y += CELL) html += `<div class="tile" style="left:${left}px;top:${y}px;--c:#${c}"></div>`;
+      for (let y = -extendTop; y < 480; y += CELL) if (!holes.has(y)) html += `<div class="tile" style="left:${left}px;top:${y}px;--c:#${c}"></div>`;
     } else {
-      for (const t of index.cols[s].tiles) html += `<div class="tile" style="left:${left}px;top:${t.y}px;--c:#${t.c}"></div>`;
+      for (const t of index.cols[s].tiles) if (!holes.has(t.y)) html += `<div class="tile" style="left:${left}px;top:${t.y}px;--c:#${t.c}"></div>`;
     }
   }
   inner.innerHTML = html;
