@@ -388,8 +388,7 @@ img { display: block; max-width: none; }
 .statement-title .line-2 { padding-left: 8%; }
 .statement-title .line-3 { text-align: right; }
 .statement-title .line-4 { padding-left: 24%; }
-.statement-title .line-5 { padding-left: 44%; }
-.statement-title .line-6 { text-align: right; }
+.statement-title .line-5 { text-align: right; }
 
 .statement-body {
   margin-top: 64px;
@@ -406,10 +405,9 @@ img { display: block; max-width: none; }
   .statement-body { padding-left: 0; }
 }
 @media (max-width: 600px) {
-  .statement-title { font-size: 10vw; }         /* the longest line ("The hub where") stays on one line */
+  .statement-title { font-size: 10vw; }         /* the longest line ("and research") stays on one line */
   .statement-title .line-2 { padding-left: 0; }
   .statement-title .line-4 { padding-left: 12%; }
-  .statement-title .line-5 { padding-left: 24%; }
 }
 
 /* =========================================================
