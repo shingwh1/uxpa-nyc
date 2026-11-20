@@ -848,6 +848,79 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
 })();
 
 /* ---------------------------------------------------------
+   Velocity marquee (after Framer's "Velocity Marquee",
+   https://precious-conference-017181.framer.app/velocity-marquee),
+   using the same maths and the demo's settings. The band drifts left at
+   70px/s. Scrolling adds 1.2 × the (smoothed) scroll speed, capped at
+   1400px/s, so scrolling down speeds it up and scrolling up sends it
+   backwards; at full speed it leans up to 8°. The item is repeated
+   enough times to cover the band and wraps seamlessly.
+   --------------------------------------------------------- */
+(() => {
+  const band = document.querySelector('.vmarquee');
+  if (!band) return;
+  const track = band.querySelector('.vmarquee-track');
+  const item = track.querySelector('.vmarquee-item');
+  const SPEED = 70;          // px/s when the page is still
+  const RESPONSE = 1.2;      // scroll speed → extra marquee speed
+  const LEAN = 8;            // degrees at full scroll speed
+  const CAP = 1400;          // px/s scroll speed cap
+  const MAX_COPIES = 40;
+  const DIR = 1;             // 1 = leftwards, -1 = rightwards
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  let width = 0;             // one item's width
+  let offset = 0, velocity = 0, lastT = 0, lastY = 0, raf = 0, visible = false;
+
+  const render = () => {
+    const skew = -DIR * clamp(velocity / CAP, -1, 1) * LEAN;
+    track.style.transform = `translate3d(${(-offset).toFixed(2)}px,0,0) skewX(${skew.toFixed(2)}deg)`;
+  };
+  const measure = () => {
+    const w = item.getBoundingClientRect().width;
+    if (w <= 1) return;
+    width = w;
+    const copies = Math.min(MAX_COPIES, Math.ceil(band.offsetWidth / w) + 2);
+    while (track.children.length < copies) {
+      const c = item.cloneNode(true);
+      c.setAttribute('aria-hidden', 'true');
+      track.append(c);
+    }
+    while (track.children.length > copies) track.lastElementChild.remove();
+    offset = ((offset % width) + width) % width;
+    render();
+  };
+  const frame = t => {
+    const dt = Math.min((t - lastT) / 1000, 0.05);
+    lastT = t;
+    const y = window.scrollY;
+    const v = dt > 0 ? (y - lastY) / dt : 0;
+    lastY = y;
+    velocity += (v - velocity) * (1 - Math.exp(-dt * 6));
+    offset += DIR * (SPEED + clamp(velocity, -CAP, CAP) * RESPONSE) * dt;
+    if (width > 1) offset = ((offset % width) + width) % width;
+    render();
+    raf = requestAnimationFrame(frame);
+  };
+  const start = () => {
+    if (reduced || raf || !visible) return;
+    lastT = performance.now(); lastY = window.scrollY; velocity = 0;
+    raf = requestAnimationFrame(frame);
+  };
+  const stop = () => { cancelAnimationFrame(raf); raf = 0; };
+
+  measure();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  let timer = 0;
+  new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(measure, 120); }).observe(band);
+  new IntersectionObserver(entries => {
+    visible = entries.some(e => e.isIntersecting);
+    visible ? start() : stop();
+  }, { rootMargin: '80px' }).observe(band);
+})();
+
+/* ---------------------------------------------------------
    Sponsor ticker: Figma track holds the logo set three times
    --------------------------------------------------------- */
 (() => {
