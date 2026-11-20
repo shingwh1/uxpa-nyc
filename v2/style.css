@@ -1052,10 +1052,9 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
    ========================================================= */
 .closer {
   display: grid;
-  justify-items: center;
-  align-content: start;                         /* the copy rides just under the gallery's last row */
+  place-items: center;                          /* the copy sits in the middle of the black section */
   min-height: 100svh;
-  padding: 96px var(--gutter) var(--section-gap);
+  padding: var(--section-gap) var(--gutter);
   background: var(--ink);
   color: var(--white);
   text-align: center;
@@ -1069,3 +1068,50 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
 .closer .cta-join { margin-top: 40px; }
 .closer .cta-join .arrow { color: var(--white); }
 .pgrid + .closer { margin-top: 0; }             /* the grid's last row runs straight into it */
+
+/* =========================================================
+   Black footer: continues straight on from the black closing
+   section, with every element in white. Buttons, the email field
+   and the social tiles are white outlines that fill white (with
+   black text and icons) on hover.
+   ========================================================= */
+.footer {
+  padding-top: var(--section-gap);
+  background: var(--ink);
+  color: var(--white);
+}
+.closer + .footer { margin-top: 0; }
+.footer .footer-links a { color: var(--white); }
+.footer .footer-links a:hover,
+.footer .footer-links a:focus-visible { color: var(--grey-line); }
+
+.footer .select-btn {
+  background: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--white);
+  color: var(--white);
+  transition: color .2s ease-out, background-color .2s ease-out;
+}
+.footer .select-btn .h { background: var(--ink); box-shadow: inset 0 0 0 1px var(--white); }
+.footer .select-btn:hover,
+.footer .select-btn:focus-visible { background: var(--white); color: var(--ink); box-shadow: inset 0 0 0 1px var(--white); }
+.footer .select-btn:hover .h,
+.footer .select-btn:focus-visible .h { box-shadow: inset 0 0 0 1px var(--white); }
+
+.footer .newsletter-input {
+  background: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--white);
+  color: var(--white);
+  caret-color: var(--white);
+}
+.footer .newsletter-input:focus { box-shadow: inset 0 0 0 2px var(--white); }
+
+.footer .social {
+  background: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--white);
+  transition: background-color .15s ease-out;
+}
+.footer .social img { filter: invert(1); transition: filter .15s ease-out; }   /* black icons → white */
+.footer .social:hover,
+.footer .social:focus-visible { background: var(--white); box-shadow: inset 0 0 0 1px var(--white); }
+.footer .social:hover img,
+.footer .social:focus-visible img { filter: none; }
