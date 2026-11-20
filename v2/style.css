@@ -395,12 +395,12 @@ img { display: block; max-width: none; }
 .statement-title .line-5 { text-align: right; margin-right: calc(-1 * var(--hang)); }
 
 .statement-body { margin-top: 64px; }
-/* The paragraph's left edge lines up with the middle of the "A" that
-   starts "and research" (line 3). That line starts at -0.5 × hang, and the
-   middle of the A's ink is 0.375 × the headline size in from there (Outfit). */
+/* The paragraph's left edge lines up with the middle of the "N" in
+   "and research" (line 3). That line starts at -0.5 × hang, and the
+   middle of the N's ink is 1.0411 × the headline size in from there (Outfit). */
 .statement .lede {
-  width: min(460px, 100%);
-  margin-left: max(0px, calc(-.5 * var(--hang) + .375 * var(--t)));
+  max-width: 460px;                             /* narrows to fit when shifted on small screens */
+  margin-left: max(0px, calc(-.5 * var(--hang) + 1.0411 * var(--t)));
   font-size: var(--body);
   line-height: 1.45;
   color: var(--accent);
