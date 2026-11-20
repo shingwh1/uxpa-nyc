@@ -1197,7 +1197,8 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
   --H: 18vw;                                    /* full row height */
   --gap: 12px;
   position: relative;
-  height: calc(6 * (var(--H) + var(--gap)));    /* the rows at full size */
+  height: 300vh;                                /* main.js sets the packed height as rows scale */
+  overflow-anchor: none;                        /* the height changes with scroll; don't let the browser compensate */
   margin-top: 48px;
   overflow-x: clip;
 }
@@ -1236,9 +1237,10 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
    ========================================================= */
 .closer {
   display: grid;
-  place-items: center;
+  justify-items: center;
+  align-content: start;                         /* the copy rides just under the gallery's last row */
   min-height: 100svh;
-  padding: var(--section-gap) var(--gutter);
+  padding: 96px var(--gutter) var(--section-gap);
   background: var(--ink);
   color: var(--white);
   text-align: center;
