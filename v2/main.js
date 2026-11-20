@@ -389,7 +389,6 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
     ['.mentorship-eyebrow', 'lines'],
     ['.mentor-card .cta-title', 'lines'],
     ['.mentor-card .cta-body', 'lines'],
-    ['.community-title', 'chars'],
     ['.cta-join .cta-title', 'lines'],
     ['.pgrid .section-title', 'chars'],
     ['.closer-title', 'chars'],
@@ -727,53 +726,62 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
 
 /* ---------------------------------------------------------
    Parallax grid (after Framer's "Parallax Grid Scroll", vertical mode)
-   A row's height depends on how high it sits in the window, and keeps
-   growing all the way up: about 15% of the window height as it enters
-   at the bottom, 42% at the top, up to 62% once it is well above the
-   screen. Rows are stacked one after another at their current size, and
-   the grid's height follows them, so the black closing section stays
-   attached to the last row and rises with it. Alternate rows drift
-   sideways in opposite directions as they climb.
+   A row's height depends on how high it sits in the window and keeps
+   growing all the way up, on a smooth S-curve: about 14% of the window
+   height as it enters at the bottom, 45% at the top, about 60% once it
+   is well above the screen. Each row is wide enough to fill the window
+   at every size. The sizes ease toward their targets, so the scaling
+   stays smooth even when the wheel scrolls in steps. Rows sit in normal
+   flow, so the black closing section stays attached to the last row and
+   rises with it. Alternate rows drift sideways in opposite directions.
    --------------------------------------------------------- */
 (() => {
   const wrap = document.querySelector('.pgrid-rows');
   if (!wrap) return;
   const rows = [...wrap.querySelectorAll('.pgrid-row')].map(el => ({
-    el, strip: el.querySelector('.pgrid-strip'), dir: Number(el.dataset.dir) || 1,
+    el, strip: el.querySelector('.pgrid-strip'), dir: Number(el.dataset.dir) || 1, h: 0,
   }));
-  const AT_TOP = 0.42;          // row height (× base) when its top is at the top of the window
-  const GROWTH = 0.27;          // how much smaller it is per window-height lower down
-  const MIN = 0.13, MAX = 0.62; // limits (× base)
-  const DRIFT = 0.05;           // sideways drift per window-height travelled (× window width)
+  const MIN = 0.13, MAX = 0.62;     // row height limits (× base)
+  const FROM = 1.15, TO = -0.75;    // curve runs from just below the window to well above it
+  const DRIFT = 0.04;               // sideways drift per window-height travelled (× window width)
+  const LAG = 0.12;                 // seconds for the sizes to catch up with the scroll
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const smooth = x => x * x * (3 - 2 * x);
 
-  let base = 0, maxH = 0, gap = 0;
+  let base = 0, gap = 0;
   const measure = () => {
     base = Math.min(window.innerHeight, window.innerWidth * 1.1);   // keeps phones in proportion
-    maxH = Math.round(MAX * base);
-    wrap.style.setProperty('--H', `${maxH}px`);
     gap = parseFloat(getComputedStyle(wrap).getPropertyValue('--gap')) || 0;
   };
-
-  let ticking = false;
-  const update = () => {
-    ticking = false;
-    const vh = window.innerHeight, vw = window.innerWidth;
-    const top = wrap.getBoundingClientRect().top;
-    let y = 0;
-    rows.forEach(row => {
-      const t = (top + y) / vh;                                        // 0 = window top, 1 = bottom
-      const h = (reduced ? AT_TOP : Math.min(MAX, Math.max(MIN, AT_TOP - GROWTH * t))) * base;
-      const g = h / maxH;
-      row.el.style.transform = `translateY(${y}px)`;
-      row.strip.style.transform = `translateX(${reduced ? 0 : row.dir * t * DRIFT * vw}px) scale(${g})`;
-      y += h + gap * g;
-    });
-    wrap.style.height = `${Math.round(y)}px`;                          // the closer follows the last row
+  const target = t => {
+    if (reduced) return 0.45 * base;
+    const x = Math.min(1, Math.max(0, (FROM - t) / (FROM - TO)));
+    return (MIN + (MAX - MIN) * smooth(x)) * base;
   };
-  const request = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+
+  let raf = 0, last = 0;
+  const frame = now => {
+    raf = 0;
+    const dt = last ? Math.min(0.05, (now - last) / 1000) : 1;
+    last = now;
+    const k = 1 - Math.exp(-dt / LAG);
+    const vh = window.innerHeight, vw = window.innerWidth;
+    let y = wrap.getBoundingClientRect().top;
+    let moving = false;
+    rows.forEach(row => {
+      const t = y / vh;                                  // 0 = window top, 1 = bottom
+      const goal = target(t);
+      row.h = row.h ? row.h + (goal - row.h) * k : goal;
+      if (Math.abs(goal - row.h) > 0.3) moving = true; else row.h = goal;
+      row.el.style.setProperty('--h', `${row.h.toFixed(2)}px`);
+      row.strip.style.transform = `translateX(${reduced ? 0 : (row.dir * t * DRIFT * vw).toFixed(1)}px)`;
+      y += row.h + gap;
+    });
+    if (moving) request(); else last = 0;
+  };
+  const request = () => { if (!raf) raf = requestAnimationFrame(frame); };
   measure();
-  update();
+  frame(0);
   window.addEventListener('scroll', request, { passive: true });
   window.addEventListener('resize', () => { measure(); request(); });
 })();
