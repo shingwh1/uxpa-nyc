@@ -368,7 +368,6 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
   if (!root.classList.contains('reveal-pending')) return;   // reduced motion (see <head>)
 
   const TARGETS = [
-    ['.nav-item > a', 'lines'],
     ['.wordmark-letters', 'chars'],               // the whole lockup: letters rise as one wave
     ['.wordmark-tagline', 'lines'],
     ['.intro-ctas .cta-title', 'lines'],
@@ -385,10 +384,6 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
     ['.mentor-card .cta-body', 'lines'],
     ['.community-title', 'chars'],
     ['.cta-join .cta-title', 'lines'],
-    ['.footer-heading', 'chars'],
-    ['.footer-text', 'lines'],
-    ['.footer-links a', 'lines'],
-    ['.select-btn', 'lines'],
   ];
   const DURATION = 1;            // s
   const CHAR_GAP = 0.0175;       // s between letters
