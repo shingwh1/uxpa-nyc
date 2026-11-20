@@ -795,16 +795,16 @@ img { display: block; max-width: none; }
   color: var(--grey-line);
   transition: color .2s ease-out, box-shadow .2s ease-out;
 }
-.select-btn .h {
-  width: 11px;
-  height: 11px;
+.select-btn .h {                                 /* 8px, same as the photo and card handles */
+  width: 8px;
+  height: 8px;
   box-shadow: inset 0 0 0 1px var(--grey-line);
   transition: box-shadow .2s ease-out;
 }
-.select-btn .tl { left: -5px; top: -5px; }
-.select-btn .tr { right: -5px; top: -5px; }
-.select-btn .bl { left: -5px; bottom: -5px; }
-.select-btn .br { right: -5px; bottom: -5px; }
+.select-btn .tl { left: -3.5px; top: -3.5px; }
+.select-btn .tr { right: -3.5px; top: -3.5px; }
+.select-btn .bl { left: -3.5px; bottom: -3.5px; }
+.select-btn .br { right: -3.5px; bottom: -3.5px; }
 .select-btn:hover,
 .select-btn:focus-visible { color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
 .select-btn:hover .h,
