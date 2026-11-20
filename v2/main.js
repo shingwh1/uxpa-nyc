@@ -369,7 +369,7 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
 
   const TARGETS = [
     ['.nav-item > a', 'lines'],
-    ['.wordmark-letters > span', 'chars'],
+    ['.wordmark-letters', 'chars'],               // the whole lockup: letters rise as one wave
     ['.wordmark-tagline', 'lines'],
     ['.intro-ctas .cta-title', 'lines'],
     ['.intro-ctas .cta-body', 'lines'],

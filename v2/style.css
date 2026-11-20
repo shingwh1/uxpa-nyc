@@ -261,7 +261,7 @@ img { display: block; max-width: none; }
   line-height: 1.26;
   font-weight: 400;
 }
-.wordmark-letters span { position: absolute; top: 0; }
+.wordmark-letters > span { position: absolute; top: 0; }   /* only the letter spans, not the text-reveal masks inside them */
 .wordmark-letters .wordmark-nyc {
   left: 7.922em;                                /* 507px at 64px */
   top: 2.125em;                                 /* 136px at 64px */
