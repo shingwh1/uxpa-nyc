@@ -596,15 +596,23 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
     if (Math.abs(p - st.last) < 0.001) return;
     st.last = p;
     const g = st.canvas.getContext('2d');
-    g.setTransform(st.dpr, 0, 0, st.dpr, 0, 0);
+    // Draw in whole device pixels: each square's edges are rounded to the canvas grid, so
+    // neighbouring squares share an edge exactly and no hairline seams show between them
+    // (fractional pixel ratios on phones otherwise leave thin column lines behind).
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.imageSmoothingEnabled = false;
+    const sx = st.canvas.width / st.el.clientWidth;
+    const sy = st.canvas.height / st.el.clientHeight;
     g.fillStyle = st.el.dataset.from;
     g.fillRect(0, 0, st.canvas.width, st.canvas.height);
     const to = st.el.dataset.to;
     for (const cell of st.cells) {
       const lead = p - cell.t;                       // > 0 once this pixel has switched
       if (lead <= 0) continue;
+      const x0 = Math.round(cell.x * sx), x1 = Math.round((cell.x + st.size) * sx);
+      const y0 = Math.round(cell.y * sy), y1 = Math.round((cell.y + st.size) * sy);
       g.fillStyle = cell.accent && lead < ACCENT_BAND ? cell.accent : to;
-      g.fillRect(cell.x, cell.y, st.size, st.size);
+      g.fillRect(x0, y0, x1 - x0, y1 - y0);
     }
   };
 
