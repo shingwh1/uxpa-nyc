@@ -21,7 +21,7 @@
 
   /* Fluid scale — each value hits the Figma size at 1440px */
   --gutter: clamp(20px, 9.7917vw, 141px);        /* content edge: x 141 at 1440 */
-  --section-gap: clamp(128px, 16.6667vw, 240px);   /* space between every section (240px at 1440) */
+  --section-gap: clamp(64px, 8.3333vw, 120px);    /* space between every section (120px at 1440) */
   --h2: clamp(40px, 5.5556vw, 80px);
   --h3: clamp(24px, 2.2222vw, 32px);
   --body: 20px;
@@ -249,7 +249,7 @@ img { display: block; max-width: none; }
   display: grid;
   grid-template-columns: minmax(0, 728fr) minmax(416px, 430fr);   /* CTAs at x 869 */
   padding-top: clamp(40px, 5.1389vw, 74px);
-  padding-bottom: calc(var(--section-gap) / 2);   /* half gap: intro → sponsors */
+  padding-bottom: var(--section-gap);
 }
 
 .wordmark { container-type: inline-size; min-width: 0; }
@@ -370,6 +370,46 @@ img { display: block; max-width: none; }
 }
 
 /* =========================================================
+   Statement (from v3) — staggered uppercase headline and a short lede
+   ========================================================= */
+.statement {
+  --accent: var(--ink);                         /* headline and lede in black */
+  margin-top: var(--section-gap);
+}
+.statement-title {
+  font-size: clamp(44px, 9.7222vw, 140px);
+  line-height: .95;
+  font-weight: 500;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.statement-title .line { display: block; }
+.statement-title .line-2 { padding-left: 8%; }
+.statement-title .line-3 { text-align: right; }
+.statement-title .line-4 { padding-left: 24%; }
+
+.statement-body {
+  margin-top: 64px;
+  padding-left: 24%;
+}
+.statement .lede {
+  max-width: 460px;
+  font-size: var(--body);
+  line-height: 1.45;
+  color: var(--accent);
+}
+
+@media (max-width: 1023px) {
+  .statement-body { padding-left: 0; }
+}
+@media (max-width: 600px) {
+  .statement-title { font-size: 10vw; }         /* "Pushing for UX" stays on one line */
+  .statement-title .line-2 { padding-left: 0; }
+  .statement-title .line-4 { padding-left: 12%; }
+}
+
+/* =========================================================
    Shared section headings
    ========================================================= */
 .section-title {
@@ -386,7 +426,12 @@ img { display: block; max-width: none; }
 /* =========================================================
    Upcoming events
    ========================================================= */
-.events { margin-top: var(--section-gap); }
+.events {                                       /* black section, white text */
+  margin-top: var(--section-gap);
+  background: var(--ink);
+  color: var(--white);
+}
+.events .arrow { color: var(--white); }
 .events .section-title { text-align: center; }
 .events .events-eyebrow { max-width: 760px; margin-inline: auto; text-align: center; }   /* same width as v3, centred under the heading */
 
@@ -501,6 +546,7 @@ img { display: block; max-width: none; }
 /* Listed cards: below 1024px, or when the visitor prefers reduced motion */
 @media (max-width: 1023px), (prefers-reduced-motion: reduce) {
   .stack { height: auto; }
+  .events { padding-block: var(--section-gap); }   /* listed cards: room inside the black section */
   .stack-pin { position: static; height: auto; display: block; padding: 0; }
   .stack-stage { display: block; container-type: normal; margin-top: 40px; }
   .stack-pin .cta-view-all { margin-top: 48px; }
@@ -638,7 +684,7 @@ img { display: block; max-width: none; }
   position: relative;
   width: var(--size);
   aspect-ratio: 1;
-  margin: calc(var(--section-gap) / 2) auto 0;   /* half gap: mentorship → circle */
+  margin: var(--section-gap) auto 0;
   container-type: inline-size;
 }
 
@@ -688,7 +734,7 @@ img { display: block; max-width: none; }
 /* =========================================================
    Footer
    ========================================================= */
-.footer { margin-top: calc(var(--section-gap) / 2); }   /* half gap: circle → footer */
+.footer { margin-top: var(--section-gap); }
 
 /* Four columns down to 961px. With a 56px gap the columns sit at x 144 / 606 /
    818 / 1232 at 1440 (Figma); narrower windows shrink Work with us and
