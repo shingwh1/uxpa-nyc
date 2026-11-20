@@ -354,6 +354,165 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
 })();
 
 /* ---------------------------------------------------------
+   Text reveal (after extrafazant.nl's hero heading)
+   Headings rise letter by letter, other text line by line, each piece
+   sliding up from behind a mask under its line (1s, expo.out; letters
+   0.0175s apart, lines 0.07s apart, blocks in one section 0.12s apart).
+   Text on screen at load animates straight away; the rest animates the
+   first time it scrolls into view. Afterwards the original markup is
+   put back, so hover effects and resizing work as before.
+   --------------------------------------------------------- */
+(() => {
+  window.__revealReady = true;
+  const root = document.documentElement;
+  if (!root.classList.contains('reveal-pending')) return;   // reduced motion (see <head>)
+
+  const TARGETS = [
+    ['.nav-item > a', 'lines'],
+    ['.wordmark-letters > span', 'chars'],
+    ['.wordmark-tagline', 'lines'],
+    ['.intro-ctas .cta-title', 'lines'],
+    ['.intro-ctas .cta-body', 'lines'],
+    ['.sponsors-title', 'chars'],
+    ['.statement-title .line', 'chars'],
+    ['.statement .lede', 'lines'],
+    ['.events .section-title', 'chars'],
+    ['.events-eyebrow', 'lines'],
+    ['.cta-view-all .cta-title', 'lines'],
+    ['.mentorship .section-title', 'chars'],
+    ['.mentorship-eyebrow', 'lines'],
+    ['.mentor-card .cta-title', 'lines'],
+    ['.mentor-card .cta-body', 'lines'],
+    ['.community-title', 'chars'],
+    ['.cta-join .cta-title', 'lines'],
+    ['.footer-heading', 'chars'],
+    ['.footer-text', 'lines'],
+    ['.footer-links a', 'lines'],
+    ['.select-btn', 'lines'],
+  ];
+  const DURATION = 1;            // s
+  const CHAR_GAP = 0.0175;       // s between letters
+  const LINE_GAP = 0.07;         // s between lines
+  const BLOCK_GAP = 0.12;        // s between text blocks in the same section
+
+  const items = [];
+  TARGETS.forEach(([sel, mode]) => document.querySelectorAll(sel).forEach(el => {
+    if (el.dataset.rv) return;
+    el.dataset.rv = mode;
+    items.push(el);
+  }));
+
+  const mask = inner => {
+    const m = document.createElement('span');
+    m.className = 'rv-m';
+    m.append(inner);
+    return m;
+  };
+  const piece = content => {
+    const i = document.createElement('span');
+    i.className = 'rv-i';
+    i.append(content);
+    return i;
+  };
+
+  // Rebuild an element's content with masked pieces; returns the moving pieces in order.
+  function split(el, mode) {
+    const pieces = [];
+    const build = node => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const out = [];
+        node.textContent.split(/(\s+)/).forEach(part => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { out.push(document.createTextNode(part)); return; }
+          if (mode === 'chars') {
+            const word = document.createElement('span');
+            word.className = 'rv-m';
+            [...part].forEach(ch => { const p = piece(ch); pieces.push(p); word.append(p); });
+            out.push(word);
+          } else {
+            const p = piece(part); pieces.push(p); out.push(mask(p));
+          }
+        });
+        return out;
+      }
+      if (node.nodeType !== Node.ELEMENT_NODE) return [node.cloneNode(true)];
+      if (node.namespaceURI === 'http://www.w3.org/2000/svg') {           // arrow icons move with their line
+        const p = piece(node.cloneNode(true)); pieces.push(p); return [mask(p)];
+      }
+      if (!node.textContent.trim()) return [node.cloneNode(true)];       // handles, <br>, …
+      const copy = node.cloneNode(false);
+      node.childNodes.forEach(c => copy.append(...build(c)));
+      return [copy];
+    };
+    const original = [...el.childNodes];
+    const built = [];
+    original.forEach(c => built.push(...build(c)));
+    el.replaceChildren(...built);
+    return { pieces, original };
+  }
+
+  function play(el, startDelay) {
+    const mode = el.dataset.rv;
+    const { pieces, original } = split(el, mode);
+    let delays;
+    if (mode === 'chars') {
+      delays = pieces.map((_, i) => startDelay + i * CHAR_GAP);
+    } else {                                                     // group pieces into lines by position
+      let line = -1, lastTop = -Infinity;
+      delays = pieces.map(p => {
+        const top = p.getBoundingClientRect().top;
+        if (top > lastTop + 2) { line++; lastTop = top; }
+        return startDelay + line * LINE_GAP;
+      });
+    }
+    el.classList.add('rv-on');
+    void el.offsetHeight;                                        // commit the hidden start position…
+    pieces.forEach((p, i) => { p.style.setProperty('--rv-delay', `${delays[i]}s`); p.classList.add('rv-go'); });   // …then slide
+    const total = (Math.max(0, ...delays) + DURATION) * 1000 + 100;
+    setTimeout(() => el.replaceChildren(...original), total);   // back to the real markup
+  }
+
+  const sectionOf = el => el.closest('section, header, footer, nav') || document.body;
+  // Play a batch of elements in page order, staggering blocks within each section
+  const playBatch = els => {
+    const counts = new Map();
+    els.sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
+      .forEach(el => {
+        const sec = sectionOf(el);
+        const n = counts.get(sec) || 0;
+        counts.set(sec, n + 1);
+        play(el, n * BLOCK_GAP);
+      });
+  };
+  const io = new IntersectionObserver(entries => {
+    const visible = entries.filter(e => e.isIntersecting).map(e => e.target);
+    visible.forEach(el => io.unobserve(el));
+    playBatch(visible);
+  }, { rootMargin: '0px 0px -15% 0px' });                         // "top 85%", as on extrafazant
+
+  let started = false;
+  const start = () => {
+    if (started) return;
+    started = true;
+    // Everything already on screen plays now (first visit); the rest waits for scrolling.
+    const onScreen = [], later = [];
+    items.forEach(el => {
+      const r = el.getBoundingClientRect();
+      (r.bottom > 0 && r.top < window.innerHeight ? onScreen : later).push(el);
+    });
+    playBatch(onScreen);
+    later.forEach(el => io.observe(el));
+  };
+  // Prefer splitting with the real font, but don't keep the page blank waiting for it.
+  if (document.fonts && document.fonts.status !== 'loaded') {
+    document.fonts.ready.then(start);
+    setTimeout(start, 400);
+  } else {
+    start();
+  }
+})();
+
+/* ---------------------------------------------------------
    Sponsor ticker: Figma track holds the logo set three times
    --------------------------------------------------------- */
 (() => {

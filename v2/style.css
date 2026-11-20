@@ -1059,3 +1059,22 @@ img { display: block; max-width: none; }
   .footer-text { line-height: 1.5; }
   .footer-grid { height: 120px; }
 }
+
+/* =========================================================
+   Text reveal (after extrafazant.nl): letters or lines rise into place
+   from behind a mask just below the text line. main.js splits the text,
+   animates it once, then restores the original markup.
+   ========================================================= */
+html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
+.rv-m {                                         /* mask: hides what sits below the line */
+  display: inline-block;
+  clip-path: inset(-1em -.3em -.22em -.3em);
+}
+.rv-i {
+  display: inline-block;
+  transform: translateY(135%);
+}
+.rv-i.rv-go {
+  transform: none;
+  transition: transform 1s cubic-bezier(.16, 1, .3, 1) var(--rv-delay, 0s);   /* expo.out */
+}

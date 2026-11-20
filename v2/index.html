@@ -8,6 +8,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script>
+    /* Text reveal: hide the animated text until main.js lifts it in.
+       Skipped for reduced motion; if main.js never runs, show it after 3s. */
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('reveal-pending');
+      setTimeout(function () { if (!window.__revealReady) document.documentElement.classList.remove('reveal-pending'); }, 3000);
+    }
+  </script>
 </head>
 <body>
 <div class="page">
