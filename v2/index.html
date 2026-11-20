@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="vendor/lenis.css">
   <link rel="stylesheet" href="style.css">
   <script>
     /* Text reveal: hide the animated text until main.js lifts it in.
@@ -34,7 +35,7 @@
         <i></i><i></i><i></i>
       </button>
 
-      <nav class="nav" id="main-nav" aria-label="Main">
+      <nav class="nav" id="main-nav" aria-label="Main" data-lenis-prevent>
         <div class="nav-selection" aria-hidden="true">
           <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
         </div>
@@ -223,135 +224,81 @@
     </div>
   </section>
 
-  <!-- ============ BOTTOM CTA: scroll scale gallery ============ -->
-  <!-- After Framer's "Scroll Scale Gallery": while pinned, the photos scale up from the
-       centre of the screen; the outer ones fly off the edges and the centre photo grows to
-       fill the screen, where the call to action fades in (see main.js). -->
-  <section class="zoom-cta" id="get-involved" aria-labelledby="zoom-cta-title">
-    <div class="zoom-pin">
-      <div class="zoom-stage">
-        <figure class="zoom-photo" style="--x:-27; --y:-15; --w:13; --ar:3 / 4"><img src="../assets/images/events-feature.png" alt=""></figure>
-        <figure class="zoom-photo" style="--x:3; --y:-21; --w:22; --ar:3 / 2"><img src="../assets/images/mentee.png" alt=""></figure>
-        <figure class="zoom-photo" style="--x:26; --y:2; --w:16; --ar:3 / 2"><img src="../assets/images/statement-talk.webp" alt=""></figure>
-        <figure class="zoom-photo" style="--x:-24; --y:14; --w:18; --ar:3 / 2"><img src="../assets/images/events/happy-hour.jpg" alt=""></figure>
-        <figure class="zoom-photo" style="--x:2; --y:19; --w:14; --ar:3 / 2"><img src="../assets/images/events/accessible-website-workshop.jpg" alt=""></figure>
-        <figure class="zoom-photo" style="--x:22; --y:18; --w:11; --ar:3 / 2"><img src="../assets/images/mentorship-faq.png" alt=""></figure>
-        <figure class="zoom-photo zoom-photo--centre" style="--x:0; --y:0; --w:26; --ar:3 / 2"><img src="../assets/images/mentor.png" alt=""></figure>
-        <div class="zoom-copy">
-          <h2 class="zoom-title" id="zoom-cta-title">Where NYC’s UX<br>community<br>comes together</h2>
-          <a class="cta cta-join zoom-join" href="#">
-            <span class="cta-title"><span class="cta-label">Join Today</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ============ PARALLAX GRID: community photos ============ -->
   <!-- After Framer's "Parallax Grid Scroll" (vertical mode): rows of photos start small at the
-       bottom of the window and grow as they scroll up, drifting sideways (see main.js).
+       bottom of the window and grow as they scroll up (see main.js).
        Photos from nycuxpa.com/about. -->
-  <section class="pgrid" aria-labelledby="pgrid-title">
+  <section class="pgrid" id="get-involved" aria-labelledby="pgrid-title">
     <div class="wrap pgrid-head">
       <h2 class="section-title" id="pgrid-title">Impact on the Community</h2>
     </div>
     <div class="pgrid-rows">
-      <div class="pgrid-row" data-dir="-1"><div class="pgrid-strip">
-        <img src="../assets/images/about/president-welcome.jpg" alt="Tamora Petitt is welcomed as President of NYC UXPA by former President Melissa McGrath and former Vice President Barry Gottlieb" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="Members networking at a NYC UXPA event" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="NYC UXPA members at an event" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-      </div></div>
-      <div class="pgrid-row" data-dir="1"><div class="pgrid-strip">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-      </div></div>
-      <div class="pgrid-row" data-dir="-1"><div class="pgrid-strip">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-      </div></div>
-      <div class="pgrid-row" data-dir="1"><div class="pgrid-strip">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-      </div></div>
-      <div class="pgrid-row" data-dir="-1"><div class="pgrid-strip">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-      </div></div>
-      <div class="pgrid-row" data-dir="1"><div class="pgrid-strip">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/members-networking.png" alt="" loading="lazy">
-        <img src="../assets/images/about/community-group.jpg" alt="" loading="lazy">
-        <img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy">
-      </div></div>
+      <div class="pgrid-row">
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="Tamora Petitt is welcomed as President of NYC UXPA by former President Melissa McGrath and former Vice President Barry Gottlieb" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="Members networking at a NYC UXPA event" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="NYC UXPA members at an event" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+      </div>
+      <div class="pgrid-row">
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+      </div>
+      <div class="pgrid-row">
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+      </div>
+      <div class="pgrid-row">
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+      </div>
+      <div class="pgrid-row">
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+      </div>
+      <div class="pgrid-row">
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></span>
+        <span class="pgrid-tile"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></span>
+      </div>
     </div>
   </section>
 
@@ -426,6 +373,7 @@
   </symbol>
 </svg>
 
+<script src="vendor/lenis.min.js"></script>
 <script src="main.js"></script>
 </body>
 </html>
