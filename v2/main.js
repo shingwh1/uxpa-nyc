@@ -562,18 +562,23 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
   const layout = st => {
     const scale = parseFloat(getComputedStyle(st.el).getPropertyValue('--grid-scale')) || 1;
     const size = Math.round(24 * scale);
+    // Snap the band to whole pixel rows so no thin slice of a row is cut off at its edges
+    st.el.style.height = '';
+    const rowsFit = Math.max(1, Math.round(st.el.clientHeight / size));
+    st.el.style.height = `${rowsFit * size}px`;
     const w = st.el.clientWidth, h = st.el.clientHeight;
     const dpr = window.devicePixelRatio || 1;
     st.canvas.width = Math.round(w * dpr);
     st.canvas.height = Math.round(h * dpr);
     const cols = Math.ceil(w / size), rows = Math.ceil(h / size);
-    if (cols !== st.cols || rows !== st.rows || size !== st.size) {
+    if (cols !== st.cols || rows !== st.rows || size !== st.size || w !== st.w) {
       st.cells = [];
       for (let r = 0; r < rows; r++) {
         const fromBottom = (rows - 1 - r) / Math.max(1, rows - 1);          // 0 at the bottom edge
         for (let c = 0; c < cols; c++) {
           st.cells.push({
-            x: c * size, y: h - (rows - r) * size,                      // rows hug the bottom edge
+            x: (w - cols * size) / 2 + c * size,                        // columns centred, like the hero grid
+            y: h - (rows - r) * size,                                   // whole rows (band height is snapped)
             // when this pixel switches; kept below 1 − ACCENT_BAND so every accent has
             // faded back by the time the band is complete
             t: (fromBottom * (1 - JITTER) + rand() * JITTER) * (1 - ACCENT_BAND),
@@ -581,7 +586,7 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
           });
         }
       }
-      st.cols = cols; st.rows = rows; st.size = size;
+      st.cols = cols; st.rows = rows; st.size = size; st.w = w;
     }
     st.dpr = dpr;
     st.last = -1;
