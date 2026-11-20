@@ -604,16 +604,19 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
   };
 
   // Progress 0 → 1 while the band moves from the bottom of the window to about a quarter of the way down
-  // Into the section: 0 → 1 while the band's top moves from the bottom of the window to 25% down.
-  // Out of the section (data-timing="out"): the mirror image, 0 → 1 while the band's bottom moves
-  // from 75% down to the top of the window, so the black under "View All Events" matches the black
-  // above "Upcoming Events".
+  // Into the section: starts as the band appears at the bottom of the window and completes when
+  // the black section's top (= the band's bottom) is 5% from the top of the window.
+  // Out of the section (data-timing="out"), the mirror image: starts when the black section's
+  // bottom (= the band's top) is 5% from the bottom of the window and completes as the band
+  // leaves the top of the window.
+  const EDGE = 0.05;
   const progress = st => {
     const r = st.el.getBoundingClientRect();
     const vh = window.innerHeight;
+    const span = vh * (1 - EDGE) + r.height;       // scroll distance over which each band plays
     const p = st.el.dataset.timing === 'out'
-      ? (vh * 0.75 - r.bottom) / (vh * 0.75)
-      : (vh - r.top) / (vh * 0.75);
+      ? (vh * (1 - EDGE) - r.top) / span
+      : (vh - r.top) / span;
     return Math.min(1, Math.max(0, p));
   };
 
