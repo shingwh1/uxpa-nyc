@@ -506,12 +506,12 @@ img { display: block; max-width: none; }
   background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .55) 100%);
   opacity: var(--front, 0);
 }
-.card-content::after {                          /* Selection box: 2px inside stroke, same as the mentorship photos */
+.card-content::after {                          /* Selection box: 1px inside stroke, same as the mentorship photos */
   content: "";
   position: absolute;
   inset: 0;
   z-index: 3;
-  box-shadow: inset 0 0 0 2px var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
 }
 .card-title {
   position: absolute;
@@ -536,7 +536,7 @@ img { display: block; max-width: none; }
   z-index: 4;
   width: 11px;
   height: 11px;
-  box-shadow: inset 0 0 0 2px var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
 }
 .card .tl { left: -5px;  top: -5px; }
 .card .tr { right: -5px; top: -5px; }
@@ -608,18 +608,18 @@ img { display: block; max-width: none; }
   height: 100%;
   object-fit: cover;
 }
-.cursor-photo::after {                     /* 2 px inside outline */
+.cursor-photo::after {                     /* 1px inside outline */
   content: "";
   position: absolute;
   inset: 0;
-  box-shadow: inset 0 0 0 2px var(--blue);
+  box-shadow: inset 0 0 0 1px var(--blue);
   opacity: 0;
   transition: opacity .6s ease-out;
 }
 .cursor-photo .h {
   width: 11px;
   height: 11px;
-  box-shadow: inset 0 0 0 2px var(--blue);
+  box-shadow: inset 0 0 0 1px var(--blue);
   opacity: 0;
   z-index: 1;
   transition: opacity .6s ease-out;
@@ -661,9 +661,9 @@ img { display: block; max-width: none; }
   white-space: nowrap;
 }
 .cursor.blue  { color: var(--blue); }
-.cursor.blue  .cursor-label { background: var(--blue-tint);  box-shadow: inset 0 0 0 2px var(--blue),  var(--label-shadow); }
+.cursor.blue  .cursor-label { background: var(--blue-tint);  box-shadow: inset 0 0 0 1px var(--blue),  var(--label-shadow); }
 .cursor.green { color: var(--green); }
-.cursor.green .cursor-label { background: var(--green-tint); box-shadow: inset 0 0 0 2px var(--green), var(--label-shadow); }
+.cursor.green .cursor-label { background: var(--green-tint); box-shadow: inset 0 0 0 1px var(--green), var(--label-shadow); }
 
 .cursor-photo.is-tapped::after,
 .cursor-photo.is-tapped .h,
@@ -788,7 +788,7 @@ img { display: block; max-width: none; }
   height: 41px;
   padding: 4px 8px;
   background: var(--white);
-  box-shadow: inset 0 0 0 1.5px var(--grey-line);
+  box-shadow: inset 0 0 0 1px var(--grey-line);
   font-size: var(--body);
   line-height: 30.2px;
   font-weight: 400;
@@ -798,7 +798,7 @@ img { display: block; max-width: none; }
 .select-btn .h {
   width: 11px;
   height: 11px;
-  box-shadow: inset 0 0 0 1.89px var(--grey-line);
+  box-shadow: inset 0 0 0 1px var(--grey-line);
   transition: box-shadow .2s ease-out;
 }
 .select-btn .tl { left: -5px; top: -5px; }
@@ -806,9 +806,9 @@ img { display: block; max-width: none; }
 .select-btn .bl { left: -5px; bottom: -5px; }
 .select-btn .br { right: -5px; bottom: -5px; }
 .select-btn:hover,
-.select-btn:focus-visible { color: var(--ink); box-shadow: inset 0 0 0 1.89px var(--ink); }
+.select-btn:focus-visible { color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
 .select-btn:hover .h,
-.select-btn:focus-visible .h { box-shadow: inset 0 0 0 1.89px var(--ink); }
+.select-btn:focus-visible .h { box-shadow: inset 0 0 0 1px var(--ink); }
 
 .btn-contact { width: min(384px, 100%); margin-top: 32px; }
 
@@ -823,12 +823,12 @@ img { display: block; max-width: none; }
   border: 0;
   border-radius: 0;
   background: var(--white);
-  box-shadow: inset 0 0 0 1.5px var(--grey-line);
+  box-shadow: inset 0 0 0 1px var(--grey-line);
   font: 300 20px/1 "Outfit", sans-serif;
   color: var(--ink);
   outline: none;
 }
-.newsletter-input:focus { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.newsletter-input:focus { box-shadow: inset 0 0 0 1px var(--ink); }
 
 /* Social Tile */
 .socials { display: flex; flex-direction: column; }
