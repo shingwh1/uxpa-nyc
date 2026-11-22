@@ -121,7 +121,7 @@ img { display: block; max-width: none; }
 
 .nav {
   position: relative;
-  width: 690px;
+  width: 714px;                                 /* the nav items' widths added up (About widened so "Our team" fits) */
   height: 48px;
 }
 .nav-list { display: flex; height: 48px; }
@@ -161,11 +161,11 @@ img { display: block; max-width: none; }
   position: absolute;
   top: 48px;
   left: 0;
-  width: var(--dw);
+  width: 100%;                                  /* same width as the hover box above it, so their edges line up */
   display: flex;
   flex-direction: column;
   gap: 11px;
-  padding: 5.5px 12px;
+  padding: 5.5px 0;
   background: var(--white);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
   opacity: 0;
@@ -180,12 +180,12 @@ img { display: block; max-width: none; }
 }
 .dropdown a {
   display: block;
-  padding: 6px 12px;
+  padding: 6px 12px 6px 24px;                   /* text starts 24px in, under the nav word above */
   font-size: var(--body);
   line-height: 25.2px;
   font-weight: 400;
   color: var(--grey-line);
-  white-space: nowrap;
+  white-space: normal;                          /* a long item ("Become a sponsor") wraps to fit the box */
   transition: color .15s ease-out;
 }
 .dropdown a:hover,
@@ -504,6 +504,7 @@ img { display: block; max-width: none; }
   width: 100%;
   height: 100%;
   object-fit: cover;
+  filter: brightness(calc(.45 + .55 * var(--front, 0)));   /* cards behind are dimmed, so the front card stands out */
 }
 .card-content::before {                         /* Title shade: dark at the bottom, fading upwards, so the white title reads on any photo */
   content: "";
@@ -543,6 +544,54 @@ img { display: block; max-width: none; }
 }
 .nowrap { white-space: nowrap; }
 .card[data-index="0"] { --front: 1; }
+
+/* Event details on each card (date, in person / virtual, Sign up).
+   Like the title, they only show on the front card; they also rise a
+   little into place as a card comes forward, so they arrive with it. */
+.card-content::after { pointer-events: none; }  /* the outline must not block the Sign up link */
+.card:has(.card-signup) .card-title { bottom: 8.4cqw; }   /* room for Sign up under the title */
+.card-meta,
+.card-signup {
+  opacity: calc((var(--front, 0) - .6) * 2.5);  /* only once the card is (almost) at the front */
+  transform: translateY(calc((1 - var(--front, 0)) * 16px));
+}
+.card-meta {
+  position: absolute;
+  top: 2.4cqw;
+  left: 2.4cqw;
+  z-index: 2;
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  font-size: max(12px, 1.15cqw);                /* 16px at 1387 */
+  font-weight: 500;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.card-date,
+.card-type { padding: .6em .85em; }
+.card-date { background: var(--white); color: var(--ink); }
+.card-type { color: var(--white); background: rgba(0, 0, 0, .45); box-shadow: inset 0 0 0 1px var(--white); }
+.card-signup {
+  position: absolute;
+  left: 50%;
+  bottom: 3cqw;
+  z-index: 2;
+  translate: -50% 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: .55em 1.3em;
+  font-size: max(14px, 1.44cqw);                /* 20px at 1387 */
+  font-weight: 500;
+  color: var(--white);
+  box-shadow: inset 0 0 0 1px var(--white);
+  transition: background-color .2s ease-out, color .2s ease-out;
+}
+.card-signup .arrow { width: 1em; height: 1em; color: currentColor; }
+.card-signup:hover,
+.card-signup:focus-visible { background: var(--white); color: var(--ink); }
 
 /* Corner handles: same as the mentorship photos — 11px, 2px stroke, 5px
    outside the corner — and the same size at every scale. White fill,
@@ -586,6 +635,37 @@ img { display: block; max-width: none; }
     --front: 1;
   }
   .card-title { font-size: max(18px, 4.8cqw); bottom: 4cqw; padding-inline: 16px; }
+  .card:has(.card-signup) .card-title { bottom: max(11cqw, 52px); }
+  .card-meta { top: max(3cqw, 10px); left: max(3cqw, 10px); }
+  .card-signup { bottom: max(3.5cqw, 12px); font-size: max(14px, 2cqw); }
+}
+
+/* "01 / 03" + gradient bar under the stack (main.js updates them) */
+.stack-progress {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 16px;
+  letter-spacing: .06em;
+  color: rgba(255, 255, 255, .6);
+  font-variant-numeric: tabular-nums;
+}
+.stack-now { color: var(--white); }
+.stack-bar {
+  width: 160px;
+  height: 2px;
+  background: rgba(255, 255, 255, .2);
+}
+.stack-bar span {
+  display: block;
+  height: 100%;
+  background: var(--brand-gradient);
+  transform: scaleX(var(--p, 0));
+  transform-origin: left;
+}
+@media (max-width: 1023px), (prefers-reduced-motion: reduce) {
+  .stack-progress { display: none; }            /* listed cards: nothing to track */
 }
 
 .cta-view-all {
@@ -1004,44 +1084,68 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
 .events + .pixel-band { margin-top: 0; }        /* …and straight out of it */
 
 /* =========================================================
-   Parallax grid: vertical mode of Framer's "Parallax Grid Scroll",
-   with the demo's layout. Rows sit in a centred column; main.js sets
-   each row's width (125% → 500% of the section) from its position in
-   the window, and the tiles share that width at 7:5. The section's
-   height is fixed at all rows at full size (also set by main.js).
+   Impact on the Community: sideways photo strip.
+   The strip pins to the window while the page scrolls down, and
+   main.js slides the photos left in step with the scroll, so only one
+   thing moves, in one direction. The gradient bar fills to match.
+   main.js sets the section's height so the slide ends exactly as the
+   last photo arrives. With reduced motion the strip is a plain row
+   you can swipe or scroll sideways.
    ========================================================= */
 .pgrid { margin-top: var(--section-gap); }
 .pgrid-head { text-align: center; }
-.pgrid-rows {
+.hgal { position: relative; margin-top: 48px; }
+.hgal-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
   display: flex;
   flex-direction: column;
-  align-items: center;                          /* wide rows overflow both edges equally */
-  gap: 16px;
-  padding: 8px 0;
-  margin-top: 48px;
+  justify-content: center;
+  gap: 32px;
   overflow: hidden;
-  overflow-anchor: none;
 }
-.pgrid-row {
+.hgal-track {
   display: flex;
-  flex-shrink: 0;
-  gap: 16px;
-  width: 125%;                                  /* main.js updates this as the row moves */
-  will-change: width;
+  gap: 24px;
+  width: max-content;
+  padding-inline: var(--gutter);
+  will-change: transform;
 }
-.pgrid-tile {
-  flex: 1 1 0px;
-  min-width: 0;
-  aspect-ratio: 7 / 5;
+.hgal-tile {
+  flex: none;
+  margin: 0;
+  height: min(62svh, 560px);
+  aspect-ratio: 3 / 2;
   overflow: hidden;
 }
-.pgrid-tile img {
+.hgal-tile img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   user-select: none;
   pointer-events: none;
+}
+.hgal-progress {
+  margin-inline: var(--gutter);
+  height: 2px;
+  background: #e6e6e6;
+}
+.hgal-progress span {
+  display: block;
+  height: 100%;
+  background: var(--brand-gradient);
+  transform: scaleX(var(--p, 0));
+  transform-origin: left;
+}
+@media (max-width: 700px) {
+  .hgal-tile { height: min(62svh, 500px); aspect-ratio: 4 / 5; }
+  .hgal-track { gap: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hgal-pin { position: static; height: auto; overflow-x: auto; padding-block: 8px; }
+  .hgal-progress { display: none; }
 }
 
 /* =========================================================
@@ -1066,7 +1170,59 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
 }
 .closer .cta-join { margin-top: 40px; }
 .closer .cta-join .arrow { color: var(--white); }
-.pgrid + .closer { margin-top: 0; }             /* the grid's last row runs straight into it */
+.pgrid + .closer { margin-top: 0; }             /* the photo strip runs straight into it */
+
+/* =========================================================
+   Impact numbers under "Impact on the Community": four figures in a
+   row, split by hairlines. main.js counts each number up from 0 when
+   the row scrolls into view, one after another, and the gradient line
+   under each number grows with its count.
+   ========================================================= */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 48px auto 0;
+  padding: 0 var(--gutter);
+  list-style: none;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  text-align: center;
+}
+.stat + .stat { border-left: 1px solid var(--grey-line); }
+.stat-num {
+  position: relative;
+  font-size: var(--h2);
+  line-height: 1;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;           /* digits keep the same width while counting */
+  color: var(--ink);
+}
+.stat-num::after {                              /* gradient line that fills as the number counts */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  height: 2px;
+  background: var(--brand-gradient);
+  transform: scaleX(var(--p, 1));
+  transform-origin: left;
+}
+.stat-label {
+  margin-top: 8px;
+  font-size: var(--body);
+  color: var(--grey-text);
+}
+.stats + .vmarquee { margin-top: 64px; }
+@media (max-width: 700px) {
+  .stats { grid-template-columns: repeat(2, 1fr); row-gap: 32px; }
+  .stat:nth-child(3) { border-left: 0; }
+}
 
 /* =========================================================
    Velocity marquee (after Framer's "Velocity Marquee") under the
@@ -1113,4 +1269,4 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
   background: currentColor;
   opacity: .62;
 }
-.vmarquee + .pgrid-rows { margin-top: 48px; }
+.vmarquee + .hgal { margin-top: 48px; }
