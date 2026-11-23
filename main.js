@@ -15,72 +15,141 @@ const GRID = {
 
 /* ---------------------------------------------------------
    Colour grids (hero + footer)
-   rects:  [x, y, w, h, startHex, endHex]  left→right gradient
-   whites: [x, y]                           48×48 white "pixel fade" squares
-   tiles:  [x, y, hoverHex]                 48×48 hover tiles
+   GRID holds the 30-column Figma grid:
+     rects:  [x, y, w, h, startHex, endHex]  left→right gradient
+     whites: [x, y]                           48×48 white "pixel fade" squares
+     tiles:  [x, y, hoverHex]                 48×48 hover tiles
+   The grid is redrawn with as many columns as the window needs
+   (cells are 48px × --grid-scale). At 30 full-size columns (1440px)
+   the output is identical to Figma; other widths resample the pattern
+   and keep the gradient continuous. The hero's top stripes extend
+   upward so a scaled-down grid still fills the hero.
    --------------------------------------------------------- */
-function buildGrid(el, data) {
-  const frag = document.createDocumentFragment();
+const CELL = 48;
+const SRC_COLS = 30;
+
+const hexToRgb = h => [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16));
+const rgbToHex = c => c.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
+const mix = (a, b, t) => rgbToHex(hexToRgb(a).map((v, i) => v + (hexToRgb(b)[i] - v) * t));
+
+function indexGrid(data) {
+  const cols = Array.from({ length: SRC_COLS }, () => ({ rects: [], whites: [], tiles: [] }));
+  const stripeRows = {};                         // y → [col] = [c0, c1] for the full-height stripes
   for (const [x, y, w, h, c0, c1] of data.rects) {
-    const d = document.createElement('div');
-    if (h === 240) d.className = 'stripe';
-    d.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;background:linear-gradient(90deg,#${c0},#${c1})`;
-    frag.appendChild(d);
+    const col = x / CELL;
+    cols[col].rects.push({ y, h, c0, c1 });
+    if (h === 240) (stripeRows[y] ||= [])[col] = [c0, c1];
   }
-  for (const [x, y] of data.whites) {
-    const d = document.createElement('div');
-    d.className = 'white';
-    d.style.cssText = `left:${x}px;top:${y}px`;
-    frag.appendChild(d);
-  }
-  for (const [x, y, c] of data.tiles) {
-    const d = document.createElement('div');
-    d.className = 'tile';
-    d.style.cssText = `left:${x}px;top:${y}px;--c:#${c}`;
-    frag.appendChild(d);
-  }
-  el.appendChild(frag);
+  for (const [x, y] of data.whites) cols[x / CELL].whites.push(y);
+  for (const [x, y, c] of data.tiles) cols[x / CELL].tiles.push({ y, c });
+  return { cols, stripeRows };
 }
-document.querySelectorAll('[data-grid]').forEach(el => buildGrid(el, GRID[el.dataset.grid]));
 
-/* ---------------------------------------------------------
-   Figma spring curves → CSS linear() easings
-   --------------------------------------------------------- */
-function springEasing(mass, stiffness, damping) {
-  const w0 = Math.sqrt(stiffness / mass);
-  const zeta = damping / (2 * Math.sqrt(stiffness * mass));
-  const wd = w0 * Math.sqrt(1 - zeta * zeta);
-  const x = t => 1 - Math.exp(-zeta * w0 * t) * (Math.cos(wd * t) + (zeta * w0 / wd) * Math.sin(wd * t));
-  // settle time: last moment the curve is more than 0.1% away from rest
-  let T = 0;
-  for (let t = 0; t < 5; t += 0.001) if (Math.abs(1 - x(t)) > 0.001) T = t;
-  const steps = 60;
-  const pts = [];
-  for (let i = 0; i <= steps; i++) pts.push(i === steps ? 1 : +x((T * i) / steps).toFixed(4));
-  return { easing: `linear(${pts.join(', ')})`, duration: `${T.toFixed(3)}s` };
+// Colour of a stripe row at source position x (0–30). `end` picks the
+// column to the left when x lands exactly on a column boundary.
+function stripeColor(row, x, end) {
+  let k = end ? Math.ceil(x) - 1 : Math.floor(x);
+  k = Math.min(SRC_COLS - 1, Math.max(0, k));
+  const [c0, c1] = row[k];
+  return mix(c0, c1, Math.min(1, Math.max(0, x - k)));
 }
-if (CSS.supports('transition-timing-function', 'linear(0, 1)')) {
-  const springs = {
-    row: [1, 200, 24],     // Event Row hover
-    open: [1, 200, 26],    // Accordion open / close
-    viewall: [1, 200, 22], // View All row hover
-    float: [1, 280, 12],   // Float Photo hover
+
+// extendTop: source px the top stripes reach above the grid (hero only).
+// fullTiles: every visible square gets a hover tile (hero with the hamburger menu),
+//            instead of only the tiles placed in Figma.
+function renderGrid(el, index, extendTop, fullTiles) {
+  const scale = parseFloat(getComputedStyle(el).getPropertyValue('--grid-scale')) || 1;
+  const n = Math.max(1, Math.ceil(el.clientWidth / (CELL * scale)));
+  const key = `${n}@${scale}@${fullTiles}`;
+  if (el.dataset.layout === key) return;
+  el.dataset.layout = key;
+
+  const inner = document.createElement('div');
+  inner.className = 'grid-inner';
+  inner.style.width = `${n * CELL}px`;
+  inner.style.marginLeft = `${-n * CELL / 2}px`;
+
+  let html = '';
+  for (let i = 0; i < n; i++) {
+    const x0 = (i * SRC_COLS) / n;
+    const x1 = ((i + 1) * SRC_COLS) / n;
+    const s = Math.min(SRC_COLS - 1, Math.floor(((i + 0.5) * SRC_COLS) / n));
+    const left = i * CELL;
+    for (const r of index.cols[s].rects) {
+      let a, b;
+      if (r.h === 240) {
+        const row = index.stripeRows[r.y];
+        a = stripeColor(row, x0, false);
+        b = stripeColor(row, x1, true);
+      } else {                                   // single 48px piece: its own gradient
+        a = mix(r.c0, r.c1, Math.min(1, Math.max(0, x0 - s)));
+        b = mix(r.c0, r.c1, Math.min(1, Math.max(0, x1 - s)));
+      }
+      const top = extendTop && r.y === 0 ? -extendTop : r.y;
+      // The "white" squares are holes: leave them out of the stripe so they're transparent
+      const gaps = index.cols[s].whites.filter(y => y >= top && y < r.y + r.h).sort((m, n) => m - n);
+      let from = top;
+      for (const y of [...gaps, r.y + r.h]) {
+        if (y > from) html += `<div style="left:${left}px;top:${from}px;height:${y - from}px;background:linear-gradient(90deg,#${a},#${b})"></div>`;
+        from = y + CELL;
+      }
+    }
+    // Hover tiles everywhere except the transparent squares, which stay empty
+    const holes = new Set(index.cols[s].whites);
+    if (fullTiles) {
+      const c = index.cols[s].tiles[0].c;        // the column's hover colour
+      for (let y = -extendTop; y < 480; y += CELL) if (!holes.has(y)) html += `<div class="tile" style="left:${left}px;top:${y}px;--c:#${c}"></div>`;
+    } else {
+      for (const t of index.cols[s].tiles) if (!holes.has(t.y)) html += `<div class="tile" style="left:${left}px;top:${t.y}px;--c:#${t.c}"></div>`;
+    }
+  }
+  inner.innerHTML = html;
+  el.replaceChildren(inner);
+}
+
+(() => {
+  const grids = [...document.querySelectorAll('[data-grid]')].map(el => ({ el, index: indexGrid(GRID[el.dataset.grid]) }));
+  const hamburger = window.matchMedia('(max-width: 960px)');
+  const blockers = [document.querySelector('.logo'), document.querySelector('.menu-toggle')];
+
+  // With the hamburger layout, switch off the hero tiles sitting behind the logo and menu button
+  const blockTiles = () => {
+    const hero = grids.find(g => g.el.dataset.grid === 'hero').el;
+    const boxes = hamburger.matches ? blockers.map(b => b.getBoundingClientRect()) : [];
+    hero.querySelectorAll('.tile').forEach(tile => {
+      const r = tile.getBoundingClientRect();
+      // "behind" = at least a third of the tile's width and height is covered
+      const hidden = boxes.some(b =>
+        Math.min(r.right, b.right) - Math.max(r.left, b.left) > r.width / 3 &&
+        Math.min(r.bottom, b.bottom) - Math.max(r.top, b.top) > r.height / 3);
+      tile.classList.toggle('is-off', hidden);
+    });
   };
-  for (const [name, params] of Object.entries(springs)) {
-    const { easing, duration } = springEasing(...params);
-    document.documentElement.style.setProperty(`--ease-${name}`, easing);
-    document.documentElement.style.setProperty(`--dur-${name}`, duration);
-  }
-}
+
+  const draw = () => {
+    grids.forEach(g => {
+      const isHero = g.el.dataset.grid === 'hero';
+      renderGrid(g.el, g.index, isHero ? 480 : 0, isHero && hamburger.matches);
+    });
+    blockTiles();
+  };
+  draw();
+  new ResizeObserver(draw).observe(document.body);
+})();
 
 /* ---------------------------------------------------------
-   Nav selector: selection box follows the hovered item
+   Navigation
+   Desktop: the selection box follows the hovered item.
+   ≤ 960px: the hamburger button opens the nav as a panel.
    --------------------------------------------------------- */
+const mobileNav = window.matchMedia('(max-width: 960px)');
+
 (() => {
   const nav = document.querySelector('.nav');
   const box = nav.querySelector('.nav-selection');
   const items = nav.querySelectorAll('.nav-item');
   const select = item => {
+    if (mobileNav.matches) return;
     items.forEach(i => i.classList.toggle('is-active', i === item));
     box.style.left = `${item.offsetLeft}px`;
     box.style.width = `${item.offsetWidth}px`;
@@ -98,21 +167,789 @@ if (CSS.supports('transition-timing-function', 'linear(0, 1)')) {
   nav.addEventListener('focusout', e => { if (!nav.contains(e.relatedTarget)) clear(); });
 })();
 
+(() => {
+  const toggle = document.querySelector('.menu-toggle');
+  const nav = document.querySelector('.nav');
+  const bar = document.querySelector('.nav-bar');
+  const setOpen = open => {
+    nav.classList.toggle('is-open', open);
+    bar.classList.toggle('is-menu-open', open);
+    document.documentElement.style.overflow = open ? 'hidden' : '';   // the full-screen menu stops the page scrolling
+    if (window.lenis) open ? window.lenis.stop() : window.lenis.start();
+    toggle.setAttribute('aria-expanded', open);
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  };
+  toggle.addEventListener('click', () => setOpen(!nav.classList.contains('is-open')));
+  nav.addEventListener('click', e => { if (e.target.closest('a')) setOpen(false); });
+  document.addEventListener('click', e => {
+    if (nav.classList.contains('is-open') && !nav.contains(e.target) && !toggle.contains(e.target)) setOpen(false);
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && nav.classList.contains('is-open')) { setOpen(false); toggle.focus(); }
+  });
+  mobileNav.addEventListener('change', () => setOpen(false));
+})();
+
 /* ---------------------------------------------------------
-   Events accordion: one row open at a time
+   Touch: tapping plays the hover effects
+   Mentorship photos stay active until something else is tapped;
+   grid tiles flash and fade like a passing cursor.
    --------------------------------------------------------- */
 (() => {
-  const rows = document.querySelectorAll('.event-row');
-  rows.forEach(row => {
-    row.querySelector('.event-head').addEventListener('click', () => {
-      const willOpen = !row.classList.contains('is-open');
-      rows.forEach(r => {
-        const open = r === row && willOpen;
-        r.classList.toggle('is-open', open);
-        r.querySelector('.event-head').setAttribute('aria-expanded', open);
-      });
-    });
+  const sticky = '.cursor-photo';
+  document.addEventListener('pointerup', e => {
+    if (e.pointerType === 'mouse') return;
+    const target = e.target.closest(sticky);
+    document.querySelectorAll(`:is(${sticky}).is-tapped`).forEach(el => { if (el !== target) el.classList.remove('is-tapped'); });
+    if (target) target.classList.toggle('is-tapped');
+
+    const tile = e.target.closest('.tile');
+    if (tile) {
+      tile.classList.add('is-tapped');
+      setTimeout(() => tile.classList.remove('is-tapped'), 400);
+    }
   });
+})();
+
+/* ---------------------------------------------------------
+   Upcoming events — scroll stack (after extrafazant.nl "Recent Werk")
+   While the stack is pinned, scroll progress p runs 0 → cards − 1.
+   For each step the front card falls away (accelerating, 0.9 window
+   heights) and fades out near the end of its step, while the cards
+   behind move one depth forward. Motion follows the scroll with a
+   slight lag, and the stack tilts gently toward the mouse.
+   --------------------------------------------------------- */
+(() => {
+  const stack = document.querySelector('[data-stack]');
+  if (!stack) return;
+  const pin = stack.querySelector('.stack-pin');
+  const carousel = stack.querySelector('.carousel');
+  const cards = [...stack.querySelectorAll('.card')];
+  const now = stack.querySelector('.stack-now');
+  const total = stack.querySelector('.stack-total');
+  const bar = stack.querySelector('.stack-bar span');
+  const pad = n => String(n).padStart(2, '0');
+  if (total) total.textContent = pad(cards.length);
+  const active = window.matchMedia('(min-width: 1024px) and (prefers-reduced-motion: no-preference)');
+
+  // Figma card boxes (% of the 1387 × 731 stack) at depth 0 (front), 1, 2 (back)
+  const DEPTH = [
+    { left: 8.435,  top: 13.133, width: 83.129, height: 86.867 },
+    { left: 11.680, top: 6.566,  width: 76.568, height: 79.891 },
+    { left: 14.564, top: 0,      width: 70.872, height: 74.145 },
+  ];
+  const FALL = 0.9;          // window heights the leaving card drops
+  const LAG = 0.3;           // seconds the stack trails the scroll
+  const TILT_X = 6;          // degrees, mouse tilt
+  const TILT_Y = 10;
+
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  const boxAt = d => {
+    const i = Math.min(Math.floor(d), DEPTH.length - 2);
+    const t = d - i;
+    const a = DEPTH[i], b = DEPTH[i + 1];
+    return { left: lerp(a.left, b.left, t), top: lerp(a.top, b.top, t), width: lerp(a.width, b.width, t), height: lerp(a.height, b.height, t) };
+  };
+
+  let target = 0, current = 0;
+  let tilt = { x: 0, y: 0 }, tiltTarget = { x: 0, y: 0 };
+  let last = 0, raf = 0;
+
+  const readScroll = () => {
+    const top = parseFloat(getComputedStyle(pin).top) || 0;
+    const travel = stack.offsetHeight - pin.offsetHeight;
+    const scrolled = top - stack.getBoundingClientRect().top;
+    target = clamp(scrolled / travel, 0, 1) * (cards.length - 1);
+  };
+
+  const render = () => {
+    cards.forEach((card, i) => {
+      const local = current - i;                       // > 0 once this card is leaving
+      const depth = Math.max(0, -local);
+      const box = boxAt(Math.min(depth, DEPTH.length - 1));
+      const leaving = i < cards.length - 1 ? clamp(local, 0, 1) : 0;
+      const fall = leaving * leaving * FALL * window.innerHeight;           // power2.in
+      const fade = 1 - clamp((leaving - 0.7) / 0.25, 0, 1);
+      card.style.left = `${box.left}%`;
+      card.style.top = `${box.top}%`;
+      card.style.width = `${box.width}%`;
+      card.style.height = `${box.height}%`;
+      card.style.transform = fall ? `translateY(${fall}px)` : '';
+      card.style.opacity = fade;
+      card.style.visibility = fade ? '' : 'hidden';
+      card.style.setProperty('--front', clamp(1 - depth, 0, 1));
+    });
+    carousel.style.transform = `perspective(1400px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`;
+    if (now) now.textContent = pad(Math.min(cards.length, Math.round(current) + 1));
+    if (bar) bar.style.setProperty('--p', cards.length > 1 ? current / (cards.length - 1) : 1);
+  };
+
+  const tick = now => {
+    const dt = Math.min(0.1, (now - last) / 1000 || 0.016);
+    last = now;
+    const k = 1 - Math.exp(-dt / (LAG / 3));          // ~settles within LAG seconds
+    current += (target - current) * k;
+    const kt = 1 - Math.exp(-dt / 0.2);
+    tilt.x += (tiltTarget.x - tilt.x) * kt;
+    tilt.y += (tiltTarget.y - tilt.y) * kt;
+    render();
+    const settled = Math.abs(target - current) < 0.0005 && Math.abs(tiltTarget.x - tilt.x) < 0.01 && Math.abs(tiltTarget.y - tilt.y) < 0.01;
+    raf = settled ? 0 : requestAnimationFrame(tick);
+  };
+  const wake = () => { if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); } };
+
+  const onScroll = () => { readScroll(); wake(); };
+  const onMove = e => {
+    const r = pin.getBoundingClientRect();
+    tiltTarget = { x: -((e.clientY - r.top) / r.height - 0.5) * TILT_X, y: ((e.clientX - r.left) / r.width - 0.5) * TILT_Y };
+    wake();
+  };
+  const onLeave = () => { tiltTarget = { x: 0, y: 0 }; wake(); };
+
+  const enable = () => {
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    if (window.matchMedia('(hover: hover)').matches) {
+      pin.addEventListener('mousemove', onMove);
+      pin.addEventListener('mouseleave', onLeave);
+    }
+    readScroll();
+    current = target;
+    render();
+  };
+  const disable = () => {
+    window.removeEventListener('scroll', onScroll);
+    window.removeEventListener('resize', onScroll);
+    pin.removeEventListener('mousemove', onMove);
+    pin.removeEventListener('mouseleave', onLeave);
+    cancelAnimationFrame(raf);
+    raf = 0;
+    cards.forEach(card => card.removeAttribute('style'));    // CSS list layout takes over
+    carousel.removeAttribute('style');
+  };
+
+  const sync = () => (active.matches ? enable() : disable());
+  active.addEventListener('change', sync);
+  sync();
+})();
+
+/* ---------------------------------------------------------
+   Footer: four columns down to 961px. At ≤ 960px — or as soon as the
+   four columns would collide (a heading or button no longer fits its
+   column, or the columns overflow the footer) — switch to the stacked
+   footer.
+   --------------------------------------------------------- */
+(() => {
+  const cols = document.querySelector('.footer-cols');
+  const narrow = window.matchMedia('(max-width: 960px)');
+  const tight = el => el.scrollWidth > el.clientWidth + 1;
+  // Buttons: compare the label text with the button (their corner handles sit outside on purpose)
+  const labelTight = btn => {
+    const range = document.createRange();
+    const text = [...btn.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
+    if (!text) return false;
+    range.selectNodeContents(text);
+    return range.getBoundingClientRect().width > btn.clientWidth - 16;   // 8px padding each side
+  };
+
+  const update = () => {
+    if (narrow.matches) { cols.classList.add('is-stacked'); return; }
+    cols.classList.remove('is-stacked');                     // measure the four-column layout
+    const collides = tight(cols) ||
+      [...cols.querySelectorAll('.footer-heading, .footer-links a')].some(tight) ||
+      [...cols.querySelectorAll('.select-btn')].some(labelTight);
+    cols.classList.toggle('is-stacked', collides);
+  };
+
+  update();
+  window.addEventListener('resize', update);
+  narrow.addEventListener('change', update);
+  document.fonts?.ready.then(update);
+})();
+
+/* ---------------------------------------------------------
+   Text reveal (after extrafazant.nl's hero heading)
+   Headings rise letter by letter, other text line by line, each piece
+   sliding up from behind a mask under its line (1s, expo.out; letters
+   0.0175s apart, lines 0.07s apart, blocks in one section 0.12s apart).
+   Text on screen at load animates straight away; the rest animates the
+   first time it scrolls into view. Afterwards the original markup is
+   put back, so hover effects and resizing work as before.
+   --------------------------------------------------------- */
+(() => {
+  window.__revealReady = true;
+  const root = document.documentElement;
+  if (!root.classList.contains('reveal-pending')) return;   // reduced motion (see <head>)
+
+  const TARGETS = [
+    ['.wordmark-letters', 'chars'],               // the whole lockup: letters rise as one wave
+    ['.wordmark-tagline', 'lines'],
+    ['.intro-ctas .cta-title', 'lines'],
+    ['.intro-ctas .cta-body', 'lines'],
+    ['.sponsors-title', 'chars'],
+    ['.statement-title .line', 'chars'],
+    ['.statement .lede', 'lines'],
+    ['.events .section-title', 'chars'],
+    ['.events-eyebrow', 'lines'],
+    ['.cta-view-all .cta-title', 'lines'],
+    ['.mentorship .section-title', 'chars'],
+    ['.mentorship-eyebrow', 'lines'],
+    ['.mentor-card .cta-title', 'lines'],
+    ['.mentor-card .cta-body', 'lines'],
+    ['.pgrid .section-title', 'chars'],
+  ];
+  const DURATION = 1;            // s
+  const CHAR_GAP = 0.0175;       // s between letters
+  const LINE_GAP = 0.07;         // s between lines
+  const BLOCK_GAP = 0.12;        // s between text blocks in the same section
+
+  const items = [];
+  TARGETS.forEach(([sel, mode]) => document.querySelectorAll(sel).forEach(el => {
+    if (el.dataset.rv) return;
+    el.dataset.rv = mode;
+    items.push(el);
+  }));
+
+  const mask = inner => {
+    const m = document.createElement('span');
+    m.className = 'rv-m';
+    m.append(inner);
+    return m;
+  };
+  const piece = content => {
+    const i = document.createElement('span');
+    i.className = 'rv-i';
+    i.append(content);
+    return i;
+  };
+
+  // Rebuild an element's content with masked pieces; returns the moving pieces in order.
+  function split(el, mode) {
+    const pieces = [];
+    const targets = [];          // chars mode: where each letter sits in the real (kerned) text
+    const wordStart = [];        // chars mode: index of the first letter of each letter's word
+    const range = document.createRange();
+    const build = node => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const out = [];
+        let offset = 0;
+        node.textContent.split(/(\s+)/).forEach(part => {
+          const start = offset;
+          offset += part.length;
+          if (!part) return;
+          if (/^\s+$/.test(part)) { out.push(document.createTextNode(part)); return; }
+          if (mode === 'chars') {
+            const word = document.createElement('span');
+            word.className = 'rv-m';
+            let o = start;
+            const first = pieces.length;
+            [...part].forEach(ch => {
+              wordStart.push(first);
+              range.setStart(node, o);
+              range.setEnd(node, o + ch.length);
+              targets.push(range.getBoundingClientRect().left);
+              o += ch.length;
+              const p = piece(ch); pieces.push(p); word.append(p);
+            });
+            out.push(word);
+          } else {
+            const p = piece(part); pieces.push(p); out.push(mask(p));
+          }
+        });
+        return out;
+      }
+      if (node.nodeType !== Node.ELEMENT_NODE) return [node.cloneNode(true)];
+      if (node.namespaceURI === 'http://www.w3.org/2000/svg') {           // arrow icons move with their line
+        const p = piece(node.cloneNode(true)); pieces.push(p); return [mask(p)];
+      }
+      if (!node.textContent.trim()) return [node.cloneNode(true)];       // handles, <br>, …
+      const copy = node.cloneNode(false);
+      node.childNodes.forEach(c => copy.append(...build(c)));
+      return [copy];
+    };
+    const original = [...el.childNodes];
+    const built = [];
+    original.forEach(c => built.push(...build(c)));
+    el.replaceChildren(...built);
+    // Separate letter boxes lose the font's kerning (e.g. "YC"), so restore the
+    // kerned spacing inside each word. Words keep their real width, so line
+    // breaks and centring match the real text and every letter rises straight
+    // into its final place.
+    if (mode === 'chars') {
+      pieces.forEach((p, i) => {
+        const f = wordStart[i];
+        if (f === i) return;
+        const want = targets[i] - targets[f];
+        const now = p.getBoundingClientRect().left - pieces[f].getBoundingClientRect().left;
+        if (Math.abs(want - now) > 0.05) p.style.marginLeft = `${want - now}px`;
+      });
+    }
+    return { pieces, original };
+  }
+
+  function play(el, startDelay) {
+    const mode = el.dataset.rv;
+    const { pieces, original } = split(el, mode);
+    let delays;
+    if (mode === 'chars') {
+      delays = pieces.map((_, i) => startDelay + i * CHAR_GAP);
+    } else {                                                     // group pieces into lines by position
+      let line = -1, lastTop = -Infinity;
+      delays = pieces.map(p => {
+        const top = p.getBoundingClientRect().top;
+        if (top > lastTop + 2) { line++; lastTop = top; }
+        return startDelay + line * LINE_GAP;
+      });
+    }
+    el.classList.add('rv-on');
+    void el.offsetHeight;                                        // commit the hidden start position…
+    pieces.forEach((p, i) => { p.style.setProperty('--rv-delay', `${delays[i]}s`); p.classList.add('rv-go'); });   // …then slide
+    const total = (Math.max(0, ...delays) + DURATION) * 1000 + 100;
+    setTimeout(() => {                                          // back to the real markup
+      el.replaceChildren(...original);
+      el.dispatchEvent(new CustomEvent('reveal:done'));
+    }, total);
+  }
+
+  const sectionOf = el => el.closest('section, header, footer, nav') || document.body;
+  // Play a batch of elements in page order, staggering blocks within each section
+  const playBatch = els => {
+    const counts = new Map();
+    els.sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
+      .forEach(el => {
+        const sec = sectionOf(el);
+        const n = counts.get(sec) || 0;
+        counts.set(sec, n + 1);
+        play(el, n * BLOCK_GAP);
+      });
+  };
+  const io = new IntersectionObserver(entries => {
+    const visible = entries.filter(e => e.isIntersecting).map(e => e.target);
+    visible.forEach(el => io.unobserve(el));
+    playBatch(visible);
+  }, { rootMargin: '0px 0px -15% 0px' });                         // "top 85%", as on extrafazant
+
+  let started = false;
+  const start = () => {
+    if (started) return;
+    started = true;
+    // Everything already on screen plays now (first visit); the rest waits for scrolling.
+    const onScreen = [], later = [];
+    items.forEach(el => {
+      const r = el.getBoundingClientRect();
+      (r.bottom > 0 && r.top < window.innerHeight ? onScreen : later).push(el);
+    });
+    playBatch(onScreen);
+    later.forEach(el => io.observe(el));
+  };
+  // Prefer splitting with the real font, but don't keep the page blank waiting for it.
+  if (document.fonts && document.fonts.status !== 'loaded') {
+    document.fonts.ready.then(start);
+    setTimeout(start, 400);
+  } else {
+    start();
+  }
+})();
+
+/* ---------------------------------------------------------
+   Pixel transitions (after Framer's "Pixel Scroll")
+   Each .pixel-band starts in its data-from colour; as it scrolls up
+   through the window, pixels switch to data-to from the bottom up, in a
+   ragged random front. A few pixels right at the front flash a UXPA
+   accent colour. The pattern is fixed per page load, so scrolling back
+   up plays it in reverse.
+   --------------------------------------------------------- */
+(() => {
+  const bands = [...document.querySelectorAll('.pixel-band')];
+  if (!bands.length) return;
+  // Accent colours pulled from the UXPA gradient (the hero grid's stripe colours, green → blue);
+  // each accent pixel gets one at random, not in gradient order.
+  const ACCENTS = GRID.hero.rects.filter(r => r[1] === 0).flatMap(r => [`#${r[4]}`, `#${r[5]}`]);
+  const JITTER = 0.55;          // how ragged the front is (0 = straight line)
+  const ACCENT_BAND = 0.07;     // how close to the front a pixel must be to flash an accent
+  const ACCENT_SHARE = 0.22;    // share of those front pixels that do
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const state = bands.map(el => ({ el, canvas: el.querySelector('canvas'), cells: [], cols: 0, rows: 0, size: 0, last: -1 }));
+
+  // Random but stable numbers per cell
+  const rand = (() => { let s = 1234567; return () => ((s = Math.imul(s ^ (s >>> 15), 2246822519) + 0x9e3779b9 | 0) >>> 0) / 4294967296; })();
+
+  const layout = st => {
+    const scale = parseFloat(getComputedStyle(st.el).getPropertyValue('--grid-scale')) || 1;
+    const size = Math.round(24 * scale);
+    // Snap the band to whole pixel rows so no thin slice of a row is cut off at its edges
+    st.el.style.height = '';
+    const rowsFit = Math.max(1, Math.round(st.el.clientHeight / size));
+    st.el.style.height = `${rowsFit * size}px`;
+    const w = st.el.clientWidth, h = st.el.clientHeight;
+    const dpr = window.devicePixelRatio || 1;
+    st.canvas.width = Math.round(w * dpr);
+    st.canvas.height = Math.round(h * dpr);
+    const cols = Math.ceil(w / size), rows = Math.ceil(h / size);
+    if (cols !== st.cols || rows !== st.rows || size !== st.size || w !== st.w) {
+      st.cells = [];
+      for (let r = 0; r < rows; r++) {
+        const fromBottom = (rows - 1 - r) / Math.max(1, rows - 1);          // 0 at the bottom edge
+        for (let c = 0; c < cols; c++) {
+          st.cells.push({
+            x: (w - cols * size) / 2 + c * size,                        // columns centred, like the hero grid
+            y: h - (rows - r) * size,                                   // whole rows (band height is snapped)
+            // when this pixel switches; kept below 1 − ACCENT_BAND so every accent has
+            // faded back by the time the band is complete
+            t: (fromBottom * (1 - JITTER) + rand() * JITTER) * (1 - ACCENT_BAND),
+            accent: rand() < ACCENT_SHARE ? ACCENTS[Math.floor(rand() * ACCENTS.length)] : null,
+          });
+        }
+      }
+      st.cols = cols; st.rows = rows; st.size = size; st.w = w;
+    }
+    st.dpr = dpr;
+    st.last = -1;
+  };
+
+  const draw = (st, p) => {
+    if (Math.abs(p - st.last) < 0.001) return;
+    st.last = p;
+    const g = st.canvas.getContext('2d');
+    // Draw in whole device pixels: each square's edges are rounded to the canvas grid, so
+    // neighbouring squares share an edge exactly and no hairline seams show between them
+    // (fractional pixel ratios on phones otherwise leave thin column lines behind).
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.imageSmoothingEnabled = false;
+    const sx = st.canvas.width / st.el.clientWidth;
+    const sy = st.canvas.height / st.el.clientHeight;
+    g.fillStyle = st.el.dataset.from;
+    g.fillRect(0, 0, st.canvas.width, st.canvas.height);
+    const to = st.el.dataset.to;
+    for (const cell of st.cells) {
+      const lead = p - cell.t;                       // > 0 once this pixel has switched
+      if (lead <= 0) continue;
+      const x0 = Math.round(cell.x * sx), x1 = Math.round((cell.x + st.size) * sx);
+      const y0 = Math.round(cell.y * sy), y1 = Math.round((cell.y + st.size) * sy);
+      g.fillStyle = cell.accent && lead < ACCENT_BAND ? cell.accent : to;
+      g.fillRect(x0, y0, x1 - x0, y1 - y0);
+    }
+  };
+
+  // Progress 0 → 1 while the band moves from the bottom of the window to about a quarter of the way down
+  // Into the section: starts as the band appears at the bottom of the window and completes when
+  // the black section's top (= the band's bottom) is 5% from the top of the window.
+  // Out of the section (data-timing="out"), the mirror image: starts when the black section's
+  // bottom (= the band's top) is 5% from the bottom of the window and completes as the band
+  // leaves the top of the window.
+  const EDGE = 0.05;
+  const progress = st => {
+    const r = st.el.getBoundingClientRect();
+    const vh = window.innerHeight;
+    const span = vh * (1 - EDGE) + r.height;       // scroll distance over which each band plays
+    const p = st.el.dataset.timing === 'out'
+      ? (vh * (1 - EDGE) - r.top) / span
+      : (vh - r.top) / span;
+    return Math.min(1, Math.max(0, p));
+  };
+
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    state.forEach(st => draw(st, reduced ? 0.5 : progress(st)));
+  };
+  const request = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+
+  const relayout = () => { state.forEach(layout); update(); };
+  relayout();
+  window.addEventListener('scroll', request, { passive: true });
+  window.addEventListener('resize', relayout);
+})();
+
+/* ---------------------------------------------------------
+   Smooth scrolling (Lenis, vendor/lenis.min.js — MIT licence), with the
+   settings of the Framer Parallax Grid Scroll demo's smooth-scroll
+   component: intensity 15 → 1.5s, default easing, mouse wheel only
+   (touch scrolling stays native). Off for reduced motion. In-page links
+   glide to their target; the full-screen menu pauses it (see the menu).
+   --------------------------------------------------------- */
+(() => {
+  if (typeof Lenis !== 'function') return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const lenis = new Lenis({
+    duration: 1.5,
+    easing: t => Math.min(1, 1.001 - 2 ** (-10 * t)),
+    smoothWheel: true,
+    syncTouch: false,
+    wheelMultiplier: 1,
+    touchMultiplier: 1,
+  });
+  window.lenis = lenis;
+  const raf = time => { lenis.raf(time); requestAnimationFrame(raf); };
+  requestAnimationFrame(raf);
+
+  // In-page links (#about, #events, …) glide instead of jumping
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const id = a.getAttribute('href');
+    const target = id === '#' ? null : document.querySelector(id);
+    if (!target) return;
+    e.preventDefault();
+    lenis.scrollTo(target, { force: true });
+    history.pushState(null, '', id);
+  });
+})();
+
+/* ---------------------------------------------------------
+   Scroll fill (after Framer's "Text Scroll with 3 Colors",
+   https://textscrollwith3colors.framer.website/): text marked
+   data-scroll-fill rises in grey, then fills in letter by letter as you
+   scroll. Its progress runs from when its top is 20% of the way up
+   the window to when it is halfway up, trailing the scroll a little
+   (the demo's "scrub"). Each letter flashes the accent colour for 50ms
+   and then turns black; scrolling back up turns letters grey again.
+   The letters are split only after the rise-in animation has finished,
+   so the two effects never fight over the same markup.
+   --------------------------------------------------------- */
+(() => {
+  const START = 0.8, END = 0.5;     // element top as a fraction of the window height (0.8 = 20% up from the bottom)
+  const ACCENT_MS = 50;             // how long a letter shows the accent colour
+  const SCRUB = 0.3;                // seconds for the fill to catch up with the scroll
+  const els = [...document.querySelectorAll('[data-scroll-fill]')];
+  if (!els.length) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;   // CSS shows it black
+
+  const splitLetters = el => {
+    const chars = [];
+    const walk = node => {
+      [...node.childNodes].forEach(child => {
+        if (child.nodeType === Node.ELEMENT_NODE) { walk(child); return; }
+        if (child.nodeType !== Node.TEXT_NODE) return;
+        const frag = document.createDocumentFragment();
+        child.textContent.split(/(\s+)/).forEach(part => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.append(part); return; }
+          const word = document.createElement('span');
+          word.className = 'sf-w';
+          [...part].forEach(ch => {
+            const c = document.createElement('span');
+            c.className = 'sf-c';
+            c.textContent = ch;
+            word.append(c);
+            chars.push(c);
+          });
+          frag.append(word);
+        });
+        child.replaceWith(frag);
+      });
+    };
+    walk(el);
+    return chars;
+  };
+
+  const setup = el => {
+    const chars = splitLetters(el);
+    const timers = new Map();
+    let shown = -1;          // index of the last filled letter
+    let progress = null, last = 0, raf = 0;
+
+    const fill = i => {
+      const c = chars[i];
+      c.classList.remove('is-on');
+      c.classList.add('is-accent');
+      timers.set(i, setTimeout(() => { c.classList.replace('is-accent', 'is-on'); timers.delete(i); }, ACCENT_MS));
+    };
+    const clear = i => {
+      clearTimeout(timers.get(i)); timers.delete(i);
+      chars[i].classList.remove('is-accent', 'is-on');
+    };
+
+    const frame = now => {
+      raf = 0;
+      const vh = window.innerHeight;
+      const top = el.getBoundingClientRect().top;
+      const target = Math.min(1, Math.max(0, (START * vh - top) / ((START - END) * vh)));
+      const dt = last ? Math.min(0.1, (now - last) / 1000) : 0;
+      last = now;
+      progress = progress === null ? target : progress + (target - progress) * (1 - Math.exp(-dt / SCRUB));
+      if (Math.abs(target - progress) < 0.0005) progress = target;
+      const want = Math.min(chars.length, Math.floor(progress * chars.length)) - 1;   // last letter to fill
+      if (want > shown) for (let i = shown + 1; i <= want; i++) fill(i);
+      else if (want < shown) for (let i = shown; i > want; i--) clear(i);
+      shown = want;
+      if (progress !== target) request(); else last = 0;
+    };
+    const request = () => { if (!raf) raf = requestAnimationFrame(frame); };
+    request();
+    window.addEventListener('scroll', request, { passive: true });
+    window.addEventListener('resize', request);
+  };
+
+  els.forEach(el => {
+    if (el.dataset.rv) el.addEventListener('reveal:done', () => setup(el), { once: true });   // waits for the rise-in
+    else setup(el);
+  });
+})();
+
+/* ---------------------------------------------------------
+   Velocity marquee (after Framer's "Velocity Marquee",
+   https://precious-conference-017181.framer.app/velocity-marquee),
+   using the same maths and the demo's settings. The band drifts left at
+   70px/s. Scrolling adds 1.2 × the (smoothed) scroll speed, capped at
+   1400px/s, so scrolling down speeds it up and scrolling up sends it
+   backwards; at full speed it leans up to 8°. The item is repeated
+   enough times to cover the band and wraps seamlessly.
+   --------------------------------------------------------- */
+(() => {
+  const band = document.querySelector('.vmarquee');
+  if (!band) return;
+  const track = band.querySelector('.vmarquee-track');
+  const item = track.querySelector('.vmarquee-item');
+  const SPEED = 70;          // px/s when the page is still
+  const RESPONSE = 1.2;      // scroll speed → extra marquee speed
+  const LEAN = 8;            // degrees at full scroll speed
+  const CAP = 1400;          // px/s scroll speed cap
+  const MAX_COPIES = 40;
+  const DIR = 1;             // 1 = leftwards, -1 = rightwards
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  let width = 0;             // one item's width
+  let offset = 0, velocity = 0, lastT = 0, lastY = 0, raf = 0, visible = false;
+
+  const render = () => {
+    const skew = -DIR * clamp(velocity / CAP, -1, 1) * LEAN;
+    track.style.transform = `translate3d(${(-offset).toFixed(2)}px,0,0) skewX(${skew.toFixed(2)}deg)`;
+  };
+  const measure = () => {
+    const w = item.getBoundingClientRect().width;
+    if (w <= 1) return;
+    width = w;
+    const copies = Math.min(MAX_COPIES, Math.ceil(band.offsetWidth / w) + 2);
+    while (track.children.length < copies) {
+      const c = item.cloneNode(true);
+      c.setAttribute('aria-hidden', 'true');
+      track.append(c);
+    }
+    while (track.children.length > copies) track.lastElementChild.remove();
+    offset = ((offset % width) + width) % width;
+    render();
+  };
+  const frame = t => {
+    const dt = Math.min((t - lastT) / 1000, 0.05);
+    lastT = t;
+    const y = window.scrollY;
+    const v = dt > 0 ? (y - lastY) / dt : 0;
+    lastY = y;
+    velocity += (v - velocity) * (1 - Math.exp(-dt * 6));
+    offset += DIR * (SPEED + clamp(velocity, -CAP, CAP) * RESPONSE) * dt;
+    if (width > 1) offset = ((offset % width) + width) % width;
+    render();
+    raf = requestAnimationFrame(frame);
+  };
+  const start = () => {
+    if (reduced || raf || !visible) return;
+    lastT = performance.now(); lastY = window.scrollY; velocity = 0;
+    raf = requestAnimationFrame(frame);
+  };
+  const stop = () => { cancelAnimationFrame(raf); raf = 0; };
+
+  measure();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  let timer = 0;
+  new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(measure, 120); }).observe(band);
+  new IntersectionObserver(entries => {
+    visible = entries.some(e => e.isIntersecting);
+    visible ? start() : stop();
+  }, { rootMargin: '80px' }).observe(band);
+})();
+
+/* ---------------------------------------------------------
+   Closer: the section pins while you scroll through it (CSS sticky).
+   q = how far you are through the section: 0 as its top comes up from
+   the bottom of the window, 1 as the pause ends. A smoothed copy of q
+   (it trails the scroll by about half a second, so nothing snaps)
+   drives:
+     --pi  each photo fading in and drifting out to its spot, between
+           q 0.1 and 0.55, gently staggered
+     --in  the headline and Join Today, q 0.45 → 0.7
+     --orbit  the whole set turning around the middle, −10° → +10°
+   --dx/--dy: each photo's distance from the middle (measured).
+   --mx/--my: mouse position over the section, eased, for the lean.
+   Reduced motion: nothing runs; CSS shows the finished layout.
+   --------------------------------------------------------- */
+(() => {
+  const sec = document.querySelector('.closer');
+  const pin = sec && sec.querySelector('.closer-pin');
+  if (!pin || !pin.querySelector('.float')) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const photos = [...pin.querySelectorAll('.float-photo')];
+  const IN_START = 0.1, IN_END = 0.55;      // photos drift in over this part of q
+  const TEXT_START = 0.45, TEXT_END = 0.7;  // headline fades in over this part
+  const ORBIT = 10;                         // degrees each way (−10° → +10°)
+  const SMOOTH = 0.5;                       // seconds the motion trails the scroll
+  const STAGGER = 0.018;                    // gap between photos (in q)
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  const easeInOut = t => 0.5 - Math.cos(Math.PI * t) / 2;   // slow start, slow finish
+  // Scattered order (fixed): photo i starts in slot ORDER[i]
+  const ORDER = photos.map((_, i) => (i * 7) % photos.length);
+  const perPhoto = (IN_END - IN_START) - STAGGER * (photos.length - 1);
+
+  const measure = () => {
+    const w = pin.clientWidth, h = pin.clientHeight;
+    photos.forEach(el => {
+      el.style.setProperty('--dx', `${(w / 2 - (el.offsetLeft + el.offsetWidth / 2)).toFixed(1)}px`);
+      el.style.setProperty('--dy', `${(h / 2 - (el.offsetTop + el.offsetHeight / 2)).toFixed(1)}px`);
+    });
+  };
+
+  let raf = 0, last = 0, q = null;
+  let mouse = { x: 0, y: 0 }, lean = { x: 0, y: 0 };
+
+  const target = () => {
+    const vh = window.innerHeight;
+    const travel = sec.offsetHeight - pin.offsetHeight;
+    return clamp((vh - sec.getBoundingClientRect().top) / (vh + travel), 0, 1);
+  };
+
+  const frame = now => {
+    raf = 0;
+    const dt = last ? Math.min(0.1, (now - last) / 1000) : 0.016;
+    last = now;
+    const t = target();
+    q = q === null ? t : q + (t - q) * (1 - Math.exp(-dt / SMOOTH));
+    if (Math.abs(t - q) < 0.0005) q = t;
+
+    photos.forEach((el, i) => {
+      const start = IN_START + ORDER[i] * STAGGER;
+      el.style.setProperty('--pi', easeInOut(clamp((q - start) / perPhoto, 0, 1)).toFixed(4));
+    });
+    sec.style.setProperty('--in', easeInOut(clamp((q - TEXT_START) / (TEXT_END - TEXT_START), 0, 1)).toFixed(4));
+    sec.style.setProperty('--orbit', `${((q * 2 - 1) * ORBIT).toFixed(3)}deg`);
+
+    const k = 1 - Math.exp(-dt / 0.35);                 // lean trails the mouse a little
+    lean.x += (mouse.x - lean.x) * k;
+    lean.y += (mouse.y - lean.y) * k;
+    sec.style.setProperty('--mx', lean.x.toFixed(3));
+    sec.style.setProperty('--my', lean.y.toFixed(3));
+
+    const moving = q !== t || Math.abs(mouse.x - lean.x) > 0.002 || Math.abs(mouse.y - lean.y) > 0.002;
+    if (moving) request(); else last = 0;
+  };
+  const request = () => { if (!raf) raf = requestAnimationFrame(frame); };
+
+  if (window.matchMedia('(hover: hover)').matches) {
+    pin.addEventListener('mousemove', e => {
+      const r = pin.getBoundingClientRect();
+      mouse = { x: ((e.clientX - r.left) / r.width - 0.5) * 2, y: ((e.clientY - r.top) / r.height - 0.5) * 2 };
+      request();
+    });
+    pin.addEventListener('mouseleave', () => { mouse = { x: 0, y: 0 }; request(); });
+  }
+  window.addEventListener('scroll', request, { passive: true });
+  window.addEventListener('resize', () => { measure(); request(); });
+  photos.forEach(el => { const img = el.querySelector('img'); img.complete || img.addEventListener('load', measure, { once: true }); });
+  measure();
+  request();
 })();
 
 /* ---------------------------------------------------------
@@ -127,4 +964,50 @@ if (CSS.supports('transition-timing-function', 'linear(0, 1)')) {
     copy.querySelectorAll('img').forEach(img => (img.alt = ''));
     track.appendChild(copy);
   }
+})();
+
+/* ---------------------------------------------------------
+   Impact numbers: when the row is 35% in view, each number counts
+   up from 0 (ease-out, 1.6 s), one after another, and its gradient
+   line grows with it. Plays once. With reduced motion the final
+   numbers simply show. Screen readers get the final number only.
+   --------------------------------------------------------- */
+(() => {
+  const row = document.querySelector('.stats');
+  if (!row) return;
+  const nums = [...row.querySelectorAll('.stat-num[data-count]')];
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const DURATION = 1600;         // ms per number
+  const STAGGER = 180;           // ms between numbers
+  const ease = t => 1 - Math.pow(1 - t, 4);                       // easeOutQuart
+
+  nums.forEach(el => {
+    el.setAttribute('aria-label', el.textContent.trim());          // read the final figure
+    el.textContent = `0${el.dataset.suffix || ''}`;
+    el.style.setProperty('--p', 0);
+  });
+
+  const play = () => {
+    const t0 = performance.now();
+    const frame = now => {
+      let running = false;
+      nums.forEach((el, i) => {
+        const t = Math.min(1, Math.max(0, (now - t0 - i * STAGGER) / DURATION));
+        const p = ease(t);
+        el.textContent = `${Math.round(p * Number(el.dataset.count))}${el.dataset.suffix || ''}`;
+        el.style.setProperty('--p', p);
+        if (t < 1) running = true;
+      });
+      if (running) requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  };
+
+  const io = new IntersectionObserver(entries => {
+    if (!entries.some(e => e.isIntersecting)) return;
+    io.disconnect();
+    play();
+  }, { threshold: 0.35 });
+  io.observe(row);
 })();

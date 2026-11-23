@@ -1,6 +1,8 @@
 /* =========================================================
-   UXPA NYC — recreated from Figma frame "11/13 Final" (1440 × 4972)
-   All measurements are taken 1:1 from the Figma file.
+   UXPA NYC v2 — recreated from Figma frame "11/13 Version3" (1440 × 5226)
+   At a 1440px-wide window every measurement matches the Figma file 1:1.
+   Narrower windows reflow (breakpoints: 1024, 960, 700, 600);
+   wider windows keep content at 1440px while the colour grids run edge to edge.
    ========================================================= */
 
 :root {
@@ -9,8 +11,6 @@
   --grey-text: #7a7a7a;
   --grey-line: #9e9e9e;
   --grey-hover: #5c5c5c;
-  --rule: #e6e6e6;
-  --row-fill: #f7f7f7;
 
   --blue: #10bae7;
   --blue-tint: #cff1fa;
@@ -19,16 +19,22 @@
 
   --brand-gradient: linear-gradient(90deg, #62b331 0%, #12b6df 50%, #0039a6 100%);
 
-  /* Spring easings — replaced at runtime by main.js with exact linear() curves */
-  --ease-row: cubic-bezier(.2, .9, .3, 1);      --dur-row: .45s;     /* stiffness 200, damping 24 */
-  --ease-open: cubic-bezier(.2, .9, .3, 1);     --dur-open: .5s;     /* stiffness 200, damping 26 */
-  --ease-viewall: cubic-bezier(.2, .9, .3, 1.1); --dur-viewall: .45s; /* stiffness 200, damping 22 */
-  --ease-float: cubic-bezier(.3, 1.6, .5, 1);   --dur-float: .9s;    /* stiffness 280, damping 12 */
+  /* Fluid scale — each value hits the Figma size at 1440px */
+  --gutter: clamp(20px, 9.7917vw, 141px);        /* content edge: x 141 at 1440 */
+  --section-gap: clamp(64px, 8.3333vw, 120px);    /* space between every section (120px at 1440) */
+  --h2: clamp(40px, 5.5556vw, 80px);
+  --h3: clamp(24px, 2.2222vw, 32px);
+  --body: 20px;
+  --grid-scale: 1;                               /* colour-grid cell size: 48px × scale */
+
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;                     /* opening the menu hides the scrollbar without shifting the page */
+}
 
 body {
   margin: 0;
@@ -44,12 +50,15 @@ h1, h2, h3, p, ul { margin: 0; padding: 0; }
 ul { list-style: none; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
-img { display: block; }
+img { display: block; max-width: none; }
 
-.page {
-  position: relative;
-  width: 1440px;
-  margin: 0 auto;
+.page { position: relative; width: 100%; overflow-x: clip; }
+
+/* Content column: 1158px wide, centred, with fluid side gutters */
+.wrap {
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
 }
 
 /* Corner handles used by selection boxes */
@@ -60,19 +69,33 @@ img { display: block; }
 
 /* =========================================================
    Hero / footer colour grid
+   main.js fills .grid-inner with 48px columns; at 1440px that is the
+   exact Figma grid, other widths add or drop columns.
    ========================================================= */
-.grid { position: absolute; inset: 0; }
-.grid > div { position: absolute; width: 48px; height: 48px; }
-.grid .stripe { height: 240px; }
-.grid .white { background: var(--white); }
-.grid .tile {
+.grid { position: absolute; inset: 0; overflow: hidden; }
+.grid-inner {
+  position: absolute;
+  left: 50%;
+  height: 480px;
+  transform: scale(var(--grid-scale));
+}
+.grid-inner > div { position: absolute; width: 48px; height: 48px; }
+.grid-inner .white { background: var(--white); }
+.grid-inner .tile {
   background: var(--c);
   opacity: 0;
   transition: opacity .6s ease-in-out;          /* mouse leave: 600 ms */
 }
-.grid .tile:hover {
+.grid-inner .tile.is-off { pointer-events: none; }   /* behind the logo / menu button */
+.grid-inner .tile.is-tapped {
   opacity: 1;
   transition: opacity .15s ease-out;            /* mouse enter: 150 ms */
+}
+@media (hover: hover) {
+  .grid-inner .tile:hover {
+    opacity: 1;
+    transition: opacity .15s ease-out;
+  }
 }
 
 /* =========================================================
@@ -81,22 +104,24 @@ img { display: block; }
 .hero {
   position: relative;
   height: 480px;
-  overflow: visible;
-  z-index: 2;
+  z-index: 10;                                  /* above the carousel cards, so the full-screen menu covers them */
 }
-.hero .grid { overflow: hidden; }
+.hero .grid-inner { bottom: 0; transform-origin: 50% 100%; }   /* anchored to the bottom; the solid top extends upward */
 
-.logo {
+.nav-bar {
   position: absolute;
-  left: 312px;
   top: 36px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 46px;                                    /* logo x 312, nav x 438 at 1440 */
 }
+.logo { flex: none; }
 
 .nav {
-  position: absolute;
-  left: 438px;
-  top: 36px;
-  width: 690px;
+  position: relative;
+  width: 714px;                                 /* the nav items' widths added up (About widened so "Our team" fits) */
   height: 48px;
 }
 .nav-list { display: flex; height: 48px; }
@@ -105,7 +130,7 @@ img { display: block; }
   display: block;
   height: 48px;
   padding: 12px 24px 0;
-  font-size: 20px;
+  font-size: var(--body);                       /* same size as the section intro text */
   line-height: 25.2px;
   font-weight: 400;
   color: var(--white);
@@ -124,22 +149,23 @@ img { display: block; }
   pointer-events: none;
   transition: left .2s ease-out, width .2s ease-out, opacity .2s ease-out;
 }
-.nav-selection .h { width: 6px; height: 6px; }
-.nav-selection .tl { left: -3px; top: -3px; }
-.nav-selection .tr { right: -3px; top: -3px; }
-.nav-selection .bl { left: -3px; bottom: -3px; }
-.nav-selection .br { right: -3px; bottom: -3px; }
+.nav-selection .h,
+.menu-toggle .h { width: 6px; height: 6px; }
+.nav-selection .tl, .menu-toggle .tl { left: -3px; top: -3px; }
+.nav-selection .tr, .menu-toggle .tr { right: -3px; top: -3px; }
+.nav-selection .bl, .menu-toggle .bl { left: -3px; bottom: -3px; }
+.nav-selection .br, .menu-toggle .br { right: -3px; bottom: -3px; }
 .nav.is-hovering .nav-selection { opacity: 1; }
 
 .dropdown {
   position: absolute;
   top: 48px;
   left: 0;
-  width: var(--dw);
+  width: 100%;                                  /* same width as the hover box above it, so their edges line up */
   display: flex;
   flex-direction: column;
   gap: 11px;
-  padding: 5.5px 12px;
+  padding: 5.5px 0;
   background: var(--white);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .08);
   opacity: 0;
@@ -154,80 +180,129 @@ img { display: block; }
 }
 .dropdown a {
   display: block;
-  padding: 6px 12px;
-  font-size: 20px;
+  padding: 6px 12px 6px 24px;                   /* text starts 24px in, under the nav word above */
+  font-size: var(--body);
   line-height: 25.2px;
   font-weight: 400;
   color: var(--grey-line);
-  white-space: nowrap;
+  white-space: normal;                          /* a long item ("Become a sponsor") wraps to fit the box */
   transition: color .15s ease-out;
 }
 .dropdown a:hover,
 .dropdown a:focus-visible { color: var(--grey-hover); }
 
+/* Hamburger button — styled like the nav's white selection box */
+.menu-toggle {
+  display: none;
+  position: relative;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0);
+  transition: background .2s ease-out, box-shadow .2s ease-out;
+}
+.menu-toggle .h { opacity: 0; transition: opacity .2s ease-out; }
+.menu-toggle i {
+  position: absolute;
+  left: 12px;
+  width: 24px;
+  height: 2px;
+  background: var(--white);
+  transition: transform .2s ease-out, opacity .2s ease-out;
+}
+.menu-toggle i:nth-of-type(1) { top: 16px; }
+.menu-toggle i:nth-of-type(2) { top: 23px; }
+.menu-toggle i:nth-of-type(3) { top: 30px; }
+.menu-toggle[aria-expanded="true"],
+.menu-toggle:focus-visible {
+  background: rgba(255, 255, 255, .2);
+  box-shadow: inset 0 0 0 1px var(--white);
+  outline: none;
+}
+.menu-toggle[aria-expanded="true"] .h,
+.menu-toggle:focus-visible .h { opacity: 1; }
+.menu-toggle[aria-expanded="true"] i:nth-of-type(1) { transform: translateY(7px) rotate(45deg); }
+.menu-toggle[aria-expanded="true"] i:nth-of-type(2) { opacity: 0; }
+.menu-toggle[aria-expanded="true"] i:nth-of-type(3) { transform: translateY(-7px) rotate(-45deg); }
+@media (hover: hover) {
+  .menu-toggle:hover { background: rgba(255, 255, 255, .2); box-shadow: inset 0 0 0 1px var(--white); }
+  .menu-toggle:hover .h { opacity: 1; }
+}
+
+/* While the full-screen menu is open the bar sits on white: logo and button turn black */
+.logo, .menu-toggle { position: relative; z-index: 2; }
+.logo img { transition: filter .2s ease-out; }
+.nav-bar.is-menu-open .logo img { filter: invert(1); }
+.menu-toggle[aria-expanded="true"],
+.menu-toggle[aria-expanded="true"]:hover {
+  background: var(--white);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+.menu-toggle[aria-expanded="true"] .h { box-shadow: inset 0 0 0 1px var(--ink); }
+.menu-toggle[aria-expanded="true"] i { background: var(--ink); }
+
 /* =========================================================
    Intro: UXPA wordmark + CTAs
    ========================================================= */
 .intro {
-  position: relative;
-  height: 532px;               /* 480 → 1012 */
+  display: grid;
+  grid-template-columns: minmax(0, 728fr) minmax(416px, 430fr);   /* CTAs at x 869 */
+  padding-top: clamp(40px, 5.1389vw, 74px);
+  padding-bottom: var(--section-gap);
 }
 
-.wordmark {
-  position: absolute;
-  left: 129px;
-  top: 74px;
-  width: 672px;
-  height: 278px;
-}
+.wordmark { container-type: inline-size; min-width: 0; }
 .wordmark-letters {
+  position: relative;
+  height: 1.08em;                               /* tagline sits 216px below the letters' top */
+  margin-left: -.06em;                          /* "U" text box starts 12px left of the column */
+  font-size: min(200px, 29.76cqw);              /* 672px-wide lockup scales to fit */
+  line-height: 1.26;
   font-weight: 400;
-  font-size: 200px;
-  line-height: 252px;
 }
-.wordmark-letters span { position: absolute; top: 0; }
+.wordmark-letters > span { position: absolute; top: 0; }   /* only the letter spans, not the text-reveal masks inside them */
 .wordmark-letters .wordmark-nyc {
-  left: 507px;
-  top: 136px;
+  left: 7.922em;                                /* 507px at 64px */
+  top: 2.125em;                                 /* 136px at 64px */
+  font-size: .32em;
   font-weight: 100;
-  font-size: 64px;
-  line-height: 80.6px;
 }
+/* Beside the CTAs the logline is exactly as wide as the visible "UXPA NYC"
+   lockup (U's left edge → C's right edge = 3.0889 × letter size from the
+   column), so it never runs past it as the lockup scales. */
 .wordmark-tagline {
-  position: absolute;
-  left: 13px;
-  top: 216px;
-  width: 659px;
-  font-size: 24px;
+  width: calc(min(200px, 29.76cqw) * 3.0889 - 1px);
+  margin-left: 1px;
+  font-size: var(--body);
   line-height: 31px;
 }
 
 .intro-ctas {
-  position: absolute;
-  left: 869px;
-  top: 85px;
   display: flex;
   flex-direction: column;
   gap: 48px;
+  padding-top: 11px;
 }
+.intro-ctas .cta { max-width: 416px; }
 
 /* CTA / Text Link Hover */
 .cta {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: var(--cw, auto);
 }
 .cta-title {
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 40px;
+  height: 1.25em;                               /* 40px row; the 40.3px label overhangs as in Figma */
+  font-size: var(--h3);
 }
 .cta-label {
   position: relative;
-  font-size: 32px;
-  line-height: 40.3px;
+  font-size: var(--h3);
+  line-height: 1.26;
   font-weight: 400;
   white-space: nowrap;
 }
@@ -236,7 +311,7 @@ img { display: block; }
   position: absolute;
   left: 0;
   right: 0;
-  top: 42px;
+  top: calc(100% + 2px);
   height: 2px;
   background: var(--brand-gradient);
   opacity: 0;
@@ -245,9 +320,13 @@ img { display: block; }
 .cta:hover .cta-label::after,
 .cta:focus-visible .cta-label::after { opacity: 1; }
 .cta-body {
-  font-size: 24px;
+  font-size: var(--body);
   line-height: 31px;
 }
+/* Text was reduced from 24px to 20px; reserve the space the 24px text used */
+.intro-ctas .cta-body { min-height: 62px; }                      /* 2 lines */
+.mentor-card .cta-body { min-height: 124px; }                    /* 4 lines */
+.mentor-card:nth-child(3) .cta-body { min-height: 62px; }        /* 2 lines */
 
 /* =========================================================
    Sponsors ticker
@@ -256,17 +335,18 @@ img { display: block; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 28px;                                    /* title → ticker */
 }
 .sponsors-title {
-  font-size: 32px;
-  line-height: 40.3px;
+  font-size: var(--h3);
+  line-height: 1.26;
   font-weight: 400;
 }
-.ticker {
-  width: 1440px;
-  height: 100px;
+.ticker {                                       /* hairlines above and below, as in v3, in v2 grey */
+  width: 100%;
+  padding-block: 24px;
   overflow: hidden;
+  border-block: 1px solid var(--grey-line);
 }
 .ticker-track {
   display: flex;
@@ -290,237 +370,364 @@ img { display: block; }
 }
 
 /* =========================================================
+   Statement (from v3) — staggered uppercase headline and a short lede
+   ========================================================= */
+.statement {
+  --accent: var(--ink);                         /* headline and lede in black */
+  --t: clamp(44px, 9.7222vw, 140px);            /* headline size */
+  --hang: min(.5 * var(--t), var(--gutter) * .6);   /* how far lines hang into the page margins */
+  margin-top: var(--section-gap);
+}
+.statement-title {
+  font-size: var(--t);
+  line-height: .95;
+  font-weight: 500;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.statement-title .line { display: block; }
+/* Lines 1 and 3 hang out past the text column's left edge and line 2 past its right edge (into the page margins), so the long lines stagger more while still overlapping */
+.statement-title .line-1 { margin-left: calc(-1 * var(--hang)); }
+.statement-title .line-2 { text-align: right; margin-right: calc(-1.6 * var(--hang)); }
+.statement-title .line-3 { margin-left: calc(-.5 * var(--hang)); }
+.statement-title .line-4 { padding-left: 36%; }
+.statement-title .line-5 { text-align: right; margin-right: calc(-1 * var(--hang)); }
+
+.statement-body { margin-top: 64px; }
+/* The paragraph's left edge lines up with the middle of the "N" in
+   "and research" (line 3). That line starts at -0.5 × hang, and the
+   middle of the N's ink is 1.0411 × the headline size in from there (Outfit). */
+.statement .lede {
+  max-width: 460px;                             /* narrows to fit when shifted on small screens */
+  margin-left: max(0px, calc(-.5 * var(--hang) + 1.0411 * var(--t)));
+  font-size: var(--body);
+  line-height: 1.45;
+  color: var(--accent);
+}
+
+/* Scroll fill (main.js): the text rises in grey, then each letter flashes
+   the accent colour and turns black as you scroll. Reduced motion: black. */
+@media (prefers-reduced-motion: no-preference) {
+  .statement [data-scroll-fill] { color: var(--grey-text); }
+}
+.sf-c.is-accent { color: var(--blue); }          /* light blue (#10bae7), the middle of the brand gradient */
+.sf-c.is-on { color: var(--ink); transition: color .1s linear; }
+
+@media (max-width: 600px) {
+  .statement { --t: 10vw; }                     /* the longest line ("and research") stays on one line */
+  .statement-title .line-4 { padding-left: 24%; }
+}
+
+/* =========================================================
    Shared section headings
    ========================================================= */
 .section-title {
-  font-size: 80px;
-  line-height: 100.8px;
+  font-size: var(--h2);
+  line-height: 1.26;
   font-weight: 300;
-  white-space: nowrap;
 }
 .section-eyebrow {
   margin-top: 16px;
-  font-size: 24px;
+  font-size: var(--body);
   line-height: 30.2px;
 }
 
 /* =========================================================
    Upcoming events
    ========================================================= */
-.events {
-  margin-top: 120px;           /* 1168 → 1288 */
-  padding-left: 141px;
+.events {                                       /* black section, white text */
+  margin-top: var(--section-gap);
+  background: var(--ink);
+  color: var(--white);
 }
-.events-eyebrow { margin-left: 5px; width: 1152px; }
+.events .arrow { color: var(--white); }
+.events .section-title { text-align: center; }
+.events .events-eyebrow { max-width: 760px; margin-inline: auto; text-align: center; }   /* same width as v3, centred under the heading */
 
-.events-body {
+/* Upcoming events — scroll stack (after extrafazant.nl "Recent Werk").
+   ≥ 1024px: the stack pins in the middle of the window for 1.2 window-heights
+   of scrolling per card. Each step drops the front card away and moves the
+   others forward; main.js drives the motion. Depth positions are the Figma
+   cards (front / middle / back) inside the 1387 × 731 box.
+   < 1024px (or reduced motion): the cards are simply listed. */
+/* As on extrafazant, the heading, the cards and the link are pinned together
+   and fill the window, so the title and intro stay in view while the cards
+   change. The front card is half the window wide (720px at 1440) and the
+   stack shrinks further if the window is short. */
+.stack {
+  --travel: 1.2;                                          /* window-heights of scrolling per card */
+  height: calc(100svh + var(--travel) * 2 * 100svh);
+}
+.stack-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
   display: flex;
-  align-items: flex-start;
-  gap: 48px;
-  margin: 48px 0 0 5px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 4.5svh, 48px);
+  padding-block: clamp(24px, 5svh, 56px);
 }
-.events-photo { flex: none; }
-
-.accordion {
-  width: 674px;
-  border-top: 1px solid var(--rule);
-}
-
-.event-row {
+.events-head { width: 100%; flex: none; }
+.stack-stage {                                            /* the room left for the cards */
   position: relative;
-  height: 96px;
-  overflow: hidden;
-  box-shadow: inset 0 -1px 0 var(--rule);
-  transition: height var(--dur-open) var(--ease-open);
+  z-index: 2;                                             /* a falling card passes over the link below */
+  flex: 0 1 31.7vw;                                       /* a 60vw-wide stack, if it fits */
+  min-height: 0;
+  width: 100%;
+  container-type: size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.event-row::before {                       /* Fill */
+.carousel {
+  position: relative;
+  width: min(100cqw, 100cqh * 1387 / 731);
+  aspect-ratio: 1387 / 731;
+  container-type: inline-size;
+}
+.card { position: absolute; }
+.card[data-index="0"] { left: 8.435%;  top: 13.133%; width: 83.129%; height: 86.867%; z-index: 3; }   /* front  */
+.card[data-index="1"] { left: 11.680%; top: 6.566%;  width: 76.568%; height: 79.891%; z-index: 2; }   /* middle */
+.card[data-index="2"] { left: 14.564%; top: 0;       width: 70.872%; height: 74.145%; z-index: 1; }   /* back   */
+
+.card-content {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.card-content img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(calc(.45 + .55 * var(--front, 0)));   /* cards behind are dimmed, so the front card stands out */
+}
+.card-content::before {                         /* Title shade: dark at the bottom, fading upwards, so the white title reads on any photo */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 65%;
+  z-index: 1;
+  background: linear-gradient(180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, .12) 25%,
+    rgba(0, 0, 0, .34) 50%,
+    rgba(0, 0, 0, .6) 75%,
+    rgba(0, 0, 0, .8) 100%);
+  opacity: var(--front, 0);
+}
+.card-content::after {                          /* Selection box: 1px inside stroke, same as the mentorship photos */
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--row-fill);
-  opacity: 0;
-  transition: opacity var(--dur-row) var(--ease-row);
-  z-index: -1;
+  z-index: 3;
+  box-shadow: inset 0 0 0 1px var(--ink);
 }
-.event-row { isolation: isolate; }
-
-.event-head {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 96px;
-}
-.event-shift {
-  display: block;
-  transition: transform var(--dur-row) var(--ease-row);
-}
-.event-head .event-shift {
+.card-title {
   position: absolute;
   left: 0;
-  top: 28px;
-  height: 40px;
+  right: 0;
+  bottom: 3.078cqw;                             /* 42.7px at 1387 */
+  z-index: 2;
+  font-size: max(18px, 4.616cqw);               /* 64px at 1387 */
+  line-height: 1.26;
+  font-weight: 500;
+  color: var(--white);
+  text-align: center;
+  opacity: var(--front, 0);                     /* only the front card shows its title */
 }
-.event-date,
-.event-title {
-  position: absolute;
-  top: 0;
-  font-size: 32px;
-  line-height: 40.3px;
-  white-space: nowrap;
-}
-.event-date { left: 0; font-weight: 300; }
-.event-title { left: 144px; font-weight: 400; }
+.nowrap { white-space: nowrap; }
+.card[data-index="0"] { --front: 1; }
 
-.plus {
-  position: absolute;
-  left: 652px;
-  top: 38px;
-  width: 20px;
-  height: 20px;
-  transition: transform var(--dur-row) var(--ease-row);
+/* Event details on each card (date, in person / virtual, Sign up).
+   Like the title, they only show on the front card; they also rise a
+   little into place as a card comes forward, so they arrive with it. */
+.card-content::after { pointer-events: none; }  /* the outline must not block the Sign up link */
+.card:has(.card-signup) .card-title { bottom: 8.4cqw; }   /* room for Sign up under the title */
+.card-meta,
+.card-signup {
+  opacity: calc((var(--front, 0) - .6) * 2.5);  /* only once the card is (almost) at the front */
+  transform: translateY(calc((1 - var(--front, 0)) * 16px));
 }
-.plus i { position: absolute; background: var(--ink); }
-.plus .bar-h { left: 0; top: 9px; width: 20px; height: 2px; }
-.plus .bar-v {
-  left: 9px; top: 0; width: 2px; height: 20px;
-  transition: transform var(--dur-open) var(--ease-open);
-}
-
-.event-details {
+.card-meta {
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 674px;
-  height: 368px;
-  opacity: 0;
-  pointer-events: none;
-  transition: transform var(--dur-row) var(--ease-row), opacity var(--dur-open) var(--ease-open);
-}
-.ed-time, .ed-speakers { position: absolute; top: 88px; display: flex; flex-direction: column; gap: 3px; }
-.ed-time { left: 144px; }
-.ed-speakers { left: 424px; width: 206px; }
-.ed-label { font-size: 20px; line-height: 25.2px; font-weight: 400; }
-.ed-value { font-size: 24px; line-height: 30.2px; }
-.ed-desc {
-  position: absolute;
-  left: 144px;
-  top: 172px;
-  width: 450px;
-  font-size: 24px;
-  line-height: 30.2px;
-}
-.ed-more {
-  position: absolute;
-  left: 144px;
-  top: 292px;
+  top: 2.4cqw;
+  left: 2.4cqw;
+  z-index: 2;
   display: flex;
+  gap: 8px;
+  margin: 0;
+  font-size: max(12px, 1.15cqw);                /* 16px at 1387 */
+  font-weight: 500;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.card-date,
+.card-type { padding: .6em .85em; }
+.card-date { background: var(--white); color: var(--ink); }
+.card-type { color: var(--white); background: rgba(0, 0, 0, .45); box-shadow: inset 0 0 0 1px var(--white); }
+.card-signup {
+  position: absolute;
+  left: 50%;
+  bottom: 3cqw;
+  z-index: 2;
+  translate: -50% 0;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 30px;
-  font-size: 24px;
-  line-height: 30.2px;
-  font-weight: 400;
+  padding: .55em 1.3em;
+  font-size: max(14px, 1.44cqw);                /* 20px at 1387 */
+  font-weight: 500;
+  color: var(--white);
+  box-shadow: inset 0 0 0 1px var(--white);
+  transition: background-color .2s ease-out, color .2s ease-out;
+}
+.card-signup .arrow { width: 1em; height: 1em; color: currentColor; }
+.card-signup:hover,
+.card-signup:focus-visible { background: var(--white); color: var(--ink); }
+
+/* Corner handles: same as the mentorship photos — 11px, 2px stroke, 5px
+   outside the corner — and the same size at every scale. White fill,
+   drawn above the outline. */
+.card .h {                                       /* 8px: a whole-pixel size ~30% smaller than 11px, so it always draws square; centred on the corner */
+  z-index: 4;
+  width: 8px;
+  height: 8px;
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+.card .tl { left: -3.5px;  top: -3.5px; }
+.card .tr { right: -3.5px; top: -3.5px; }
+.card .bl { left: -3.5px;  bottom: -3.5px; }
+.card .br { right: -3.5px; bottom: -3.5px; }
+
+/* Listed cards: below 1024px, or when the visitor prefers reduced motion */
+@media (max-width: 1023px), (prefers-reduced-motion: reduce) {
+  .stack { height: auto; }
+  .events { padding-block: var(--section-gap); }   /* listed cards: room inside the black section */
+  .stack-pin { position: static; height: auto; display: block; padding: 0; }
+  .stack-stage { display: block; container-type: normal; margin-top: 40px; }
+  .stack-pin .cta-view-all { margin-top: 48px; }
+  .carousel {
+    width: auto;
+    max-width: 1153px;
+    aspect-ratio: auto;
+    margin: 0 auto;
+    padding-inline: var(--gutter);
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .card,
+  .card[data-index] {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1153 / 635;
+    --front: 1;
+  }
+  .card-title { font-size: max(18px, 4.8cqw); bottom: 4cqw; padding-inline: 16px; }
+  .card:has(.card-signup) .card-title { bottom: max(11cqw, 52px); }
+  .card-meta { top: max(3cqw, 10px); left: max(3cqw, 10px); }
+  .card-signup { bottom: max(3.5cqw, 12px); font-size: max(14px, 2cqw); }
 }
 
-/* Hover + open states */
-.event-row:hover::before,
-.event-row.is-open::before { opacity: 1; }
-.event-row:hover .event-shift,
-.event-row.is-open .event-shift { transform: translateX(24px); }
-.event-row:hover .plus,
-.event-row.is-open .plus { transform: translateX(-24px); }
-.event-row.is-open { height: 368px; }
-.event-row.is-open .bar-v { transform: rotate(90deg); }
-.event-row.is-open .event-details { opacity: 1; }
-.event-row.is-open .ed-more { pointer-events: auto; }
-
-.view-all {
-  position: relative;
-  display: block;
-  height: 96px;
-  background: var(--white);
-  box-shadow: inset 0 -1px 0 var(--rule);
-  isolation: isolate;
-}
-.view-all::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 1px;
-  background: var(--row-fill);
-  opacity: 0;
-  z-index: -1;
-  transition: opacity var(--dur-viewall) var(--ease-viewall);
-}
-.view-all-inner {
-  position: absolute;
-  left: 0;
-  top: 28px;
+/* "01 / 03" + gradient bar under the stack (main.js updates them) */
+.stack-progress {
+  flex: none;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 32px;
-  line-height: 40.3px;
-  font-weight: 400;
-  white-space: nowrap;
-  transition: transform var(--dur-viewall) var(--ease-viewall);
+  gap: 16px;
+  font-size: 16px;
+  letter-spacing: .06em;
+  color: rgba(255, 255, 255, .6);
+  font-variant-numeric: tabular-nums;
 }
-.view-all:hover::before { opacity: 1; }
-.view-all:hover .view-all-inner { transform: translateX(24px); }
+.stack-now { color: var(--white); }
+.stack-bar {
+  width: 160px;
+  height: 2px;
+  background: rgba(255, 255, 255, .2);
+}
+.stack-bar span {
+  display: block;
+  height: 100%;
+  background: var(--brand-gradient);
+  transform: scaleX(var(--p, 0));
+  transform-origin: left;
+}
+@media (max-width: 1023px), (prefers-reduced-motion: reduce) {
+  .stack-progress { display: none; }            /* listed cards: nothing to track */
+}
+
+.cta-view-all {
+  flex: none;
+  width: max-content;
+  margin: 0 auto;                               /* centred on the page */
+}
 
 /* =========================================================
    Mentorship
    ========================================================= */
-.mentorship {
-  margin-top: 120px;           /* 2090 → 2210 */
-  padding-left: 139px;
-}
-.mentorship-eyebrow { margin-left: 5px; width: 1155px; }
+.mentorship { margin-top: var(--section-gap); }
+.mentorship .section-title { margin-left: -2px; }
+.mentorship-eyebrow { max-width: 1155px; margin-left: 3px; }
 
 .mentor-cards {
-  display: flex;
-  gap: 52px;
-  height: 434px;               /* Frame 103: 2435 → 2869 */
-  margin: 48px 0 0 6px;
+  display: grid;
+  grid-template-columns: 352fr 350fr 350fr;
+  column-gap: clamp(24px, 3.6111vw, 52px);
+  margin: 48px -2px 0 4px;                      /* x 145 → 1301 at 1440 */
 }
-.mentor-card { width: var(--card-w); }
-.mentor-card .cta { margin-top: var(--cta-gap); }
+.mentor-card { min-width: 0; }
+.mentor-card .cta { margin-top: 31px; }
+.mentor-card:first-child .cta { margin-top: 28px; }
+.mentor-card .cta-label { white-space: normal; }
 
 /* Cursor Photo / Mentorship */
 .cursor-photo {
   position: relative;
-  width: 347px;
-  height: 231px;
+  width: min(347px, 100%);
+  aspect-ratio: 347 / 231;
 }
 .cursor-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-.cursor-photo::after {                     /* 2 px inside outline */
+.cursor-photo::after {                     /* 1px inside outline */
   content: "";
   position: absolute;
   inset: 0;
-  box-shadow: inset 0 0 0 2px var(--blue);
+  box-shadow: inset 0 0 0 1px var(--blue);
   opacity: 0;
   transition: opacity .6s ease-out;
 }
 .cursor-photo .h {
-  width: 11px;
-  height: 11px;
-  box-shadow: inset 0 0 0 2px var(--blue);
+  width: 8px;
+  height: 8px;
+  box-shadow: inset 0 0 0 1px var(--blue);
   opacity: 0;
   z-index: 1;
   transition: opacity .6s ease-out;
 }
-.cursor-photo .tl { left: -5px; top: -5px; }
-.cursor-photo .tr { right: -5px; top: -5px; }
-.cursor-photo .bl { left: -5px; bottom: -5px; }
-.cursor-photo .br { right: -5px; bottom: -5px; }
+.cursor-photo .tl { left: -3.5px; top: -3.5px; }
+.cursor-photo .tr { right: -3.5px; top: -3.5px; }
+.cursor-photo .bl { left: -3.5px; bottom: -3.5px; }
+.cursor-photo .br { right: -3.5px; bottom: -3.5px; }
 
 .cursor {
   position: absolute;
-  left: var(--x);
-  top: var(--y);
+  left: calc(var(--x) / 347 * 100%);
+  top: calc(var(--y) / 231 * 100%);
   width: 1px;
   height: 1px;
   opacity: 0;
@@ -534,9 +741,10 @@ img { display: block; }
   top: -1px;
   width: 28px;
   height: 29px;
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .08));
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .08)) drop-shadow(0 2px 6px rgba(0, 0, 0, .35));   /* lifts the pointer off the photo */
 }
 .cursor-label {
+  --label-shadow: 0 2px 8px rgba(0, 0, 0, .35);   /* separates the label from the photo */
   position: absolute;
   left: 22px;
   top: 33px;
@@ -548,90 +756,51 @@ img { display: block; }
   white-space: nowrap;
 }
 .cursor.blue  { color: var(--blue); }
-.cursor.blue  .cursor-label { background: var(--blue-tint);  box-shadow: inset 0 0 0 2px var(--blue); }
+.cursor.blue  .cursor-label { background: var(--blue-tint);  box-shadow: inset 0 0 0 1px var(--blue),  var(--label-shadow); }
 .cursor.green { color: var(--green); }
-.cursor.green .cursor-label { background: var(--green-tint); box-shadow: inset 0 0 0 2px var(--green); }
+.cursor.green .cursor-label { background: var(--green-tint); box-shadow: inset 0 0 0 1px var(--green), var(--label-shadow); }
 
-.cursor-photo:hover::after,
-.cursor-photo:hover .h,
-.cursor-photo:hover .cursor { opacity: 1; }
-.cursor-photo:hover .cursor { transform: none; }
-
-/* =========================================================
-   Community circle
-   ========================================================= */
-.community {
-  position: relative;
-  width: 1227px;
-  height: 1227px;
-  margin: 120px 0 0 107px;    /* 2869 → 2989 */
+.cursor-photo.is-tapped::after,
+.cursor-photo.is-tapped .h,
+.cursor-photo.is-tapped .cursor { opacity: 1; }
+.cursor-photo.is-tapped .cursor { transform: none; }
+@media (hover: hover) {
+  .cursor-photo:hover::after,
+  .cursor-photo:hover .h,
+  .cursor-photo:hover .cursor { opacity: 1; }
+  .cursor-photo:hover .cursor { transform: none; }
 }
-
-.float-photo {
-  position: absolute;
-  width: 144px;
-  height: 144px;
-}
-.float-photo img {
-  position: relative;
-  width: 144px;
-  height: 144px;
-  transition: transform var(--dur-float) var(--ease-float);
-}
-.float-photo .pop {                         /* Pop Square: sits behind the photo */
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 48px;
-  height: 48px;
-  background: var(--pop);
-  opacity: 0;
-  transform: translate(84px, 12px);
-  transition: transform var(--dur-float) var(--ease-float), opacity var(--dur-float) var(--ease-float);
-}
-.float-photo:hover img { transform: scale(1.125); }           /* 144 → 162 */
-.float-photo:hover .pop { opacity: 1; transform: translate(132px, -36px); }
-
-.community-center {
-  position: absolute;
-  left: 320px;
-  top: 431px;
-  width: 587px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.community-title {
-  font-size: 80px;
-  line-height: 88px;
-  font-weight: 300;
-  text-align: center;
-}
-.cta-join { margin-top: 51px; }
 
 /* =========================================================
    Footer
    ========================================================= */
-.footer { margin-top: 120px; }    /* 4216 → 4336 */
+.footer { margin-top: var(--section-gap); }
 
+/* Four columns down to 961px. With a 56px gap the columns sit at x 144 / 606 /
+   818 / 1232 at 1440 (Figma); narrower windows shrink Work with us and
+   Newsletter first, while Links never gets narrower than its longest link.
+   If anything would still collide, main.js switches to the stacked footer. */
 .footer-cols {
   display: grid;
-  grid-template-columns: 462px 212px 414px 64px;
-  padding-left: 144px;
-  height: 396px;                  /* 4336 → 4732 */
+  grid-template-columns: minmax(0, 406fr) minmax(max-content, 156fr) minmax(0, 358fr) 64px;
+  column-gap: clamp(24px, 3.8889vw, 56px);
+  min-height: 396px;                            /* grid starts 396px below the headings */
+  padding-inline: calc(var(--gutter) + 3px);    /* x 144 → 1296 at 1440 */
 }
 
 .footer-heading {
-  font-size: 32px;
-  line-height: 40.3px;
+  font-size: var(--h3);
+  line-height: 1.26;
   font-weight: 400;
   white-space: nowrap;
 }
 .footer-text {
   margin-top: 16px;
-  font-size: 24px;
+  font-size: var(--body);
   line-height: 30.2px;
 }
+.footer-text-work { max-width: 334px; min-height: 120.8px; }   /* reserves the 24px-era 4 lines */
+.footer-text-news { max-width: 336px; min-height: 90.6px; }    /* 3 lines */
 
 .footer-links {
   display: flex;
@@ -641,8 +810,8 @@ img { display: block; }
 }
 .footer-links a {
   display: block;
-  width: 134px;
-  font-size: 24px;
+  white-space: nowrap;
+  font-size: var(--body);
   line-height: 30.2px;
   color: var(--grey-text);
   transition: color .15s ease-out;
@@ -659,45 +828,53 @@ img { display: block; }
   height: 41px;
   padding: 4px 8px;
   background: var(--white);
-  box-shadow: inset 0 0 0 1.5px var(--grey-line);
-  font-size: 24px;
+  box-shadow: inset 0 0 0 1px var(--grey-line);
+  font-size: var(--body);
   line-height: 30.2px;
   font-weight: 400;
   color: var(--grey-line);
   transition: color .2s ease-out, box-shadow .2s ease-out;
 }
-.select-btn .h {
-  width: 11px;
-  height: 11px;
-  box-shadow: inset 0 0 0 1.89px var(--grey-line);
+.select-btn .h {                                 /* 8px, same as the photo and card handles */
+  width: 8px;
+  height: 8px;
+  box-shadow: inset 0 0 0 1px var(--grey-line);
   transition: box-shadow .2s ease-out;
 }
-.select-btn .tl { left: -5px; top: -5px; }
-.select-btn .tr { right: -5px; top: -5px; }
-.select-btn .bl { left: -5px; bottom: -5px; }
-.select-btn .br { right: -5px; bottom: -5px; }
+.select-btn .tl { left: -3.5px; top: -3.5px; }
+.select-btn .tr { right: -3.5px; top: -3.5px; }
+.select-btn .bl { left: -3.5px; bottom: -3.5px; }
+.select-btn .br { right: -3.5px; bottom: -3.5px; }
 .select-btn:hover,
-.select-btn:focus-visible { color: var(--ink); box-shadow: inset 0 0 0 1.89px var(--ink); }
+.select-btn:focus-visible { color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
 .select-btn:hover .h,
-.select-btn:focus-visible .h { box-shadow: inset 0 0 0 1.89px var(--ink); }
+.select-btn:focus-visible .h { box-shadow: inset 0 0 0 1px var(--ink); }
+
+.btn-contact { width: min(384px, 100%); margin-top: 32px; }
 
 .newsletter { margin-top: 22px; }
+.newsletter .select-btn { width: min(336px, 100%); }
 .newsletter-input {
   display: block;
-  width: 336px;
+  width: min(336px, 100%);
   height: 40px;
   margin-bottom: 24px;
   padding: 0 12px;
   border: 0;
+  border-radius: 0;
   background: var(--white);
-  box-shadow: inset 0 0 0 1.5px var(--grey-line);
+  box-shadow: inset 0 0 0 1px var(--grey-line);
   font: 300 20px/1 "Outfit", sans-serif;
   color: var(--ink);
   outline: none;
 }
-.newsletter-input:focus { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.newsletter-input:focus { box-shadow: inset 0 0 0 1px var(--ink); }
 
 /* Social Tile */
+.socials { display: flex; flex-direction: column; }
+.socials li:nth-child(2) { margin-top: 7px; }
+.socials li:nth-child(3) { margin-top: 6px; }
+.socials li:nth-child(4) { margin-top: 7px; }
 .social {
   display: flex;
   align-items: center;
@@ -713,7 +890,400 @@ img { display: block; }
 
 .footer-grid {
   position: relative;
-  height: 240px;
+  height: calc(336px * var(--grid-scale));       /* 7 rows: the pixel pattern plus 2 rows of gradient pixels below it */
   overflow: hidden;
 }
-.footer-grid .grid { height: 480px; }
+.footer-grid .grid-inner { top: 0; transform-origin: 50% 0; }
+
+/* =========================================================
+   ≤ 1214px — the UXPA NYC lockup and logline sit above the two CTAs
+   ========================================================= */
+@media (max-width: 1214px) {
+  .intro {
+    grid-template-columns: 1fr;
+    row-gap: 56px;
+  }
+  .wordmark-tagline { width: auto; max-width: 659px; }
+  .intro-ctas {
+    flex-direction: row;
+    gap: 40px;
+    padding-top: 0;
+  }
+  .intro-ctas .cta { flex: 1; max-width: 416px; }
+  .intro-ctas .cta-body { min-height: 0; }
+}
+
+/* =========================================================
+   Stacked footer — at ≤ 960px, or whenever the four columns would collide
+   (main.js adds .is-stacked): Work with us on its own row, Newsletter +
+   Links side by side, social tiles below
+   ========================================================= */
+.footer-cols.is-stacked {
+  grid-template-columns: 1fr 1fr;
+  gap: 48px 32px;
+  min-height: 0;
+  padding-bottom: 72px;
+}
+.is-stacked .footer-col:first-child,
+.is-stacked .socials { grid-column: 1 / -1; }
+.is-stacked .footer-col:nth-child(3) { order: 1; }   /* Newsletter on the left */
+.is-stacked .footer-col:nth-child(2) { order: 2; }   /* Links on the right */
+.is-stacked .socials { order: 3; }
+.is-stacked .footer-text-work,
+.is-stacked .footer-text-news { min-height: 0; }
+.is-stacked .socials { flex-direction: row; gap: 12px; align-self: start; }
+.is-stacked .socials li:nth-child(n) { margin-top: 0; }
+
+/* =========================================================
+   ≤ 1023px — mentorship cards stack
+   ========================================================= */
+@media (max-width: 1023px) {
+  .mentor-cards {
+    grid-template-columns: 1fr;
+    row-gap: 56px;
+    max-width: 560px;
+    min-height: 0;
+    margin: 40px auto 0;                        /* single column is centred; text stays left-aligned under its photo */
+  }
+  .mentor-card .cta,
+  .mentor-card:first-child .cta { margin-top: 24px; }
+  .cursor-photo { width: 100%; }
+  .mentor-card .cta-body { min-height: 0; }
+}
+
+/* =========================================================
+   ≤ 960px — tablet: hamburger menu, stacked intro, 2-column footer
+   ========================================================= */
+@media (max-width: 960px) {
+  :root { --grid-scale: .75; }
+  .hero { height: 400px; }
+
+  .nav-bar {
+    justify-content: space-between;
+    padding-inline: var(--gutter);
+  }
+  .menu-toggle { display: block; }
+
+  /* Full-screen menu: covers the whole window; logo and close button stay on top */
+  .nav {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    width: auto;
+    height: auto;
+    padding: 132px var(--gutter) 48px;         /* clears the 36px + 48px bar */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--white);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .2s ease-out, visibility 0s linear .2s;
+  }
+  .nav.is-open {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity .2s ease-out;
+  }
+  .nav-selection { display: none; }
+  .nav-list { flex-direction: column; height: auto; }
+  .nav-item { width: auto; height: auto; }
+  .nav-item > a {
+    height: auto;
+    padding: 12px 0;
+    line-height: 1.26;
+    color: var(--ink);
+  }
+  .dropdown,
+  .nav-item.is-active .dropdown,
+  .nav-item:focus-within .dropdown {
+    position: static;
+    width: auto;
+    gap: 0;
+    padding: 0 0 8px 16px;
+    box-shadow: none;
+    opacity: 1;
+    visibility: visible;
+    transition: none;
+  }
+  .dropdown a { padding: 6px 0; color: var(--grey-text); }
+}
+
+/* =========================================================
+   ≤ 600px — phone
+   ========================================================= */
+@media (max-width: 600px) {
+  :root {
+    --gutter: 20px;
+    --body: 18px;
+    --grid-scale: .5;
+  }
+  .hero { height: 312px; }
+  .nav-bar { top: 24px; }
+  .nav { padding-top: 112px; }                  /* clears the 24px + 48px bar */
+
+  .wordmark-tagline,
+  .cta-body { line-height: 1.5; }
+
+  .intro-ctas { flex-direction: column; gap: 32px; }
+
+  .ticker-track { zoom: .6; }
+
+  .section-eyebrow { line-height: 1.5; margin-left: 0; }
+  .mentorship .section-title { margin-left: 0; }
+
+
+  .cursor-label { font-size: 16px; line-height: 20px; padding: 4px 10px; }
+
+  .footer-cols.is-stacked {
+    grid-template-columns: 1fr auto;          /* Newsletter takes the room, Links as wide as it needs */
+    gap: 40px 24px;
+  }
+  .footer-cols { padding-inline: var(--gutter); }
+  .footer-heading { white-space: normal; }
+  .footer-text { line-height: 1.5; }
+}
+
+/* =========================================================
+   Text reveal (after extrafazant.nl): letters or lines rise into place
+   from behind a mask just below the text line. main.js splits the text,
+   animates it once, then restores the original markup.
+   ========================================================= */
+html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
+.rv-m {                                         /* mask: hides what sits below the line */
+  display: inline-block;
+  clip-path: inset(-1em -.3em -.22em -.3em);
+}
+.rv-i {
+  display: inline-block;
+  transform: translateY(135%);
+}
+.rv-i.rv-go {
+  transform: none;
+  transition: transform 1s cubic-bezier(.16, 1, .3, 1) var(--rv-delay, 0s);   /* expo.out */
+}
+/* Wordmark: end the masks where the logline begins (216px below the
+   letters' top at 200px = the letter box minus .18em), so letters
+   rising into place never pass over the text underneath. */
+.wordmark-letters .rv-m { clip-path: inset(-1em -.3em .18em -.3em); }
+.wordmark-letters .wordmark-nyc .rv-m { clip-path: inset(-1em -.3em .01em -.3em); }
+
+/* =========================================================
+   Pixel transitions (after Framer's "Pixel Scroll"): a band of square
+   pixels in and out of the black Upcoming Events section. As you
+   scroll, the next section's colour takes over pixel by pixel from the
+   bottom, with a few UXPA-colour accents along the edge. main.js draws
+   the bands on a canvas.
+   ========================================================= */
+.pixel-band {
+  position: relative;
+  height: clamp(200px, 34vh, 360px);
+  margin-top: var(--section-gap);
+}
+.pixel-band canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.pixel-band + .events { margin-top: 0; }        /* the band runs straight into the black section */
+.events + .pixel-band { margin-top: 0; }        /* …and straight out of it */
+
+/* =========================================================
+   Closer: the black section the photo strip scrolls into, with the
+   community headline and Join Today in white.
+   The section is taller than the window and its content pins (stays
+   put) while you scroll through it — a pause of --hold window-heights.
+   main.js follows the scroll (with a soft lag, so nothing snaps) and:
+     - fades the photos in, each drifting slowly out to its spot (--pi)
+     - turns the whole set slowly around the headline (--orbit), about
+       20° from the moment the section arrives to when it leaves
+     - fades the headline and Join Today in once the photos are out (--in)
+   ========================================================= */
+.closer {
+  --hold: 1.5;                                  /* window-heights of scrolling while pinned */
+  position: relative;
+  height: calc(100svh * (1 + var(--hold)));
+  background: var(--ink);
+  color: var(--white);
+  text-align: center;
+}
+.closer-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: grid;
+  place-items: center;                          /* the copy sits in the middle of the screen */
+  padding: var(--section-gap) var(--gutter);
+  overflow: hidden;
+}
+.closer-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: var(--in, 1);
+  translate: 0 calc((1 - var(--in, 1)) * 24px);
+}
+.closer-title {
+  font-size: var(--h2);
+  line-height: 1.1;
+  font-weight: 300;
+}
+.closer .cta-join { margin-top: 40px; }
+.closer .cta-join .arrow { color: var(--white); }
+.pgrid + .closer { margin-top: var(--section-gap); }
+
+/* Floating photos (gallery around the headline). Each one's spot is
+   --x / --y (% of the screen), --s vw wide, --a its width/height ratio.
+   main.js measures --dx / --dy, the distance from that spot to the middle.
+     .float   rotate --orbit: the whole set turns slowly around the middle
+     figure   rotate −orbit keeps each photo upright; translate / scale /
+              opacity: the slow drift-in (it starts 35% of the way toward
+              the middle, small and clear, and eases out to its spot) plus
+              the mouse lean
+     img      transform animation: the idle bob */
+.float {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  rotate: var(--orbit, 0deg);
+}
+.float-photo {
+  --k: calc(1 - var(--pi, 1));                  /* 1 = not in yet, 0 = in place */
+  position: absolute;
+  left: calc(var(--x) * 1%);
+  top: calc(var(--y) * 1%);
+  width: clamp(56px, calc(var(--s) * 1vw), calc(var(--s) * 16px));
+  aspect-ratio: var(--a, 1);
+  margin: 0;
+  translate:
+    calc(var(--dx, 0px) * var(--k) * .35 + var(--mx, 0) * var(--d) * 14px)
+    calc(var(--dy, 0px) * var(--k) * .35 + var(--my, 0) * var(--d) * 14px);
+  rotate: calc(-1 * var(--orbit, 0deg));
+  scale: calc(.75 + .25 * var(--pi, 1));
+  opacity: var(--pi, 1);
+  will-change: translate, rotate, scale, opacity;
+}
+.float-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(.88);
+  animation: float-bob calc(var(--t) * 1s) ease-in-out infinite alternate;
+  animation-delay: calc(var(--t) * -.37s);      /* start each bob at a different point */
+}
+@keyframes float-bob {
+  from { transform: translateY(-7px); }
+  to   { transform: translateY(7px); }
+}
+@media (max-width: 700px) {
+  /* Phone: fewer, quieter photos so the headline stays readable over them */
+  .float-photo:nth-child(3),
+  .float-photo:nth-child(5),
+  .float-photo:nth-child(7),
+  .float-photo:nth-child(10),
+  .float-photo:nth-child(14),
+  .float-photo:nth-child(16) { display: none; }
+  .float-photo img { opacity: .55; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* No pause and no motion: the finished layout, one screen tall */
+  .closer { height: auto; }
+  .closer-pin { position: static; height: auto; min-height: 100svh; }
+  .float, .float-photo, .closer-inner { rotate: none; translate: none; scale: none; opacity: 1; }
+  .float-photo img { animation: none; }
+}
+
+/* =========================================================
+   Impact numbers under "Impact on the Community": four figures in a
+   row, split by hairlines. main.js counts each number up from 0 when
+   the row scrolls into view, one after another, and the gradient line
+   under each number grows with its count.
+   ========================================================= */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 48px auto 0;
+  padding: 0 var(--gutter);
+  list-style: none;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  text-align: center;
+}
+.stat + .stat { border-left: 1px solid var(--grey-line); }
+.stat-num {
+  position: relative;
+  font-size: var(--h2);
+  line-height: 1;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;           /* digits keep the same width while counting */
+  color: var(--ink);
+}
+.stat-num::after {                              /* gradient line that fills as the number counts */
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  height: 2px;
+  background: var(--brand-gradient);
+  transform: scaleX(var(--p, 1));
+  transform-origin: left;
+}
+.stat-label {
+  margin-top: 8px;
+  font-size: var(--body);
+  color: var(--grey-text);
+}
+.stats + .vmarquee { margin-top: 64px; }
+@media (max-width: 700px) {
+  .stats { grid-template-columns: repeat(2, 1fr); row-gap: 32px; }
+  .stat:nth-child(3) { border-left: 0; }
+}
+
+/* =========================================================
+   Velocity marquee (after Framer's "Velocity Marquee") under the
+   "Impact on the Community" heading: the demo's band (hairlines above
+   and below, faded ends, a circle between words) in the site's type and
+   colours. main.js moves and tilts the track.
+   ========================================================= */
+.vmarquee {
+  margin-top: 48px;
+  padding-block: 20px;
+  overflow: hidden;
+  border-block: 1px solid var(--grey-line);     /* same hairlines as the sponsor ticker */
+}
+.vmarquee-mask {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
+}
+.vmarquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  font-size: clamp(22px, 2.3611vw, 34px);       /* 34px at 1440, as in the demo */
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: var(--ink);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.vmarquee-item {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  white-space: pre;
+}
+.vmarquee-sep {                                  /* a small filled circle between the words */
+  flex: none;
+  width: .32em;
+  height: .32em;
+  margin: 0 .7em;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .62;
+}

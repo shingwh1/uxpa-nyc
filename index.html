@@ -2,12 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=1440">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>UXPA NYC</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="vendor/lenis.css">
   <link rel="stylesheet" href="style.css">
+  <script>
+    /* Text reveal: hide the animated text until main.js lifts it in.
+       Skipped for reduced motion; if main.js never runs, show it after 3s. */
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('reveal-pending');
+      setTimeout(function () { if (!window.__revealReady) document.documentElement.classList.remove('reveal-pending'); }, 3000);
+    }
+  </script>
 </head>
 <body>
 <div class="page">
@@ -16,61 +25,68 @@
   <header class="hero" id="top">
     <div class="grid" data-grid="hero" aria-hidden="true"></div>
 
-    <a class="logo" href="#top" aria-label="UXPA NYC home">
-      <img src="assets/icons/logo.svg" width="81" height="48" alt="">
-    </a>
+    <div class="nav-bar">
+      <a class="logo" href="#top" aria-label="UXPA NYC home">
+        <img src="../assets/icons/logo.svg" width="81" height="48" alt="">
+      </a>
 
-    <nav class="nav" aria-label="Main">
-      <div class="nav-selection" aria-hidden="true">
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav" aria-label="Open menu">
         <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
-      </div>
-      <ul class="nav-list">
-        <li class="nav-item" style="--w:103px">
-          <a href="#about">About</a>
-          <div class="dropdown" style="--dw:134px">
-            <a href="#">Our team</a>
-          </div>
-        </li>
-        <li class="nav-item" style="--w:160px">
-          <a href="#get-involved">Get Involved</a>
-          <div class="dropdown" style="--dw:161px">
-            <a href="#">Membership</a>
-            <a href="#">Volunteering</a>
-            <a href="#mentorship">Mentorship</a>
-          </div>
-        </li>
-        <li class="nav-item" style="--w:107px"><a href="#events">Events</a></li>
-        <li class="nav-item" style="--w:130px">
-          <a href="#sponsors">Sponsors</a>
-          <div class="dropdown" style="--dw:211px">
-            <a href="#">Become a sponsor</a>
-          </div>
-        </li>
-        <li class="nav-item" style="--w:88px"><a href="#faq">FAQ</a></li>
-        <li class="nav-item" style="--w:102px"><a href="#">Log in</a></li>
-      </ul>
-    </nav>
+        <i></i><i></i><i></i>
+      </button>
+
+      <nav class="nav" id="main-nav" aria-label="Main" data-lenis-prevent>
+        <div class="nav-selection" aria-hidden="true">
+          <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+        </div>
+        <ul class="nav-list">
+          <li class="nav-item" style="--w:127px">
+            <a href="#about">About</a>
+            <div class="dropdown">
+              <a href="#">Our team</a>
+            </div>
+          </li>
+          <li class="nav-item" style="--w:160px">
+            <a href="#get-involved">Get Involved</a>
+            <div class="dropdown">
+              <a href="#">Membership</a>
+              <a href="#">Volunteering</a>
+              <a href="#mentorship">Mentorship</a>
+            </div>
+          </li>
+          <li class="nav-item" style="--w:107px"><a href="#events">Events</a></li>
+          <li class="nav-item" style="--w:130px">
+            <a href="#sponsors">Sponsors</a>
+            <div class="dropdown">
+              <a href="#">Become a sponsor</a>
+            </div>
+          </li>
+          <li class="nav-item" style="--w:88px"><a href="#faq">FAQ</a></li>
+          <li class="nav-item" style="--w:102px"><a href="#">Log in</a></li>
+        </ul>
+      </nav>
+    </div>
   </header>
 
   <!-- ============ INTRO ============ -->
-  <section class="intro" id="about">
+  <section class="intro wrap" id="about">
     <div class="wordmark">
       <h1 class="wordmark-letters" aria-label="UXPA NYC">
         <span aria-hidden="true" style="left:0">U</span>
-        <span aria-hidden="true" style="left:129px">X</span>
-        <span aria-hidden="true" style="left:262px">P</span>
-        <span aria-hidden="true" style="left:355px">A</span>
+        <span aria-hidden="true" style="left:.645em">X</span>
+        <span aria-hidden="true" style="left:1.31em">P</span>
+        <span aria-hidden="true" style="left:1.775em">A</span>
         <span aria-hidden="true" class="wordmark-nyc">NYC</span>
       </h1>
       <p class="wordmark-tagline">Real talk from professionals, students, and the companies backing them. Pushing for UX to have a seat at the table.</p>
     </div>
 
     <div class="intro-ctas">
-      <a class="cta" href="#get-involved" style="--cw:416px">
+      <a class="cta" href="#get-involved">
         <span class="cta-title"><span class="cta-label">Become a member</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
         <span class="cta-body">Join our network of over 200 members!</span>
       </a>
-      <a class="cta" href="#events" style="--cw:416px">
+      <a class="cta" href="#events">
         <span class="cta-title"><span class="cta-label">Upcoming Events</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
         <span class="cta-body">Explore our upcoming events from the NYC UXPA community!</span>
       </a>
@@ -84,135 +100,139 @@
       <div class="ticker-track">
         <!-- set is repeated 3x for a seamless loop; JS fills copies 2 and 3 -->
         <div class="ticker-set">
-          <span class="logo-accenture"><img src="assets/images/sponsors/accenture.png" width="228" height="60" alt="Accenture"></span>
-          <img src="assets/images/sponsors/infragistics.png" width="307" height="45" alt="Infragistics">
-          <img src="assets/images/sponsors/mastercard.png" width="67" height="52" alt="Mastercard">
-          <img src="assets/images/sponsors/bloomberg.png" width="227" height="42" alt="Bloomberg">
-          <img src="assets/images/sponsors/small-planet.png" width="77" height="100" alt="Small Planet">
-          <img src="assets/images/sponsors/verizon.png" width="196" height="60" alt="Verizon">
+          <span class="logo-accenture"><img src="../assets/images/sponsors/accenture.png" width="228" height="60" alt="Accenture"></span>
+          <img src="../assets/images/sponsors/infragistics.png" width="307" height="45" alt="Infragistics">
+          <img src="../assets/images/sponsors/mastercard.png" width="67" height="52" alt="Mastercard">
+          <img src="../assets/images/sponsors/bloomberg.png" width="227" height="42" alt="Bloomberg">
+          <img src="../assets/images/sponsors/small-planet.png" width="77" height="100" alt="Small Planet">
+          <img src="../assets/images/sponsors/verizon.png" width="196" height="60" alt="Verizon">
         </div>
       </div>
     </div>
   </section>
 
+  <!-- ============ STATEMENT (from v3): staggered uppercase headline ============ -->
+  <section class="statement wrap">
+    <h2 class="statement-title">
+      <span class="line line-1">Where NYC’s</span>
+      <span class="line line-2">design, tech,</span>
+      <span class="line line-3">and research</span>
+      <span class="line line-4">worlds</span>
+      <span class="line line-5">collide</span>
+    </h2>
+    <div class="statement-body">
+      <p class="lede" data-scroll-fill>From Wall Street to Brooklyn startups, we unite cross-industry innovators around one shared obsession: crafting intuitive, unforgettable digital products.</p>
+    </div>
+  </section>
+
+  <!-- Pixel transition (into Upcoming Events): scroll-driven, see main.js -->
+  <div class="pixel-band" data-from="#ffffff" data-to="#000000" aria-hidden="true"><canvas></canvas></div>
+
   <!-- ============ UPCOMING EVENTS ============ -->
   <section class="events" id="events">
-    <h2 class="section-title">Upcoming Events</h2>
-    <p class="section-eyebrow events-eyebrow">Our events range from roundtables, presentations, panels to workshops. Check out our in-person and virtual event lineup and look at what our community has been up to!</p>
+    <!-- Scroll stack (after extrafazant.nl "Recent Werk"): the heading, the
+         cards and the link are pinned together; each scroll step drops the
+         front card away and brings the next one forward (see main.js) -->
+    <div class="stack" data-stack>
+      <div class="stack-pin">
+        <div class="wrap events-head">
+          <h2 class="section-title">Upcoming Events</h2>
+          <p class="section-eyebrow events-eyebrow">Our events range from roundtables, presentations, panels to workshops. Check out our in-person and virtual event lineup and look at what our community has been up to!</p>
+        </div>
 
-    <div class="events-body">
-      <img class="events-photo" src="assets/images/events-feature.png" width="432" height="576" alt="">
+        <!-- PLACEHOLDER event details (dates, times, in person / virtual, sign-up links):
+             replace with the client's real events. -->
+        <div class="stack-stage">
+          <div class="carousel">
+            <div class="card" data-index="0">
+              <div class="card-content">
+                <img src="../assets/images/events/happy-hour.jpg" alt="">
+                <p class="card-meta"><span class="card-date">Thu, Dec 4 · 6:30 PM</span><span class="card-type">In person</span></p>
+                <p class="card-title">Happy Hour &amp; UX Bingo</p>
+                <a class="card-signup" href="#">Sign up<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></a>
+              </div>
+              <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+            </div>
+            <div class="card" data-index="1">
+              <div class="card-content">
+                <img src="../assets/images/events/accessible-website-workshop.jpg" alt="">
+                <p class="card-meta"><span class="card-date">Sat, Dec 13 · 11:00 AM</span><span class="card-type">In person</span></p>
+                <p class="card-title">Design an Accessible Website: <span class="nowrap">Hands-On</span> UX Workshop</p>
+                <a class="card-signup" href="#">Sign up<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></a>
+              </div>
+              <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+            </div>
+            <div class="card" data-index="2">
+              <div class="card-content">
+                <img src="../assets/images/events/women-in-tech.png" alt="">
+                <p class="card-meta"><span class="card-date">Wed, Jan 14 · 7:00 PM</span><span class="card-type">Virtual</span></p>
+                <p class="card-title">Women in Tech Panel</p>
+                <a class="card-signup" href="#">Sign up<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></a>
+              </div>
+              <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+            </div>
+          </div>
+        </div>
 
-      <div class="accordion">
-        <div class="event-row">
-          <button class="event-head" aria-expanded="false">
-            <span class="event-shift"><span class="event-date">11.12</span><span class="event-title">Happy Hour &amp; UX Bingo</span></span>
-            <span class="plus" aria-hidden="true"><i class="bar-h"></i><i class="bar-v"></i></span>
-          </button>
-          <div class="event-details event-shift">
-            <div class="ed-time"><span class="ed-label">Time</span><span class="ed-value">[Time TBD]</span></div>
-            <div class="ed-speakers"><span class="ed-label">Speakers</span><span class="ed-value">[Speaker names]</span></div>
-            <p class="ed-desc">[Short description of the event: what it covers, who it’s for and what to expect.]</p>
-            <a class="ed-more" href="#">See more<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></a>
-          </div>
+        <!-- Where you are in the stack: "01 / 03" and a gradient bar that fills
+             as you scroll through the cards (main.js updates both) -->
+        <div class="stack-progress" aria-hidden="true">
+          <span class="stack-count"><span class="stack-now">01</span> / <span class="stack-total">03</span></span>
+          <span class="stack-bar"><span></span></span>
         </div>
-        <div class="event-row">
-          <button class="event-head" aria-expanded="false">
-            <span class="event-shift"><span class="event-date">11.19</span><span class="event-title">Women in Tech Panel</span></span>
-            <span class="plus" aria-hidden="true"><i class="bar-h"></i><i class="bar-v"></i></span>
-          </button>
-          <div class="event-details event-shift">
-            <div class="ed-time"><span class="ed-label">Time</span><span class="ed-value">[Time TBD]</span></div>
-            <div class="ed-speakers"><span class="ed-label">Speakers</span><span class="ed-value">[Speaker names]</span></div>
-            <p class="ed-desc">[Short description of the event: what it covers, who it’s for and what to expect.]</p>
-            <a class="ed-more" href="#">See more<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></a>
-          </div>
-        </div>
-        <div class="event-row">
-          <button class="event-head" aria-expanded="false">
-            <span class="event-shift"><span class="event-date">12.03</span><span class="event-title">Leading through Mentorship</span></span>
-            <span class="plus" aria-hidden="true"><i class="bar-h"></i><i class="bar-v"></i></span>
-          </button>
-          <div class="event-details event-shift">
-            <div class="ed-time"><span class="ed-label">Time</span><span class="ed-value">[Time TBD]</span></div>
-            <div class="ed-speakers"><span class="ed-label">Speakers</span><span class="ed-value">[Speaker names]</span></div>
-            <p class="ed-desc">[Short description of the event: what it covers, who it’s for and what to expect.]</p>
-            <a class="ed-more" href="#">See more<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></a>
-          </div>
-        </div>
-        <div class="event-row">
-          <button class="event-head" aria-expanded="false">
-            <span class="event-shift"><span class="event-date">12.10</span><span class="event-title">Changing Careers to UX</span></span>
-            <span class="plus" aria-hidden="true"><i class="bar-h"></i><i class="bar-v"></i></span>
-          </button>
-          <div class="event-details event-shift">
-            <div class="ed-time"><span class="ed-label">Time</span><span class="ed-value">[Time TBD]</span></div>
-            <div class="ed-speakers"><span class="ed-label">Speakers</span><span class="ed-value">[Speaker names]</span></div>
-            <p class="ed-desc">[Short description of the event: what it covers, who it’s for and what to expect.]</p>
-            <a class="ed-more" href="#">See more<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></a>
-          </div>
-        </div>
-        <div class="event-row">
-          <button class="event-head" aria-expanded="false">
-            <span class="event-shift"><span class="event-date">12.17</span><span class="event-title">Ask a Recruiter</span></span>
-            <span class="plus" aria-hidden="true"><i class="bar-h"></i><i class="bar-v"></i></span>
-          </button>
-          <div class="event-details event-shift">
-            <div class="ed-time"><span class="ed-label">Time</span><span class="ed-value">[Time TBD]</span></div>
-            <div class="ed-speakers"><span class="ed-label">Speakers</span><span class="ed-value">[Speaker names]</span></div>
-            <p class="ed-desc">[Short description of the event: what it covers, who it’s for and what to expect.]</p>
-            <a class="ed-more" href="#">See more<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></a>
-          </div>
-        </div>
-        <a class="view-all" href="#">
-          <span class="view-all-inner">View All Events<svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
+
+        <a class="cta cta-view-all" href="#">
+          <span class="cta-title"><span class="cta-label">View All Events</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
         </a>
       </div>
     </div>
   </section>
 
+  <!-- Pixel transition (out of Upcoming Events): scroll-driven, see main.js -->
+  <div class="pixel-band" data-from="#000000" data-to="#ffffff" data-timing="out" aria-hidden="true"><canvas></canvas></div>
+
   <!-- ============ MENTORSHIP ============ -->
-  <section class="mentorship" id="mentorship">
+  <section class="mentorship wrap" id="mentorship">
     <h2 class="section-title">Mentorship Program</h2>
     <p class="section-eyebrow mentorship-eyebrow">The program pairs UX professionals looking to take the next step in their career with a mentor who has insight or experience with facing challenges and reaching their goals.</p>
 
     <div class="mentor-cards">
-      <article class="mentor-card" style="--card-w:352px; --cta-gap:28px">
+      <article class="mentor-card">
         <div class="cursor-photo">
-          <img src="assets/images/mentee.png" alt="Mentee placing sticky notes on a whiteboard">
+          <img src="../assets/images/mentee.png" alt="Mentee placing sticky notes on a whiteboard">
           <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
-          <span class="cursor blue"  style="--x:22px;  --y:9px;   --dx:29px;  --dy:24px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">Students</span></span>
-          <span class="cursor green" style="--x:140px; --y:81px;  --dx:-27px; --dy:-5px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">Career changers</span></span>
-          <span class="cursor blue"  style="--x:34px;  --y:145px; --dx:19px;  --dy:-31px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">New designers</span></span>
+          <span class="cursor blue"  style="--x:22; --y:9;   --dx:29px;  --dy:24px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">Students</span></span>
+          <span class="cursor green" style="--x:140; --y:81;  --dx:-27px; --dy:-5px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">Career changers</span></span>
+          <span class="cursor blue"  style="--x:34; --y:145; --dx:19px;  --dy:-31px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">New designers</span></span>
         </div>
-        <a class="cta" href="#" style="--cw:352px">
+        <a class="cta" href="#">
           <span class="cta-title"><span class="cta-label">Become a mentee</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
           <span class="cta-body">Are you a student or a new designer? Get matched with a UX professional and grow your design skills.</span>
         </a>
       </article>
 
-      <article class="mentor-card" style="--card-w:350px; --cta-gap:31px">
+      <article class="mentor-card">
         <div class="cursor-photo">
-          <img src="assets/images/mentor.png" alt="Audience at a UXPA NYC presentation">
+          <img src="../assets/images/mentor.png" alt="Audience at a UXPA NYC presentation">
           <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
-          <span class="cursor blue"  style="--x:16px;  --y:7px;   --dx:20px;  --dy:25px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">Product designers</span></span>
-          <span class="cursor green" style="--x:130px; --y:85px;  --dx:-22px; --dy:-7px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">UX/UI designers</span></span>
-          <span class="cursor blue"  style="--x:30px;  --y:147px; --dx:19px;  --dy:-31px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">UX researchers</span></span>
+          <span class="cursor blue"  style="--x:16; --y:7;   --dx:20px;  --dy:25px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">Product designers</span></span>
+          <span class="cursor green" style="--x:130; --y:85;  --dx:-22px; --dy:-7px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">UX/UI designers</span></span>
+          <span class="cursor blue"  style="--x:30; --y:147; --dx:19px;  --dy:-31px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">UX researchers</span></span>
         </div>
-        <a class="cta" href="#" style="--cw:350px">
+        <a class="cta" href="#">
           <span class="cta-title"><span class="cta-label">Become a mentor</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
           <span class="cta-body">Have UX experience and want to support new designers? Become a mentor and give back to the community. </span>
         </a>
       </article>
 
-      <article class="mentor-card" style="--card-w:350px; --cta-gap:31px">
+      <article class="mentor-card">
         <div class="cursor-photo">
-          <img src="assets/images/mentorship-faq.png" alt="Packed room at a UXPA NYC event">
+          <img src="../assets/images/mentorship-faq.png" alt="Packed room at a UXPA NYC event">
           <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
-          <span class="cursor blue"  style="--x:18px;  --y:25px;  --dx:17px;  --dy:17px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">Application process</span></span>
-          <span class="cursor green" style="--x:170px; --y:121px; --dx:-31px; --dy:-21px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">Eligibility</span></span>
+          <span class="cursor blue"  style="--x:18; --y:25;  --dx:17px;  --dy:17px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">Application process</span></span>
+          <span class="cursor green" style="--x:170; --y:121; --dx:-31px; --dy:-21px"><svg viewBox="0 0 28 29"><use href="#pointer"/></svg><span class="cursor-label">Eligibility</span></span>
         </div>
-        <a class="cta" href="#faq" style="--cw:350px">
+        <a class="cta" href="#faq">
           <span class="cta-title"><span class="cta-label">Mentorship FAQ</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
           <span class="cta-body">Our one-stop-shop for all mentorship related inquiries.</span>
         </a>
@@ -220,36 +240,80 @@
     </div>
   </section>
 
-  <!-- ============ COMMUNITY ============ -->
-  <section class="community" id="get-involved">
-    <div class="float-photo" style="left:1042px; top:676px;  --pop:#f9d441"><i class="pop"></i><img src="assets/images/community/photo-1.png" alt=""></div>
-    <div class="float-photo" style="left:908px;  top:908px;  --pop:#0039a6"><i class="pop"></i><img src="assets/images/community/photo-2.png" alt=""></div>
-    <div class="float-photo" style="left:676px;  top:1042px; --pop:#df6429"><i class="pop"></i><img src="assets/images/community/photo-3.png" alt=""></div>
-    <div class="float-photo" style="left:407px;  top:1042px; --pop:#10bae7"><i class="pop"></i><img src="assets/images/community/photo-4.png" alt=""></div>
-    <div class="float-photo" style="left:175px;  top:908px;  --pop:#64b32c"><i class="pop"></i><img src="assets/images/community/photo-5.png" alt=""></div>
-    <div class="float-photo" style="left:41px;   top:676px;  --pop:#f9d441"><i class="pop"></i><img src="assets/images/community/photo-6.png" alt=""></div>
-    <div class="float-photo" style="left:41px;   top:407px;  --pop:#0039a6"><i class="pop"></i><img src="assets/images/community/photo-7.png" alt=""></div>
-    <div class="float-photo" style="left:175px;  top:175px;  --pop:#df6429"><i class="pop"></i><img src="assets/images/community/photo-8.png" alt=""></div>
-    <div class="float-photo" style="left:407px;  top:41px;   --pop:#10bae7"><i class="pop"></i><img src="assets/images/community/photo-9.png" alt=""></div>
-    <div class="float-photo" style="left:676px;  top:41px;   --pop:#64b32c"><i class="pop"></i><img src="assets/images/community/photo-10.png" alt=""></div>
-    <div class="float-photo" style="left:908px;  top:175px;  --pop:#f9d441"><i class="pop"></i><img src="assets/images/community/photo-11.png" alt=""></div>
-    <div class="float-photo" style="left:1042px; top:407px;  --pop:#0039a6"><i class="pop"></i><img src="assets/images/community/photo-12.png" alt=""></div>
+  <!-- ============ PARALLAX GRID: community photos ============ -->
+  <!-- After Framer's "Parallax Grid Scroll" (vertical mode): rows of photos start small at the
+       bottom of the window and grow as they scroll up (see main.js).
+       Photos from nycuxpa.com/about. -->
+  <section class="pgrid" id="get-involved" aria-labelledby="pgrid-title">
+    <div class="wrap pgrid-head">
+      <h2 class="section-title" id="pgrid-title">Impact on the Community</h2>
+    </div>
+    <!-- Impact numbers: each one counts up from 0 when the row scrolls into view (see main.js).
+         PLACEHOLDER figures (only "200+ members" comes from the current site):
+         replace with the client's real numbers. Change data-count and the text together. -->
+    <ul class="stats wrap" aria-label="UXPA NYC in numbers">
+      <li class="stat"><span class="stat-num" data-count="200" data-suffix="+">200+</span><span class="stat-label">Members</span></li>
+      <li class="stat"><span class="stat-num" data-count="50" data-suffix="+">50+</span><span class="stat-label">Events hosted</span></li>
+      <li class="stat"><span class="stat-num" data-count="30" data-suffix="+">30+</span><span class="stat-label">Mentor pairs</span></li>
+      <li class="stat"><span class="stat-num" data-count="20" data-suffix="+">20+</span><span class="stat-label">Years in NYC</span></li>
+    </ul>
+    <!-- Velocity marquee (after Framer's "Velocity Marquee"): drifts left, speeds up and leans
+         with the scroll speed, runs backwards when scrolling up. main.js repeats the item. -->
+    <div class="vmarquee" role="group" aria-label="Who our community is">
+      <div class="vmarquee-mask">
+        <div class="vmarquee-track">
+          <span class="vmarquee-item"><span class="vmarquee-word">Students</span><span class="vmarquee-sep" aria-hidden="true"></span><span class="vmarquee-word">Designers</span><span class="vmarquee-sep" aria-hidden="true"></span><span class="vmarquee-word">Researchers</span><span class="vmarquee-sep" aria-hidden="true"></span><span class="vmarquee-word">Consultants</span><span class="vmarquee-sep" aria-hidden="true"></span><span class="vmarquee-word">Educators</span><span class="vmarquee-sep" aria-hidden="true"></span><span class="vmarquee-word">Design Leaders</span><span class="vmarquee-sep" aria-hidden="true"></span><span class="vmarquee-word">Accessibility Specialists</span><span class="vmarquee-sep" aria-hidden="true"></span><span class="vmarquee-word">Product Enthusiasts</span><span class="vmarquee-sep" aria-hidden="true"></span><span class="vmarquee-word">Information Architects</span><span class="vmarquee-sep" aria-hidden="true"></span><span class="vmarquee-word">Developers</span><span class="vmarquee-sep" aria-hidden="true"></span><span class="vmarquee-word">Engineers</span><span class="vmarquee-sep" aria-hidden="true"></span></span>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <div class="community-center">
-      <h2 class="community-title">Where NYC’s UX<br>community<br>comes together</h2>
-      <a class="cta cta-join" href="#">
-        <span class="cta-title"><span class="cta-label">Join Today</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
-      </a>
+  <!-- ============ CLOSER: the section the photo strip leads into ============ -->
+  <section class="closer" aria-labelledby="closer-title">
+    <!-- The section pins (stays put) while you keep scrolling. During that pause the
+         photos burst out of the middle and spread across the screen like stars, each
+         growing to full size as it reaches its spot; then the headline and Join Today
+         come in (main.js sets --p and --pi). Afterwards each photo bobs gently and
+         leans a little toward the mouse.
+         --x / --y: top-left corner as % of the screen; --s: width (vw); --a: shape
+         (1 = square, 1.5 = landscape 3:2); --d: how much it leans; --t: bob length in
+         seconds. To add a photo, copy a <figure> line and change its src and numbers. -->
+    <div class="closer-pin">
+      <div class="float" aria-hidden="true">
+        <figure class="float-photo" style="--x:4; --y:6; --s:11; --a:1; --d:1; --t:7"><img src="../assets/images/community/photo-1.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:19; --y:16; --s:12; --a:1.5; --d:0.8; --t:8.5"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:35; --y:4; --s:6; --a:1; --d:0.4; --t:9"><img src="../assets/images/community/photo-2.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:47; --y:5; --s:11; --a:1.5; --d:0.7; --t:7.5"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:64; --y:13; --s:9; --a:1; --d:0.6; --t:10"><img src="../assets/images/community/photo-3.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:78; --y:5; --s:13; --a:1.5; --d:0.9; --t:8"><img src="../assets/images/statement-talk.webp" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:90; --y:27; --s:6; --a:1; --d:0.4; --t:9.5"><img src="../assets/images/community/photo-4.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:2; --y:37; --s:12; --a:1.5; --d:0.85; --t:7"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:84; --y:40; --s:10; --a:1; --d:0.75; --t:8.5"><img src="../assets/images/community/photo-6.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:17; --y:50; --s:6; --a:1; --d:0.45; --t:10"><img src="../assets/images/community/photo-5.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:76; --y:62; --s:12; --a:1.5; --d:0.9; --t:7.5"><img src="../assets/images/mentorship-faq.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:5; --y:66; --s:10; --a:1; --d:0.7; --t:9"><img src="../assets/images/community/photo-7.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:21; --y:79; --s:12; --a:1.5; --d:0.95; --t:8"><img src="../assets/images/mentor.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:40; --y:87; --s:6; --a:1; --d:0.35; --t:9.5"><img src="../assets/images/community/photo-8.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:52; --y:77; --s:10; --a:1; --d:0.8; --t:7"><img src="../assets/images/community/photo-9.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:67; --y:87; --s:6; --a:1; --d:0.4; --t:10"><img src="../assets/images/community/photo-10.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:87; --y:79; --s:9; --a:1; --d:0.6; --t:8.5"><img src="../assets/images/community/photo-11.png" alt="" loading="lazy" decoding="async"></figure>
+      </div>
+      <div class="closer-inner">
+        <h2 class="closer-title" id="closer-title">Where NYC’s UX<br>community<br>comes together</h2>
+        <a class="cta cta-join" href="#">
+          <span class="cta-title"><span class="cta-label">Join Today</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
+        </a>
+      </div>
     </div>
   </section>
 
   <!-- ============ FOOTER ============ -->
   <footer class="footer" id="faq">
-    <div class="footer-cols">
+    <div class="footer-cols wrap">
       <div class="footer-col">
         <h2 class="footer-heading">Work with us</h2>
-        <p class="footer-text" style="width:334px">Want to give a talk or looking to host a workshop with UXPA NYC? We are always looking to collaborate!</p>
-        <a class="select-btn" href="mailto:" style="width:384px; margin-top:32px">
+        <p class="footer-text footer-text-work">Want to give a talk or looking to host a workshop with UXPA NYC? We are always looking to collaborate!</p>
+        <a class="select-btn btn-contact" href="mailto:">
           Contact UXPA NYC
           <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
         </a>
@@ -269,10 +333,10 @@
 
       <div class="footer-col">
         <h2 class="footer-heading">Newsletter</h2>
-        <p class="footer-text" style="width:336px">Sign up for our newsletter to keep up to date with what UXPA NYC is doing!</p>
+        <p class="footer-text footer-text-news">Sign up for our newsletter to keep up to date with what UXPA NYC is doing!</p>
         <form class="newsletter" onsubmit="return false">
           <input class="newsletter-input" type="email" aria-label="Email address">
-          <button class="select-btn" type="submit" style="width:336px">
+          <button class="select-btn" type="submit">
             Subscribe
             <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
           </button>
@@ -280,10 +344,10 @@
       </div>
 
       <ul class="socials">
-        <li><a class="social" href="mailto:" aria-label="Email" style="margin-top:0"><img src="assets/icons/mail.svg" width="44" height="44" alt=""></a></li>
-        <li><a class="social" href="#" aria-label="LinkedIn" style="margin-top:7px"><img src="assets/icons/linkedin.svg" width="49" height="49" alt=""></a></li>
-        <li><a class="social" href="#" aria-label="Instagram" style="margin-top:6px"><img src="assets/icons/instagram.svg" width="41" height="41" alt=""></a></li>
-        <li><a class="social" href="#" aria-label="Website" style="margin-top:7px"><img src="assets/icons/globe.svg" width="48" height="48" alt=""></a></li>
+        <li><a class="social" href="mailto:" aria-label="Email"><img src="../assets/icons/mail.svg" width="44" height="44" alt=""></a></li>
+        <li><a class="social" href="#" aria-label="LinkedIn"><img src="../assets/icons/linkedin.svg" width="49" height="49" alt=""></a></li>
+        <li><a class="social" href="#" aria-label="Instagram"><img src="../assets/icons/instagram.svg" width="41" height="41" alt=""></a></li>
+        <li><a class="social" href="#" aria-label="Website"><img src="../assets/icons/globe.svg" width="48" height="48" alt=""></a></li>
       </ul>
     </div>
 
@@ -304,6 +368,7 @@
   </symbol>
 </svg>
 
+<script src="vendor/lenis.min.js"></script>
 <script src="main.js"></script>
 </body>
 </html>
