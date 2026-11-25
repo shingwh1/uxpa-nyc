@@ -4,6 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>UXPA NYC</title>
+  <!-- Favicon: the UXPA boxes mark, black in light mode and white in dark mode.
+       The SVG switches by itself; the PNGs are for browsers without SVG favicons. -->
+  <link rel="icon" href="../assets/icons/favicon/favicon-32-black.png" sizes="32x32" type="image/png" media="(prefers-color-scheme: light)">
+  <link rel="icon" href="../assets/icons/favicon/favicon-32-white.png" sizes="32x32" type="image/png" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="../assets/icons/favicon/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../assets/icons/favicon/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;500&display=swap" rel="stylesheet">
@@ -174,13 +180,6 @@
           </div>
         </div>
 
-        <!-- Where you are in the stack: "01 / 03" and a gradient bar that fills
-             as you scroll through the cards (main.js updates both) -->
-        <div class="stack-progress" aria-hidden="true">
-          <span class="stack-count"><span class="stack-now">01</span> / <span class="stack-total">03</span></span>
-          <span class="stack-bar"><span></span></span>
-        </div>
-
         <a class="cta cta-view-all" href="#">
           <span class="cta-title"><span class="cta-label">View All Events</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
         </a>
@@ -193,7 +192,10 @@
 
   <!-- ============ MENTORSHIP ============ -->
   <section class="mentorship wrap" id="mentorship">
-    <h2 class="section-title">Mentorship Program</h2>
+    <h2 class="section-title">
+      <span class="line">Mentorship</span>
+      <span class="line line-indent">Program</span>
+    </h2>
     <p class="section-eyebrow mentorship-eyebrow">The program pairs UX professionals looking to take the next step in their career with a mentor who has insight or experience with facing challenges and reaching their goals.</p>
 
     <div class="mentor-cards">
@@ -266,33 +268,44 @@
         </div>
       </div>
     </div>
-    <!-- Sideways photo strip: the strip stays on screen while you scroll down,
-         and the photos slide left in one line (see main.js). The gradient bar
-         under it shows how far along you are.
-         PLACEHOLDER: these are the photos we already have. Add more event photos
-         from the client by copying a <figure> line and changing the src and alt. -->
-    <div class="hgal" data-hgal>
-      <div class="hgal-pin">
-        <div class="hgal-track">
-          <figure class="hgal-tile"><img src="../assets/images/about/president-welcome.jpg" alt="Tamora Petitt is welcomed as President of NYC UXPA by former President Melissa McGrath and former Vice President Barry Gottlieb" loading="lazy" decoding="async"></figure>
-          <figure class="hgal-tile"><img src="../assets/images/about/members-networking.png" alt="Members networking at a NYC UXPA event" loading="lazy" decoding="async"></figure>
-          <figure class="hgal-tile"><img src="../assets/images/statement-talk.webp" alt="A talk at a UXPA NYC event" loading="lazy" decoding="async"></figure>
-          <figure class="hgal-tile"><img src="../assets/images/about/community-group.jpg" alt="NYC UXPA members at an event" loading="lazy" decoding="async"></figure>
-          <figure class="hgal-tile"><img src="../assets/images/mentorship-faq.png" alt="Packed room at a UXPA NYC event" loading="lazy" decoding="async"></figure>
-          <figure class="hgal-tile"><img src="../assets/images/mentor.png" alt="Audience at a UXPA NYC presentation" loading="lazy" decoding="async"></figure>
-        </div>
-        <div class="hgal-progress" aria-hidden="true"><span></span></div>
-      </div>
-    </div>
   </section>
 
-  <!-- ============ CLOSER: the section the photo strip leads into ============ -->
+  <!-- ============ CLOSER: Where NYC’s UX community comes together ============ -->
   <section class="closer" aria-labelledby="closer-title">
-    <div class="closer-inner">
-      <h2 class="closer-title" id="closer-title">Where NYC’s UX<br>community<br>comes together</h2>
-      <a class="cta cta-join" href="#">
-        <span class="cta-title"><span class="cta-label">Join Today</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
-      </a>
+    <!-- The section pins (stays put) while you keep scrolling. During that pause the
+         photos burst out of the middle and spread across the screen like stars, each
+         growing to full size as it reaches its spot; then the headline and Join Today
+         come in (main.js sets --p and --pi). Afterwards each photo bobs gently and
+         leans a little toward the mouse.
+         --x / --y: top-left corner as % of the screen; --s: width (vw); --a: shape
+         (1 = square, 1.5 = landscape 3:2); --d: how much it leans; --t: bob length in
+         seconds. To add a photo, copy a <figure> line and change its src and numbers. -->
+    <div class="closer-pin">
+      <div class="float" aria-hidden="true">
+        <figure class="float-photo" style="--x:4; --y:6; --s:11; --a:1; --d:1; --t:7"><img src="../assets/images/community/photo-1.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:19; --y:16; --s:12; --a:1.5; --d:0.8; --t:8.5"><img src="../assets/images/about/president-welcome.jpg" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:35; --y:4; --s:6; --a:1; --d:0.4; --t:9"><img src="../assets/images/community/photo-2.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:47; --y:5; --s:11; --a:1.5; --d:0.7; --t:7.5"><img src="../assets/images/about/members-networking.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:64; --y:13; --s:9; --a:1; --d:0.6; --t:10"><img src="../assets/images/community/photo-3.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:78; --y:5; --s:13; --a:1.5; --d:0.9; --t:8"><img src="../assets/images/statement-talk.webp" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:90; --y:27; --s:6; --a:1; --d:0.4; --t:9.5"><img src="../assets/images/community/photo-4.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:2; --y:37; --s:12; --a:1.5; --d:0.85; --t:7"><img src="../assets/images/about/community-group.jpg" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:84; --y:40; --s:10; --a:1; --d:0.75; --t:8.5"><img src="../assets/images/community/photo-6.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:17; --y:50; --s:6; --a:1; --d:0.45; --t:10"><img src="../assets/images/community/photo-5.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:76; --y:62; --s:12; --a:1.5; --d:0.9; --t:7.5"><img src="../assets/images/mentorship-faq.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:5; --y:66; --s:10; --a:1; --d:0.7; --t:9"><img src="../assets/images/community/photo-7.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:21; --y:79; --s:12; --a:1.5; --d:0.95; --t:8"><img src="../assets/images/mentor.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:40; --y:87; --s:6; --a:1; --d:0.35; --t:9.5"><img src="../assets/images/community/photo-8.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:52; --y:77; --s:10; --a:1; --d:0.8; --t:7"><img src="../assets/images/community/photo-9.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:67; --y:87; --s:6; --a:1; --d:0.4; --t:10"><img src="../assets/images/community/photo-10.png" alt="" loading="lazy" decoding="async"></figure>
+        <figure class="float-photo" style="--x:87; --y:79; --s:9; --a:1; --d:0.6; --t:8.5"><img src="../assets/images/community/photo-11.png" alt="" loading="lazy" decoding="async"></figure>
+      </div>
+      <div class="closer-inner">
+        <h2 class="closer-title" id="closer-title">Where NYC’s UX<br>community<br>comes together</h2>
+        <a class="cta cta-join" href="#">
+          <span class="cta-title"><span class="cta-label">Join Today</span><svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><use href="#arrow"/></svg></span>
+        </a>
+      </div>
     </div>
   </section>
 

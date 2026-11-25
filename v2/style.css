@@ -427,6 +427,27 @@ img { display: block; max-width: none; }
   line-height: 1.26;
   font-weight: 300;
 }
+/* Upcoming Events and Mentorship Program titles, from v3-designcore:
+   big uppercase display type (128px at 1440); Mentorship splits over two
+   lines with the second indented. */
+.events .section-title,
+.mentorship .section-title {
+  font-size: clamp(48px, 8.8889vw, 128px);
+  line-height: .95;
+  font-weight: 500;
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+}
+.section-title .line { display: block; }
+.section-title .line-indent { padding-left: 1.6em; }
+.events .events-eyebrow,
+.mentorship .mentorship-eyebrow { margin-top: 24px; }
+@media (min-width: 601px) {
+  .events .section-title { white-space: nowrap; }   /* one line, as in v3 (it runs a few px into the gutters) */
+}
+@media (max-width: 600px) {
+  .section-title .line-indent { padding-left: .8em; }
+}
 .section-eyebrow {
   margin-top: 16px;
   font-size: var(--body);
@@ -549,7 +570,13 @@ img { display: block; max-width: none; }
    Like the title, they only show on the front card; they also rise a
    little into place as a card comes forward, so they arrive with it. */
 .card-content::after { pointer-events: none; }  /* the outline must not block the Sign up link */
-.card:has(.card-signup) .card-title { bottom: 8.4cqw; }   /* room for Sign up under the title */
+/* Room for Sign up under the title: the usual 8.4cqw, but never less than
+   8px clear of the button's top (its bottom + its height: line-height plus
+   .55em padding top and bottom). */
+.card { --signup-bottom: 3cqw; --signup-size: max(14px, 1.44cqw); --title-min: 8.4cqw; }
+.card:has(.card-signup) .card-title {
+  bottom: max(var(--title-min), calc(var(--signup-bottom) + var(--signup-size) * 2.36 + 8px));
+}
 .card-meta,
 .card-signup {
   opacity: calc((var(--front, 0) - .6) * 2.5);  /* only once the card is (almost) at the front */
@@ -576,14 +603,15 @@ img { display: block; max-width: none; }
 .card-signup {
   position: absolute;
   left: 50%;
-  bottom: 3cqw;
+  bottom: var(--signup-bottom);
   z-index: 2;
   translate: -50% 0;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: .55em 1.3em;
-  font-size: max(14px, 1.44cqw);                /* 20px at 1387 */
+  font-size: var(--signup-size);                /* 20px at 1387 */
+  line-height: 1.26;                            /* fixed, so the title's clearance above can be worked out */
   font-weight: 500;
   color: var(--white);
   box-shadow: inset 0 0 0 1px var(--white);
@@ -635,37 +663,8 @@ img { display: block; max-width: none; }
     --front: 1;
   }
   .card-title { font-size: max(18px, 4.8cqw); bottom: 4cqw; padding-inline: 16px; }
-  .card:has(.card-signup) .card-title { bottom: max(11cqw, 52px); }
+  .card { --signup-bottom: max(3.5cqw, 12px); --signup-size: max(14px, 2cqw); --title-min: max(11cqw, 52px); }
   .card-meta { top: max(3cqw, 10px); left: max(3cqw, 10px); }
-  .card-signup { bottom: max(3.5cqw, 12px); font-size: max(14px, 2cqw); }
-}
-
-/* "01 / 03" + gradient bar under the stack (main.js updates them) */
-.stack-progress {
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-size: 16px;
-  letter-spacing: .06em;
-  color: rgba(255, 255, 255, .6);
-  font-variant-numeric: tabular-nums;
-}
-.stack-now { color: var(--white); }
-.stack-bar {
-  width: 160px;
-  height: 2px;
-  background: rgba(255, 255, 255, .2);
-}
-.stack-bar span {
-  display: block;
-  height: 100%;
-  background: var(--brand-gradient);
-  transform: scaleX(var(--p, 0));
-  transform-origin: left;
-}
-@media (max-width: 1023px), (prefers-reduced-motion: reduce) {
-  .stack-progress { display: none; }            /* listed cards: nothing to track */
 }
 
 .cta-view-all {
@@ -679,7 +678,7 @@ img { display: block; max-width: none; }
    ========================================================= */
 .mentorship { margin-top: var(--section-gap); }
 .mentorship .section-title { margin-left: -2px; }
-.mentorship-eyebrow { max-width: 1155px; margin-left: 3px; }
+.mentorship-eyebrow { max-width: 760px; margin-left: 3px; }   /* same width as v3 */
 
 .mentor-cards {
   display: grid;
@@ -748,9 +747,9 @@ img { display: block; max-width: none; }
   position: absolute;
   left: 22px;
   top: 33px;
-  padding: 6px 14px;
-  font-size: 20px;
-  line-height: 25.2px;
+  padding: 4px 10px;
+  font-size: 16px;                              /* 16px at every size */
+  line-height: 20px;
   font-weight: 400;
   color: var(--ink);
   white-space: nowrap;
@@ -895,6 +894,34 @@ img { display: block; max-width: none; }
 }
 .footer-grid .grid-inner { top: 0; transform-origin: 50% 0; }
 
+/* Dark footer: black like the "comes together" section above it, so the
+   page ends in one continuous dark run with no seam. Resting outlines and
+   text are dimmed white (the grey of the light version); hover brings them
+   to full white. */
+.footer {
+  --dim: rgba(255, 255, 255, .45);
+  margin-top: 0;
+  padding-top: var(--section-gap);
+  background: var(--ink);
+  color: var(--white);
+}
+.footer .footer-links a { color: rgba(255, 255, 255, .6); }
+.footer .footer-links a:hover,
+.footer .footer-links a:focus-visible { color: var(--white); }
+.footer .select-btn { background: var(--ink); color: var(--dim); box-shadow: inset 0 0 0 1px var(--dim); }
+.footer .select-btn .h { background: var(--ink); box-shadow: inset 0 0 0 1px var(--dim); }
+.footer .select-btn:hover,
+.footer .select-btn:focus-visible { color: var(--white); box-shadow: inset 0 0 0 1px var(--white); }
+.footer .select-btn:hover .h,
+.footer .select-btn:focus-visible .h { box-shadow: inset 0 0 0 1px var(--white); }
+.footer .newsletter-input { background: var(--ink); color: var(--white); box-shadow: inset 0 0 0 1px var(--dim); }
+.footer .newsletter-input:focus { box-shadow: inset 0 0 0 1px var(--white); }
+.footer .social { background: var(--ink); box-shadow: inset 0 0 0 1px var(--dim); }
+.footer .social img { filter: invert(1); }
+.footer .social:hover,
+.footer .social:focus-visible { box-shadow: inset 0 0 0 1px var(--white); }
+.footer .grid-inner .white { background: var(--ink); }   /* the grid's blank cells match the black */
+
 /* =========================================================
    ≤ 1214px — the UXPA NYC lockup and logline sit above the two CTAs
    ========================================================= */
@@ -1032,8 +1059,6 @@ img { display: block; max-width: none; }
   .mentorship .section-title { margin-left: 0; }
 
 
-  .cursor-label { font-size: 16px; line-height: 20px; padding: 4px 10px; }
-
   .footer-cols.is-stacked {
     grid-template-columns: 1fr auto;          /* Newsletter takes the room, Links as wide as it needs */
     gap: 40px 24px;
@@ -1084,93 +1109,132 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
 .events + .pixel-band { margin-top: 0; }        /* …and straight out of it */
 
 /* =========================================================
-   Impact on the Community: sideways photo strip.
-   The strip pins to the window while the page scrolls down, and
-   main.js slides the photos left in step with the scroll, so only one
-   thing moves, in one direction. The gradient bar fills to match.
-   main.js sets the section's height so the slide ends exactly as the
-   last photo arrives. With reduced motion the strip is a plain row
-   you can swipe or scroll sideways.
+   Impact on the Community
    ========================================================= */
-.pgrid { margin-top: var(--section-gap); }
+.pgrid {                                        /* black section, white text (like Upcoming Events) */
+  margin-top: var(--section-gap);
+  padding-block: var(--section-gap);
+  background: var(--ink);
+  color: var(--white);
+}
 .pgrid-head { text-align: center; }
-.hgal { position: relative; margin-top: 48px; }
-.hgal-pin {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 32px;
-  overflow: hidden;
-}
-.hgal-track {
-  display: flex;
-  gap: 24px;
-  width: max-content;
-  padding-inline: var(--gutter);
-  will-change: transform;
-}
-.hgal-tile {
-  flex: none;
-  margin: 0;
-  height: min(62svh, 560px);
-  aspect-ratio: 3 / 2;
-  overflow: hidden;
-}
-.hgal-tile img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  user-select: none;
-  pointer-events: none;
-}
-.hgal-progress {
-  margin-inline: var(--gutter);
-  height: 2px;
-  background: #e6e6e6;
-}
-.hgal-progress span {
-  display: block;
-  height: 100%;
-  background: var(--brand-gradient);
-  transform: scaleX(var(--p, 0));
-  transform-origin: left;
-}
-@media (max-width: 700px) {
-  .hgal-tile { height: min(62svh, 500px); aspect-ratio: 4 / 5; }
-  .hgal-track { gap: 16px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hgal-pin { position: static; height: auto; overflow-x: auto; padding-block: 8px; }
-  .hgal-progress { display: none; }
-}
+.pgrid .stat + .stat { border-left-color: rgba(255, 255, 255, .3); }
+.pgrid .stat-num { color: var(--white); }
+.pgrid .stat-label { color: rgba(255, 255, 255, .6); }
+.pgrid .vmarquee { border-color: rgba(255, 255, 255, .3); }
+.pgrid .vmarquee-track { color: var(--white); }
 
 /* =========================================================
-   Closer: the black section the parallax grid scrolls into
-   (as in Framer's Parallax Grid Scroll demo), with the community
-   headline and the Join Today link in white.
+   Closer: the black section after Impact on the Community, with the
+   community headline and Join Today in white.
+   The section is taller than the window and its content pins (stays
+   put) while you scroll through it — a pause of --hold window-heights.
+   main.js follows the scroll (with a soft lag, so nothing snaps) and:
+     - fades the photos in, each drifting slowly out to its spot (--pi)
+     - turns the whole set slowly around the headline (--orbit), about
+       20° from the moment the section arrives to when it leaves
+     - fades the headline and Join Today in once the photos are out (--in)
    ========================================================= */
 .closer {
-  display: grid;
-  place-items: center;                          /* the copy sits in the middle of the black section */
-  min-height: 100svh;
-  padding: var(--section-gap) var(--gutter);
+  --hold: 1.5;                                  /* window-heights of scrolling while pinned */
+  position: relative;
+  height: calc(100svh * (1 + var(--hold)));
   background: var(--ink);
   color: var(--white);
   text-align: center;
 }
-.closer-inner { display: flex; flex-direction: column; align-items: center; }
-.closer-title {
+.closer-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: grid;
+  place-items: center;                          /* the copy sits in the middle of the screen */
+  padding: var(--section-gap) var(--gutter);
+  overflow: hidden;
+}
+.closer-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.closer-title {                                 /* fades in with the scroll; Join Today has its own reveal (main.js) */
+  opacity: var(--in, 1);
+  translate: 0 calc((1 - var(--in, 1)) * 24px);
   font-size: var(--h2);
   line-height: 1.1;
   font-weight: 300;
 }
-.closer .cta-join { margin-top: 40px; }
+.closer .cta-join {                            /* fades up like the headline, a little after it (--join, main.js) */
+  margin-top: 40px;
+  opacity: var(--join, 1);
+  translate: 0 calc((1 - var(--join, 1)) * 24px);
+  pointer-events: var(--join-events, auto);     /* not clickable while hidden */
+}
 .closer .cta-join .arrow { color: var(--white); }
-.pgrid + .closer { margin-top: 0; }             /* the photo strip runs straight into it */
+.pgrid + .closer { margin-top: 0; }             /* both black: one continuous dark run */
+
+/* Floating photos (gallery around the headline). Each one's spot is
+   --x / --y (% of the screen), --s vw wide, --a its width/height ratio.
+   main.js measures --dx / --dy, the distance from that spot to the middle.
+     .float   rotate --orbit: the whole set turns slowly around the middle
+     figure   rotate −orbit keeps each photo upright; translate / scale /
+              opacity: the slow drift-in (it starts 35% of the way toward
+              the middle, small and clear, and eases out to its spot) plus
+              the mouse lean
+     img      transform animation: the idle bob */
+.float {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  rotate: var(--orbit, 0deg);
+}
+.float-photo {
+  --k: calc(1 - var(--pi, 1));                  /* 1 = not in yet, 0 = in place */
+  position: absolute;
+  left: calc(var(--x) * 1%);
+  top: calc(var(--y) * 1%);
+  width: clamp(56px, calc(var(--s) * 1vw), calc(var(--s) * 16px));
+  aspect-ratio: var(--a, 1);
+  margin: 0;
+  translate:
+    calc(var(--dx, 0px) * var(--k) * .35 + var(--mx, 0) * var(--d) * 14px)
+    calc(var(--dy, 0px) * var(--k) * .35 + var(--my, 0) * var(--d) * 14px);
+  rotate: calc(-1 * var(--orbit, 0deg));
+  scale: calc(.75 + .25 * var(--pi, 1));
+  opacity: var(--pi, 1);
+  will-change: translate, rotate, scale, opacity;
+}
+.float-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(.88);
+  animation: float-bob calc(var(--t) * 1s) ease-in-out infinite alternate;
+  animation-delay: calc(var(--t) * -.37s);      /* start each bob at a different point */
+}
+@keyframes float-bob {
+  from { transform: translateY(-7px); }
+  to   { transform: translateY(7px); }
+}
+@media (max-width: 700px) {
+  /* Phone: fewer, quieter photos so the headline stays readable over them */
+  .float-photo:nth-child(3),
+  .float-photo:nth-child(5),
+  .float-photo:nth-child(7),
+  .float-photo:nth-child(10),
+  .float-photo:nth-child(14),
+  .float-photo:nth-child(16) { display: none; }
+  .float-photo img { opacity: .55; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* No pause and no motion: the finished layout, one screen tall */
+  .closer { height: auto; }
+  .closer-pin { position: static; height: auto; min-height: 100svh; }
+  .float, .float-photo, .closer-title, .closer .cta-join { rotate: none; translate: none; scale: none; opacity: 1; }
+  .float-photo img { animation: none; }
+}
 
 /* =========================================================
    Impact numbers under "Impact on the Community": four figures in a
@@ -1269,4 +1333,3 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
   background: currentColor;
   opacity: .62;
 }
-.vmarquee + .hgal { margin-top: 48px; }
