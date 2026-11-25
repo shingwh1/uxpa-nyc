@@ -225,11 +225,6 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
   const pin = stack.querySelector('.stack-pin');
   const carousel = stack.querySelector('.carousel');
   const cards = [...stack.querySelectorAll('.card')];
-  const now = stack.querySelector('.stack-now');
-  const total = stack.querySelector('.stack-total');
-  const bar = stack.querySelector('.stack-bar span');
-  const pad = n => String(n).padStart(2, '0');
-  if (total) total.textContent = pad(cards.length);
   const active = window.matchMedia('(min-width: 1024px) and (prefers-reduced-motion: no-preference)');
 
   // Figma card boxes (% of the 1387 × 731 stack) at depth 0 (front), 1, 2 (back)
@@ -281,8 +276,6 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
       card.style.setProperty('--front', clamp(1 - depth, 0, 1));
     });
     carousel.style.transform = `perspective(1400px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`;
-    if (now) now.textContent = pad(Math.min(cards.length, Math.round(current) + 1));
-    if (bar) bar.style.setProperty('--p', cards.length > 1 ? current / (cards.length - 1) : 1);
   };
 
   const tick = now => {
@@ -397,9 +390,7 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
     ['.mentorship-eyebrow', 'lines'],
     ['.mentor-card .cta-title', 'lines'],
     ['.mentor-card .cta-body', 'lines'],
-    ['.cta-join .cta-title', 'lines'],
     ['.pgrid .section-title', 'chars'],
-    ['.closer-title', 'chars'],
   ];
   const DURATION = 1;            // s
   const CHAR_GAP = 0.0175;       // s between letters
@@ -543,8 +534,7 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
       (r.bottom > 0 && r.top < window.innerHeight ? onScreen : later).push(el);
     });
     playBatch(onScreen);
-    later.forEach(el => io.observe(el));
-  };
+    later.forEach(el => io.observe(el));  };
   // Prefer splitting with the real font, but don't keep the page blank waiting for it.
   if (document.fonts && document.fonts.status !== 'loaded') {
     document.fonts.ready.then(start);
@@ -663,41 +653,6 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
   relayout();
   window.addEventListener('scroll', request, { passive: true });
   window.addEventListener('resize', relayout);
-})();
-
-/* ---------------------------------------------------------
-   Impact on the Community: sideways photo strip. While the strip is
-   pinned, scrolling down slides the photos left by the same amount
-   (1 px down = 1 px left), so the movement stays calm and predictable.
-   The section is made tall enough for the whole strip to pass:
-   window height + how far the strip has to travel.
-   --------------------------------------------------------- */
-(() => {
-  const gal = document.querySelector('[data-hgal]');
-  if (!gal) return;
-  const pin = gal.querySelector('.hgal-pin');
-  const track = gal.querySelector('.hgal-track');
-  const bar = gal.querySelector('.hgal-progress span');
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;   // CSS: plain sideways row
-
-  let travel = 0, raf = 0;
-  const measure = () => {
-    travel = Math.max(0, track.scrollWidth - pin.clientWidth);
-    gal.style.height = `${pin.offsetHeight + travel}px`;
-    update();
-  };
-  const update = () => {
-    raf = 0;
-    const scrolled = Math.min(Math.max(-gal.getBoundingClientRect().top, 0), travel);
-    track.style.transform = `translate3d(${-scrolled}px, 0, 0)`;
-    if (bar) bar.style.setProperty('--p', travel ? scrolled / travel : 0);
-  };
-  const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
-
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', measure);
-  track.querySelectorAll('img').forEach(img => img.complete || img.addEventListener('load', measure, { once: true }));
-  measure();
 })();
 
 /* ---------------------------------------------------------
@@ -897,6 +852,100 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
     visible = entries.some(e => e.isIntersecting);
     visible ? start() : stop();
   }, { rootMargin: '80px' }).observe(band);
+})();
+
+/* ---------------------------------------------------------
+   Closer: the section pins while you scroll through it (CSS sticky).
+   q = how far you are through the section: 0 as its top comes up from
+   the bottom of the window, 1 as the pause ends. A smoothed copy of q
+   (it trails the scroll by about half a second, so nothing snaps)
+   drives:
+     --pi  each photo fading in and drifting out to its spot, between
+           q 0.1 and 0.55, gently staggered
+     --in  the headline and Join Today, q 0.45 → 0.7
+     --orbit  the whole set turning around the middle, −10° → +10°
+   --dx/--dy: each photo's distance from the middle (measured).
+   --mx/--my: mouse position over the section, eased, for the lean.
+   Reduced motion: nothing runs; CSS shows the finished layout.
+   --------------------------------------------------------- */
+(() => {
+  const sec = document.querySelector('.closer');
+  const pin = sec && sec.querySelector('.closer-pin');
+  if (!pin || !pin.querySelector('.float')) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const photos = [...pin.querySelectorAll('.float-photo')];
+  const IN_START = 0.1, IN_END = 0.55;      // photos drift in over this part of q
+  const TEXT_START = 0.45, TEXT_END = 0.7;  // headline fades in over this part
+  const JOIN_START = 0.58, JOIN_END = 0.8;  // Join Today fades up the same way, starting a little after the headline
+  const ORBIT = 10;                         // degrees each way (−10° → +10°)
+  const SMOOTH = 0.5;                       // seconds the motion trails the scroll
+  const STAGGER = 0.018;                    // gap between photos (in q)
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  const easeInOut = t => 0.5 - Math.cos(Math.PI * t) / 2;   // slow start, slow finish
+  // Scattered order (fixed): photo i starts in slot ORDER[i]
+  const ORDER = photos.map((_, i) => (i * 7) % photos.length);
+  const perPhoto = (IN_END - IN_START) - STAGGER * (photos.length - 1);
+
+  const measure = () => {
+    const w = pin.clientWidth, h = pin.clientHeight;
+    photos.forEach(el => {
+      el.style.setProperty('--dx', `${(w / 2 - (el.offsetLeft + el.offsetWidth / 2)).toFixed(1)}px`);
+      el.style.setProperty('--dy', `${(h / 2 - (el.offsetTop + el.offsetHeight / 2)).toFixed(1)}px`);
+    });
+  };
+
+  let raf = 0, last = 0, q = null;
+  let mouse = { x: 0, y: 0 }, lean = { x: 0, y: 0 };
+
+  const target = () => {
+    const vh = window.innerHeight;
+    const travel = sec.offsetHeight - pin.offsetHeight;
+    return clamp((vh - sec.getBoundingClientRect().top) / (vh + travel), 0, 1);
+  };
+
+  const frame = now => {
+    raf = 0;
+    const dt = last ? Math.min(0.1, (now - last) / 1000) : 0.016;
+    last = now;
+    const t = target();
+    q = q === null ? t : q + (t - q) * (1 - Math.exp(-dt / SMOOTH));
+    if (Math.abs(t - q) < 0.0005) q = t;
+
+    photos.forEach((el, i) => {
+      const start = IN_START + ORDER[i] * STAGGER;
+      el.style.setProperty('--pi', easeInOut(clamp((q - start) / perPhoto, 0, 1)).toFixed(4));
+    });
+    sec.style.setProperty('--in', easeInOut(clamp((q - TEXT_START) / (TEXT_END - TEXT_START), 0, 1)).toFixed(4));
+    sec.style.setProperty('--orbit', `${((q * 2 - 1) * ORBIT).toFixed(3)}deg`);
+    const joinIn = easeInOut(clamp((q - JOIN_START) / (JOIN_END - JOIN_START), 0, 1));
+    sec.style.setProperty('--join', joinIn.toFixed(4));
+    sec.style.setProperty('--join-events', joinIn > 0.5 ? 'auto' : 'none');
+
+    const k = 1 - Math.exp(-dt / 0.35);                 // lean trails the mouse a little
+    lean.x += (mouse.x - lean.x) * k;
+    lean.y += (mouse.y - lean.y) * k;
+    sec.style.setProperty('--mx', lean.x.toFixed(3));
+    sec.style.setProperty('--my', lean.y.toFixed(3));
+
+    const moving = q !== t || Math.abs(mouse.x - lean.x) > 0.002 || Math.abs(mouse.y - lean.y) > 0.002;
+    if (moving) request(); else last = 0;
+  };
+  const request = () => { if (!raf) raf = requestAnimationFrame(frame); };
+
+  if (window.matchMedia('(hover: hover)').matches) {
+    pin.addEventListener('mousemove', e => {
+      const r = pin.getBoundingClientRect();
+      mouse = { x: ((e.clientX - r.left) / r.width - 0.5) * 2, y: ((e.clientY - r.top) / r.height - 0.5) * 2 };
+      request();
+    });
+    pin.addEventListener('mouseleave', () => { mouse = { x: 0, y: 0 }; request(); });
+  }
+  window.addEventListener('scroll', request, { passive: true });
+  window.addEventListener('resize', () => { measure(); request(); });
+  photos.forEach(el => { const img = el.querySelector('img'); img.complete || img.addEventListener('load', measure, { once: true }); });
+  measure();
+  request();
 })();
 
 /* ---------------------------------------------------------
