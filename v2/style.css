@@ -418,16 +418,21 @@ img { display: block; max-width: none; }
 .sf-c.is-on { color: var(--ink); transition: color .1s linear; }
 
 /* "design", "tech" and "research" in the headline start light grey and
-   turn light blue as you scroll past set points, one after another
+   take their colour as you scroll past set points, one after another
    (main.js adds .is-on). Scrolling back up turns them grey again.
-   Reduced motion: blue from the start. */
+   Reduced motion: coloured from the start. */
 .statement-title .sw {
   color: #c4c4c4;                               /* light grey */
   transition: color .4s ease-out;
 }
-.statement-title .sw.is-on { color: var(--blue); }   /* light blue, the middle of the brand gradient */
+/* Each word takes its stop of the brand gradient: design green (start),
+   tech light blue (middle), research dark blue (end). */
+.statement-title .sw { --sw: var(--blue); }
+.statement-title .sw[data-text="design"] { --sw: #62b331; }
+.statement-title .sw[data-text="research"] { --sw: #0039a6; }
+.statement-title .sw.is-on { color: var(--sw); }
 @media (prefers-reduced-motion: reduce) {
-  .statement-title .sw { color: var(--blue); }
+  .statement-title .sw { color: var(--sw); }
 }
 
 /* ≤ 767px (designcore's phone/small-tablet breakpoint): each pair of words
@@ -438,6 +443,9 @@ img { display: block; max-width: none; }
   .statement { --t: min(100px, calc((100vw - 2 * var(--gutter)) / 5.3)); }
   .statement-title .w { display: block; }
   .statement-title .line-4 { padding-left: 24%; }
+}
+@media (max-width: 600px) {                     /* "From Wall Street to Brooklyn…" centred on the page */
+  .statement .lede { margin-inline: auto; text-align: center; }
 }
 @media (max-width: 479px) {
   .statement-title { line-height: .9; }
@@ -628,11 +636,11 @@ img { display: block; max-width: none; }
    little into place as a card comes forward, so they arrive with it. */
 .card-content::after { pointer-events: none; }  /* the outline must not block the Sign up link */
 /* Room for Sign up under the title: the usual 8.4cqw, but never less than
-   8px clear of the button's top (its bottom + its height: line-height plus
-   .55em padding top and bottom). */
+   8px clear of the link's top (its bottom + its line-height, plus the
+   4px its underline hangs below). */
 .card { --signup-bottom: 3cqw; --signup-size: max(14px, 1.44cqw); --title-min: 8.4cqw; }
 .card:has(.card-signup) .card-title {
-  bottom: max(var(--title-min), calc(var(--signup-bottom) + var(--signup-size) * 2.36 + 8px));
+  bottom: max(var(--title-min), calc(var(--signup-bottom) + var(--signup-size) * 1.26 + 12px));
 }
 .card-meta,
 .card-signup {
@@ -649,9 +657,7 @@ img { display: block; max-width: none; }
   margin: 0;
   font-size: max(12px, 1.15cqw);                /* 16px at 1387 */
   font-weight: 500;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  line-height: 1;
+  line-height: 1;                               /* sentence case, as written in the markup */
 }
 .card-date,
 .card-type { padding: .6em .85em; }
@@ -666,17 +672,28 @@ img { display: block; max-width: none; }
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: .55em 1.3em;
   font-size: var(--signup-size);                /* 20px at 1387 */
   line-height: 1.26;                            /* fixed, so the title's clearance above can be worked out */
   font-weight: 500;
   color: var(--white);
-  box-shadow: inset 0 0 0 1px var(--white);
-  transition: background-color .2s ease-out, color .2s ease-out;
 }
 .card-signup .arrow { width: 1em; height: 1em; color: currentColor; }
-.card-signup:hover,
-.card-signup:focus-visible { background: var(--white); color: var(--ink); }
+/* No box: like the other CTAs, a 2px brand-gradient underline (under the
+   words, not the arrow) appears on hover / keyboard focus. */
+.signup-label { position: relative; }
+.signup-label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 2px);
+  height: 2px;
+  background: var(--brand-gradient);
+  opacity: 0;
+  transition: opacity .2s ease-out;
+}
+.card-signup:hover .signup-label::after,
+.card-signup:focus-visible .signup-label::after { opacity: 1; }
 
 /* Corner handles: same as the mentorship photos — 11px, 2px stroke, 5px
    outside the corner — and the same size at every scale. White fill,
@@ -946,10 +963,13 @@ img { display: block; max-width: none; }
 
 .footer-grid {
   position: relative;
-  height: calc(240px * var(--grid-scale));       /* 5 rows: just the pixel pattern (the 2 solid gradient rows below it are cut off) */
+  height: calc(96px * var(--grid-scale));        /* 2 rows of solid gradient pixels */
   overflow: hidden;
 }
-.footer-grid .grid-inner { top: 0; transform-origin: 50% 0; }
+.footer-grid .grid-inner {                       /* skip the 5 jagged pattern rows: the solid gradient starts 240px down */
+  top: calc(-240px * var(--grid-scale));
+  transform-origin: 50% 0;
+}
 
 /* Dark footer: black like the "Be a part of our community" section above it, so the
    page ends in one continuous dark run with no seam. Resting outlines and
@@ -998,25 +1018,68 @@ img { display: block; max-width: none; }
 }
 
 /* =========================================================
-   Stacked footer — at ≤ 960px, or whenever the four columns would collide
-   (main.js adds .is-stacked): Work with us on its own row, Newsletter +
-   Links side by side, social tiles below
+   Stacked footer — at ≤ 600px, or whenever the four columns would collide
+   (main.js adds .is-stacked), on two rows of the same two columns:
+     Work with us | Links
+     Newsletter   | social tiles (in a column, as in the four-column footer)
+   The right column is as wide as the longest link, so the tiles line up
+   under the links.
    ========================================================= */
 .footer-cols.is-stacked {
-  grid-template-columns: 1fr 1fr;
-  gap: 48px 32px;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "work links"
+    "news social";
+  gap: 48px 40px;                               /* rows / columns */
   min-height: 0;
   padding-bottom: 72px;
 }
-.is-stacked .footer-col:first-child,
-.is-stacked .socials { grid-column: 1 / -1; }
-.is-stacked .footer-col:nth-child(3) { order: 1; }   /* Newsletter on the left */
-.is-stacked .footer-col:nth-child(2) { order: 2; }   /* Links on the right */
-.is-stacked .socials { order: 3; }
+.is-stacked .footer-col:nth-child(1) { grid-area: work; }
+.is-stacked .footer-col:nth-child(2) { grid-area: links; }
+.is-stacked .footer-col:nth-child(3) { grid-area: news; }
+.is-stacked .socials { grid-area: social; align-self: start; }
 .is-stacked .footer-text-work,
-.is-stacked .footer-text-news { min-height: 0; }
-.is-stacked .socials { flex-direction: row; gap: 12px; align-self: start; }
-.is-stacked .socials li:nth-child(n) { margin-top: 0; }
+.is-stacked .footer-text-news { min-height: 0; max-width: none; }
+/* Work with us and Newsletter share a column, so their text, Contact
+   button, email box and Subscribe button all fill it: always the same width */
+.is-stacked .btn-contact,
+.is-stacked .newsletter-input,
+.is-stacked .newsletter .select-btn { width: 100%; }
+/* On the narrowest phones (~320px) "Contact UXPA NYC" no longer fits on
+   one line: let the button grow to two lines instead of spilling out */
+.is-stacked .select-btn {
+  height: auto;
+  min-height: 41px;
+  padding-block: 4px;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* 601–960px: the four columns stay, scaled down with the window. Each
+   size below runs in a straight line from its 601px value to its 960px
+   value (--fx goes 0 → 1 across that range), so the columns narrow
+   smoothly; at 601px the narrowest column still fits "Contact UXPA NYC". */
+@media (min-width: 601px) and (max-width: 960px) {
+  .footer {
+    --fx: ((100vw - 601px) / 359);
+    --soc: calc(48px + 16 * var(--fx));          /* social tiles 48 → 64px */
+  }
+  .footer-cols {
+    grid-template-columns: minmax(0, 406fr) minmax(max-content, 156fr) minmax(0, 358fr) var(--soc);
+    column-gap: calc(16px + 21 * var(--fx));     /* 16 → 37px */
+  }
+  .footer-heading { font-size: calc(20px + 4 * var(--fx)); }   /* 20 → 24px */
+  .footer-text,
+  .footer-links a,
+  .footer .select-btn,
+  .footer .newsletter-input { font-size: calc(16px + 4 * var(--fx)); }   /* 16 → 20px */
+  .footer-text,
+  .footer-links a { line-height: 1.5; }
+  .footer-text-work,
+  .footer-text-news { min-height: 0; }           /* narrow columns wrap more; let the text set its own height */
+  .social { width: var(--soc); height: var(--soc); }
+  .social img { width: auto; height: auto; max-width: 72%; }
+}
 
 /* =========================================================
    ≤ 1023px — mentorship cards stack
@@ -1036,7 +1099,7 @@ img { display: block; max-width: none; }
 }
 
 /* =========================================================
-   ≤ 960px — tablet: hamburger menu, stacked intro, 2-column footer
+   ≤ 960px — tablet: hamburger menu, stacked intro
    ========================================================= */
 @media (max-width: 960px) {
   :root { --grid-scale: .75; }
@@ -1117,8 +1180,7 @@ img { display: block; max-width: none; }
 
 
   .footer-cols.is-stacked {
-    grid-template-columns: 1fr auto;          /* Newsletter takes the room, Links as wide as it needs */
-    gap: 40px 24px;
+    gap: 40px;                                /* 40px between rows and between the columns */
   }
   .footer-cols { padding-inline: var(--gutter); }
   .footer-heading { white-space: normal; }
