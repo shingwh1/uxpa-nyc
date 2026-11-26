@@ -328,14 +328,14 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
 })();
 
 /* ---------------------------------------------------------
-   Footer: four columns down to 961px. At ≤ 960px — or as soon as the
+   Footer: four columns down to 601px. At ≤ 600px — or as soon as the
    four columns would collide (a heading or button no longer fits its
    column, or the columns overflow the footer) — switch to the stacked
    footer.
    --------------------------------------------------------- */
 (() => {
   const cols = document.querySelector('.footer-cols');
-  const narrow = window.matchMedia('(max-width: 960px)');
+  const narrow = window.matchMedia('(max-width: 600px)');
   const tight = el => el.scrollWidth > el.clientWidth + 1;
   // Buttons: compare the label text with the button (their corner handles sit outside on purpose)
   const labelTight = btn => {
