@@ -374,7 +374,10 @@ img { display: block; max-width: none; }
    ========================================================= */
 .statement {
   --accent: var(--ink);                         /* headline and lede in black */
-  --t: clamp(44px, 9.7222vw, 140px);            /* headline size */
+  /* Headline size: 140px, or smaller only as far as "and research"
+     (7.52 em, the longest line) needs to fit, so it stays big on narrow
+     screens (after designcore.org). Phones split the lines further, below. */
+  --t: min(140px, calc((100vw - var(--gutter)) / 7.9));
   --hang: min(.5 * var(--t), var(--gutter) * .6);   /* how far lines hang into the page margins */
   margin-top: var(--section-gap);
 }
@@ -414,9 +417,30 @@ img { display: block; max-width: none; }
 .sf-c.is-accent { color: var(--blue); }          /* light blue (#10bae7), the middle of the brand gradient */
 .sf-c.is-on { color: var(--ink); transition: color .1s linear; }
 
-@media (max-width: 600px) {
-  .statement { --t: 10vw; }                     /* the longest line ("and research") stays on one line */
+/* "design", "tech" and "research" in the headline start light grey and
+   turn light blue as you scroll past set points, one after another
+   (main.js adds .is-on). Scrolling back up turns them grey again.
+   Reduced motion: blue from the start. */
+.statement-title .sw {
+  color: #c4c4c4;                               /* light grey */
+  transition: color .4s ease-out;
+}
+.statement-title .sw.is-on { color: var(--blue); }   /* light blue, the middle of the brand gradient */
+@media (prefers-reduced-motion: reduce) {
+  .statement-title .sw { color: var(--blue); }
+}
+
+/* ≤ 767px (designcore's phone/small-tablet breakpoint): each pair of words
+   splits onto its own line, so the longest line is "research" (5.14 em)
+   and the headline can stay near designcore's 100px phone hero size. */
+.statement-title .w { display: inline; }
+@media (max-width: 767px) {
+  .statement { --t: min(100px, calc((100vw - 2 * var(--gutter)) / 5.3)); }
+  .statement-title .w { display: block; }
   .statement-title .line-4 { padding-left: 24%; }
+}
+@media (max-width: 479px) {
+  .statement-title { line-height: .9; }
 }
 
 /* =========================================================
@@ -427,12 +451,22 @@ img { display: block; max-width: none; }
   line-height: 1.26;
   font-weight: 300;
 }
-/* Upcoming Events and Mentorship Program titles, from v3-designcore:
-   big uppercase display type (128px at 1440); Mentorship splits over two
-   lines with the second indented. */
+/* Upcoming Events, Mentorship Program, Our impact and Be a part of our community titles: big uppercase display
+   type that stays big on narrow screens, after designcore.org. Like
+   their section headings it steps down at their breakpoints and holds
+   each size in between, rather than shrinking with the window:
+     ≥ 992px  128px     768–991px  80px     ≤ 767px  65px
+   Each step is capped so "MENTORSHIP" (6.27 em wide, the longest word)
+   always fits the text column. To keep the size, the lines rearrange:
+   "Upcoming / Events" splits over two lines below 1280px, and
+   "Mentorship / Program" is always two lines with the second indented,
+   and "Our impact" (5.95 em) fits on one line at every size. */
 .events .section-title,
+.pgrid .section-title,
+.closer .closer-title,
 .mentorship .section-title {
-  font-size: clamp(48px, 8.8889vw, 128px);
+  --title-fit: calc((100vw - 2 * var(--gutter)) / 6.5);   /* largest size where the longest line fits */
+  font-size: min(128px, var(--title-fit));
   line-height: .95;
   font-weight: 500;
   letter-spacing: -.01em;
@@ -442,11 +476,34 @@ img { display: block; max-width: none; }
 .section-title .line-indent { padding-left: 1.6em; }
 .events .events-eyebrow,
 .mentorship .mentorship-eyebrow { margin-top: 24px; }
-@media (min-width: 601px) {
-  .events .section-title { white-space: nowrap; }   /* one line, as in v3 (it runs a few px into the gutters) */
+@media (min-width: 1280px) {
+  .events .section-title {                          /* one line ("Upcoming Events" is 9.27 em wide) */
+    white-space: nowrap;
+    margin-inline: calc(-1 * var(--gutter));        /* centred on the window, free to use the side margins */
+  }
+  .events .section-title .line { display: inline; }
+}                                                   /* narrower: "Upcoming" / "Events" on two lines */
+@media (max-width: 991px) {
+  .events .section-title,
+  .pgrid .section-title,
+  .closer .closer-title,
+  .mentorship .section-title { font-size: min(80px, var(--title-fit)); }
 }
-@media (max-width: 600px) {
+@media (max-width: 767px) {
+  .events .section-title,
+  .pgrid .section-title,
+  .closer .closer-title,
+  .mentorship .section-title {
+    --title-fit: calc((100vw - 2 * var(--gutter)) / 6.35);
+    font-size: min(65px, var(--title-fit));
+  }
   .section-title .line-indent { padding-left: .8em; }
+}
+@media (max-width: 479px) {
+  .events .section-title,
+  .pgrid .section-title,
+  .closer .closer-title,
+  .mentorship .section-title { line-height: .9; }  /* designcore tightens the leading on phones */
 }
 .section-eyebrow {
   margin-top: 16px;
@@ -889,12 +946,12 @@ img { display: block; max-width: none; }
 
 .footer-grid {
   position: relative;
-  height: calc(336px * var(--grid-scale));       /* 7 rows: the pixel pattern plus 2 rows of gradient pixels below it */
+  height: calc(240px * var(--grid-scale));       /* 5 rows: just the pixel pattern (the 2 solid gradient rows below it are cut off) */
   overflow: hidden;
 }
 .footer-grid .grid-inner { top: 0; transform-origin: 50% 0; }
 
-/* Dark footer: black like the "comes together" section above it, so the
+/* Dark footer: black like the "Be a part of our community" section above it, so the
    page ends in one continuous dark run with no seam. Resting outlines and
    text are dimmed white (the grey of the light version); hover brings them
    to full white. */
@@ -1109,7 +1166,7 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
 .events + .pixel-band { margin-top: 0; }        /* …and straight out of it */
 
 /* =========================================================
-   Impact on the Community
+   Our impact
    ========================================================= */
 .pgrid {                                        /* black section, white text (like Upcoming Events) */
   margin-top: var(--section-gap);
@@ -1125,15 +1182,15 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
 .pgrid .vmarquee-track { color: var(--white); }
 
 /* =========================================================
-   Closer: the black section after Impact on the Community, with the
-   community headline and Join Today in white.
+   Closer: the black section after Our impact, with the
+   community headline and Get Involved in white.
    The section is taller than the window and its content pins (stays
    put) while you scroll through it — a pause of --hold window-heights.
    main.js follows the scroll (with a soft lag, so nothing snaps) and:
      - fades the photos in, each drifting slowly out to its spot (--pi)
      - turns the whole set slowly around the headline (--orbit), about
        20° from the moment the section arrives to when it leaves
-     - fades the headline and Join Today in once the photos are out (--in)
+     - fades the headline and Get Involved in once the photos are out (--in)
    ========================================================= */
 .closer {
   --hold: 1.5;                                  /* window-heights of scrolling while pinned */
@@ -1159,13 +1216,15 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
   flex-direction: column;
   align-items: center;
 }
-.closer-title {                                 /* fades in with the scroll; Join Today has its own reveal (main.js) */
+.closer-title {                                 /* fades in with the scroll; Get Involved follows a little later (--join) */
   opacity: var(--in, 1);
   translate: 0 calc((1 - var(--in, 1)) * 24px);
-  font-size: var(--h2);
-  line-height: 1.1;
-  font-weight: 300;
 }
+/* Type: the same big uppercase titles as Upcoming Events / Mentorship /
+   Our impact (sizes in "Shared section headings"), always on three
+   lines: "Be a part / of our / community" ("community", 6.19 em, is the
+   widest, so it fits at every size). */
+.closer-title .line { display: block; }
 .closer .cta-join {                            /* fades up like the headline, a little after it (--join, main.js) */
   margin-top: 40px;
   opacity: var(--join, 1);
@@ -1193,8 +1252,8 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
 .float-photo {
   --k: calc(1 - var(--pi, 1));                  /* 1 = not in yet, 0 = in place */
   position: absolute;
-  left: calc(var(--x) * 1%);
-  top: calc(var(--y) * 1%);
+  left: calc(var(--x) * 1% + var(--px, 0px));   /* --px / --py: nudge clear of the headline (main.js) */
+  top: calc(var(--y) * 1% + var(--py, 0px));
   width: clamp(56px, calc(var(--s) * 1vw), calc(var(--s) * 16px));
   aspect-ratio: var(--a, 1);
   margin: 0;
@@ -1237,7 +1296,7 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
 }
 
 /* =========================================================
-   Impact numbers under "Impact on the Community": four figures in a
+   Impact numbers under "Our impact": four figures in a
    row, split by hairlines. main.js counts each number up from 0 when
    the row scrolls into view, one after another, and the gradient line
    under each number grows with its count.
@@ -1290,7 +1349,7 @@ html.reveal-pending [data-rv]:not(.rv-on) { opacity: 0; }
 
 /* =========================================================
    Velocity marquee (after Framer's "Velocity Marquee") under the
-   "Impact on the Community" heading: the demo's band (hairlines above
+   "Our impact" heading: the demo's band (hairlines above
    and below, faded ends, a circle between words) in the site's type and
    colours. main.js moves and tilts the track.
    ========================================================= */

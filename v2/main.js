@@ -691,6 +691,38 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
 })();
 
 /* ---------------------------------------------------------
+   Statement headline: "design", "tech" and "research" turn light blue
+   as you scroll, each by its own position in the window: a word lights
+   up once its middle has risen past AT of the way up from the bottom
+   of the window (design 10%, tech 30%, research 50%). Scrolling back
+   down below that turns it grey again. The colour change itself is a
+   short fade (CSS).
+   --------------------------------------------------------- */
+(() => {
+  const title = document.querySelector('.statement-title');
+  if (!title) return;
+  const words = [...title.querySelectorAll('.sw')];
+  if (!words.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const AT = [0.1, 0.3, 0.5];                            // design / tech / research: fraction of the window height, up from the bottom
+
+  let raf = 0;
+  const update = () => {
+    raf = 0;
+    const vh = window.innerHeight;
+    words.forEach((w, i) => {
+      const r = w.getBoundingClientRect();
+      const up = (vh - (r.top + r.height / 2)) / vh;     // 0 at the bottom of the window, 1 at the top
+      w.classList.toggle('is-on', up >= AT[i]);
+    });
+  };
+  const request = () => { if (!raf) raf = requestAnimationFrame(update); };
+  window.addEventListener('scroll', request, { passive: true });
+  window.addEventListener('resize', request);
+  update();
+})();
+
+/* ---------------------------------------------------------
    Scroll fill (after Framer's "Text Scroll with 3 Colors",
    https://textscrollwith3colors.framer.website/): text marked
    data-scroll-fill rises in grey, then fills in letter by letter as you
@@ -862,7 +894,7 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
    drives:
      --pi  each photo fading in and drifting out to its spot, between
            q 0.1 and 0.55, gently staggered
-     --in  the headline and Join Today, q 0.45 → 0.7
+     --in  the headline and Get Involved, q 0.45 → 0.7
      --orbit  the whole set turning around the middle, −10° → +10°
    --dx/--dy: each photo's distance from the middle (measured).
    --mx/--my: mouse position over the section, eased, for the lean.
@@ -872,12 +904,60 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
   const sec = document.querySelector('.closer');
   const pin = sec && sec.querySelector('.closer-pin');
   if (!pin || !pin.querySelector('.float')) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
   const photos = [...pin.querySelectorAll('.float-photo')];
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Keep the photos clear of the headline and Get Involved. Any photo whose
+  // spot would sit under the text (padded for the mouse lean and the bob)
+  // is pushed straight out from the middle until it clears it at every
+  // angle the set turns through (the turn keeps each photo's distance from
+  // the middle, so pushing outward is what clears it). If that would put
+  // more than a third of the photo off screen, it is hidden instead.
+  // --px / --py move the photo's spot (CSS left/top).
+  const clearText = () => {
+    const inner = pin.querySelector('.closer-inner');
+    const w = pin.clientWidth, h = pin.clientHeight, cx = w / 2, cy = h / 2;
+    const PAD = 24;
+    const box = {
+      l: inner.offsetLeft - PAD, r: inner.offsetLeft + inner.offsetWidth + PAD,
+      t: inner.offsetTop - PAD,  b: inner.offsetTop + inner.offsetHeight + PAD,
+    };
+    const angles = (reduced ? [0] : [-10, -5, 0, 5, 10]).map(a => a * Math.PI / 180);
+    photos.forEach(el => {
+      el.style.removeProperty('--px');
+      el.style.removeProperty('--py');
+      el.style.visibility = '';
+      if (getComputedStyle(el).display === 'none') return;
+      const pw = el.offsetWidth, ph = el.offsetHeight;
+      const ox = el.offsetLeft + pw / 2 - cx, oy = el.offsetTop + ph / 2 - cy;
+      const d = Math.hypot(ox, oy) || 1, ux = ox / d, uy = oy / d;
+      const hits = r => angles.some(a => {
+        const x = cx + r * (ux * Math.cos(a) - uy * Math.sin(a));
+        const y = cy + r * (ux * Math.sin(a) + uy * Math.cos(a));
+        return x + pw / 2 > box.l && x - pw / 2 < box.r && y + ph / 2 > box.t && y - ph / 2 < box.b;
+      });
+      let r = d;
+      while (hits(r) && r < d + w + h) r += 4;
+      if (r === d) return;
+      const nx = cx + ux * r, ny = cy + uy * r;
+      const offX = Math.max(0, pw / 2 - nx, nx + pw / 2 - w) / pw;
+      const offY = Math.max(0, ph / 2 - ny, ny + ph / 2 - h) / ph;
+      if (offX > 1 / 3 || offY > 1 / 3) { el.style.visibility = 'hidden'; return; }
+      el.style.setProperty('--px', `${(ux * (r - d)).toFixed(1)}px`);
+      el.style.setProperty('--py', `${(uy * (r - d)).toFixed(1)}px`);
+    });
+  };
+
+  if (reduced) {                                 // no motion: just the finished layout, kept clear of the text
+    clearText();
+    window.addEventListener('resize', clearText);
+    if (document.fonts) document.fonts.ready.then(clearText);
+    return;
+  }
+
   const IN_START = 0.1, IN_END = 0.55;      // photos drift in over this part of q
   const TEXT_START = 0.45, TEXT_END = 0.7;  // headline fades in over this part
-  const JOIN_START = 0.58, JOIN_END = 0.8;  // Join Today fades up the same way, starting a little after the headline
+  const JOIN_START = 0.58, JOIN_END = 0.8;  // Get Involved fades up the same way, starting a little after the headline
   const ORBIT = 10;                         // degrees each way (−10° → +10°)
   const SMOOTH = 0.5;                       // seconds the motion trails the scroll
   const STAGGER = 0.018;                    // gap between photos (in q)
@@ -888,6 +968,7 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
   const perPhoto = (IN_END - IN_START) - STAGGER * (photos.length - 1);
 
   const measure = () => {
+    clearText();
     const w = pin.clientWidth, h = pin.clientHeight;
     photos.forEach(el => {
       el.style.setProperty('--dx', `${(w / 2 - (el.offsetLeft + el.offsetWidth / 2)).toFixed(1)}px`);
@@ -945,6 +1026,7 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
   window.addEventListener('resize', () => { measure(); request(); });
   photos.forEach(el => { const img = el.querySelector('img'); img.complete || img.addEventListener('load', measure, { once: true }); });
   measure();
+  if (document.fonts) document.fonts.ready.then(measure);   // the headline's width depends on the font
   request();
 })();
 
