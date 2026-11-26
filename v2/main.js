@@ -362,6 +362,43 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
 })();
 
 /* ---------------------------------------------------------
+   Statement statue: starts fading in once "Where" (the headline's first
+   word) is fully visible — its last letter has landed — over FADE ms.
+   Driven by --statue-o on the headline (CSS reads it as the statue's
+   opacity), because the reveal below briefly swaps the "worlds" line the
+   statue sits in for a copy; both read the variable, so the fade never
+   jumps. With reduced motion the statue simply shows. Set up before the
+   reveal, so it sees "Where" start.
+   --------------------------------------------------------- */
+(() => {
+  const title = document.querySelector('.statement-title');
+  const first = title && title.querySelector('.line-1');
+  if (!first || !document.documentElement.classList.contains('reveal-pending')) return;
+  const FADE = 1200;                                    // ms
+  title.style.setProperty('--statue-o', 0);
+  const fade = () => {
+    // the reveal wraps each word's letters in a .rv-m and sets each letter's start
+    // delay; the last letter of "Where" lands 1s (its rise) after its delay
+    const word = first.querySelector('.rv-m');
+    const letters = word ? [...word.querySelectorAll('.rv-i')] : [];
+    const delay = letters.length ? parseFloat(letters[letters.length - 1].style.getPropertyValue('--rv-delay')) || 0 : 0;
+    const t0 = performance.now() + (delay + 1) * 1000;  // start once "Where" is fully visible
+    const frame = now => {
+      const t = Math.min(1, Math.max(0, (now - t0) / FADE));
+      title.style.setProperty('--statue-o', 1 - Math.pow(1 - t, 2));   // ease-out
+      if (t < 1) requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  };
+  const mo = new MutationObserver(() => {
+    if (!first.classList.contains('rv-on')) return;     // "Where" has started rising
+    mo.disconnect();
+    fade();
+  });
+  mo.observe(first, { attributes: true, attributeFilter: ['class'] });
+})();
+
+/* ---------------------------------------------------------
    Text reveal (after extrafazant.nl's hero heading)
    Headings rise letter by letter, other text line by line, each piece
    sliding up from behind a mask under its line (1s, expo.out; letters
@@ -370,6 +407,7 @@ const mobileNav = window.matchMedia('(max-width: 960px)');
    first time it scrolls into view. Afterwards the original markup is
    put back, so hover effects and resizing work as before.
    --------------------------------------------------------- */
+
 (() => {
   window.__revealReady = true;
   const root = document.documentElement;

@@ -390,9 +390,47 @@ img { display: block; max-width: none; }
   color: var(--accent);
 }
 .statement-title .line { display: block; }
+/* The Statue of Liberty (a halftone SVG) fills the empty space under
+   "and research", left of "worlds" and "collide". It hangs from the
+   "worlds" line (it's inside .line-4), so it follows that line however the
+   headline wraps. Its top sits --img-gap below "and", and it's placed so
+   the torch (--torch of the way across the image) is centred under the
+   "N" of "and" (--n-x: "and" starts at -.5 × hang, and the middle of the
+   N is 1.0411 × the headline size in from there, as for the paragraph).
+   It's 1.4 × as tall as the "worlds" + "collide" lines, unless the space
+   before "worlds" (which starts --p4 in) is too narrow, when it's as wide
+   as fits. It reaches below "collide", so "collide" gets bottom padding to
+   keep the paragraph underneath clear. --lh is the headline's line height. */
+.statement-title {
+  --lh: .95;
+  --p4: 36%;
+  --img-gap: .3em;                              /* space between "and" and the top of the statue */
+  --img-ratio: .765;                            /* the SVG's width / height */
+  --torch: .145;                                /* the torch's centre, as a fraction of the image width */
+  --n-x: calc(-.5 * var(--hang) + 1.0411em);    /* the middle of the "N" in "and" */
+  /* width: 1.4 × two lines tall, or narrower so its right edge stays .15em short of "worlds" */
+  --img-w: min(calc(2.8 * var(--lh) * 1em * var(--img-ratio)),
+               calc((var(--p4) - .15em - var(--n-x)) / (1 - var(--torch))));
+}
+.statement-title .line-4 { position: relative; }
+.statement-title .line-5 {                      /* room for the part of the statue below "collide" */
+  padding-bottom: max(0px, calc(var(--img-gap) + var(--img-w) / var(--img-ratio) - 2 * var(--lh) * 1em - 40px));
+}
+.statement-img {
+  position: absolute;
+  left: calc(var(--n-x) - var(--torch) * var(--img-w));   /* torch under the "N" */
+  top: var(--img-gap);
+  width: var(--img-w);                          /* sized by width (a % in height would follow the line's height) */
+  height: auto;
+  -webkit-mask-image: linear-gradient(to bottom, #000 82%, transparent);   /* the photo crops the statue at the waist: fade it out */
+  mask-image: linear-gradient(to bottom, #000 82%, transparent);
+  pointer-events: none;
+}
+/* Fades in once "Where" is fully visible (main.js sets --statue-o); reduced motion: shown as is */
+html.reveal-pending .statement-img { opacity: var(--statue-o, 0); }
 /* Lines 1 and 3 hang out past the text column's left edge and line 2 past its right edge (into the page margins), so the long lines stagger more while still overlapping */
 .statement-title .line-1 { margin-left: calc(-1 * var(--hang)); }
-.statement-title .line-2 { text-align: right; margin-right: calc(-1.6 * var(--hang)); }
+.statement-title .line-2 { text-align: right; margin-right: calc(-1 * var(--hang)); }   /* same overhang as lines 1 and 5, so both edges match */
 .statement-title .line-3 { margin-left: calc(-.5 * var(--hang)); }
 .statement-title .line-4 { padding-left: 36%; }
 .statement-title .line-5 { text-align: right; margin-right: calc(-1 * var(--hang)); }
@@ -443,12 +481,21 @@ img { display: block; max-width: none; }
   .statement { --t: min(100px, calc((100vw - 2 * var(--gutter)) / 5.3)); }
   .statement-title .w { display: block; }
   .statement-title .line-4 { padding-left: 24%; }
+  /* "and" is on its own line and "worlds" starts only 24% in: there's no room
+     to put the torch under the "N", so the statue lines up with the left
+     edge of "and" instead, as wide as the space before "worlds" allows */
+  .statement-title {
+    --p4: 24%;
+    --img-w: min(calc(2.8 * var(--lh) * 1em * var(--img-ratio)),
+                 calc(var(--p4) + .5 * var(--hang) - .15em));
+  }
+  .statement-img { left: calc(-.5 * var(--hang)); }
 }
 @media (max-width: 600px) {                     /* "From Wall Street to Brooklyn…" centred on the page */
   .statement .lede { margin-inline: auto; text-align: center; }
 }
 @media (max-width: 479px) {
-  .statement-title { line-height: .9; }
+  .statement-title { line-height: .9; --lh: .9; }
 }
 
 /* =========================================================
